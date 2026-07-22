@@ -40,6 +40,11 @@ data/cases.db
 # Small demo DBs in data/unified/ and case_knowledge.db stay committed
 # so the repo is runnable after: python scripts/build_appsail.py
 
+# ── Editor / tooling config (local only) ────────────────────────
+.claude/
+.vscode/
+.idea/
+
 # ── Python / tooling ────────────────────────────────────────────
 __pycache__/
 *.pyc
