@@ -1,0 +1,3942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KSP Crime Intelligence</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      /* Dark command-center palette — surfaces */
+      --white: #0f1626;          /* card / elevated surface */
+      --bg: #070b14;             /* app ground */
+      --sidebar: #0b1120;
+      --border: #1c2740;
+      --border-light: #141d33;
+      /* Text */
+      --text: #e8eef8;
+      --text-2: #aab8ce;
+      --muted: #5c6b84;
+      /* Accent */
+      --accent: #3b82f6;
+      --accent-light: rgba(59,130,246,.12);
+      --accent-hover: #2f6fe0;
+      --navy: #dce7f8;           /* heading tone (light on dark) */
+      --green: #34d399;
+      --red: #f87171;
+      --amber: #fbbf24;
+      --user-bubble: #2563eb;
+      --ai-bg: #0f1626;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+      --shadow-md: 0 10px 30px rgba(0,0,0,.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    ::selection { background: rgba(59,130,246,.35); }
+
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1c2740; border-radius: 6px; border: 2px solid transparent; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background: #2a3a5c; border: 2px solid transparent; background-clip: padding-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      background-image: radial-gradient(ellipse 900px 420px at 70% -10%, rgba(37,99,235,.09), transparent),
+                        radial-gradient(ellipse 700px 380px at 0% 100%, rgba(30,58,138,.07), transparent);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SIDEBAR ─────────────────────────────────────────────── */
+    .sidebar {
+      width: 248px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: width .2s ease, border .2s ease;
+      overflow: hidden;
+    }
+    .sidebar-map-hidden {
+      width: 0 !important;
+      border-right: none !important;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px 14px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(140deg, #1e3a8a 0%, #3b82f6 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: .04em;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px rgba(59,130,246,.35);
+    }
+
+    .logo-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -.01em;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-nav {
+      padding: 8px 10px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .nav-group-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      padding: 10px 4px 5px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-2);
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      transition: background .12s, color .12s;
+    }
+
+    .nav-item:hover { background: var(--bg); color: var(--text); }
+    .nav-item.active { background: var(--accent-light); color: var(--accent); }
+
+    .nav-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; opacity: .85; }
+    .nav-divider { height: 1px; background: var(--border-light); margin: 6px 4px; }
+
+    .chat-sessions {
+      flex: 1;
+      overflow-y: auto;
+      padding: 6px 10px 10px;
+      min-height: 0;
+    }
+
+    .sessions-header {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      padding: 10px 2px 6px;
+      font-weight: 600;
+    }
+
+    .session-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 8px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12.5px;
+      color: var(--text-2);
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      transition: background .1s;
+    }
+
+    .session-item:hover { background: var(--bg); }
+    .session-item.active { background: var(--accent-light); color: var(--accent); }
+    .session-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .session-del {
+      opacity: 0;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      line-height: 1;
+    }
+
+    .session-item:hover .session-del { opacity: 1; }
+    .session-del:hover { color: var(--red); }
+
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+
+    .dot.red { background: var(--red); }
+    .dot.amber { background: var(--amber); }
+
+    /* ── MAIN ────────────────────────────────────────────────── */
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg); }
+
+    /* ── TOPBAR ──────────────────────────────────────────────── */
+    .topbar {
+      height: 46px;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      padding: 0 4px;
+    }
+
+    .tab-btn {
+      height: 100%;
+      padding: 0 14px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color .12s, border-color .12s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-right: 14px;
+    }
+
+    .lang-toggle {
+      display: flex;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .lang-btn {
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .lang-btn.active { background: var(--accent); color: white; }
+
+    .icon-btn {
+      background: var(--white);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-family: inherit;
+      transition: border-color .12s;
+    }
+
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── PANELS ──────────────────────────────────────────────── */
+    .panel { flex: 1; overflow-y: auto; display: none; }
+    .panel.active { display: flex; flex-direction: column; }
+
+    /* ── CHAT PANEL ──────────────────────────────────────────── */
+    #panel-chat { background: var(--bg); padding-bottom: 0; }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 0 16px;
+    }
+
+    .welcome-screen {
+      max-width: 640px;
+      margin: 48px auto;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .welcome-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: .03em;
+      margin-bottom: 20px;
+    }
+
+    .welcome-screen h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f1f5fb 30%, #7fb0ff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -.02em;
+      margin-bottom: 10px;
+    }
+
+    .welcome-screen p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+
+    .example-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .example-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 15px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 13px;
+      color: var(--text-2);
+      transition: border-color .12s, box-shadow .12s;
+      box-shadow: var(--shadow);
+    }
+
+    .example-card:hover { border-color: var(--accent); color: var(--text); }
+    .example-card strong { display: block; color: var(--text); font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+
+    /* Messages */
+    .message {
+      max-width: 768px;
+      margin: 0 auto 6px;
+      padding: 6px 24px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .message.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .avatar.user { background: var(--user-bubble); color: white; }
+    .avatar.bot { background: linear-gradient(140deg, #1e3a8a 0%, #3b82f6 100%); color: white; box-shadow: 0 2px 8px rgba(59,130,246,.3); }
+
+    .msg-body { flex: 1; min-width: 0; max-width: 86%; }
+    .message.user .msg-body { align-items: flex-end; }
+
+    .msg-role {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 4px;
+      letter-spacing: .02em;
+    }
+
+    .message.user .msg-role { text-align: right; }
+
+    .msg-bubble {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      line-height: 1.65;
+      width: 100%;
+    }
+
+    .message.user .msg-bubble {
+      background: var(--user-bubble);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.bot .msg-bubble {
+      background: var(--white);
+      color: var(--text);
+      border: 1px solid var(--border-light);
+      border-bottom-left-radius: 4px;
+      box-shadow: var(--shadow);
+    }
+
+    .msg-bubble p { margin-bottom: 8px; }
+    .msg-bubble p:last-child { margin-bottom: 0; }
+    .msg-bubble ul, .msg-bubble ol { margin: 6px 0 8px 18px; }
+    .msg-bubble li { margin-bottom: 3px; }
+    .msg-bubble strong { font-weight: 600; }
+    .msg-bubble h1, .msg-bubble h2, .msg-bubble h3 { font-weight: 600; margin: 10px 0 5px; color: var(--navy); }
+    .msg-bubble pre { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px; overflow-x: auto; font-size: 12px; margin: 8px 0; }
+    .msg-bubble code { background: var(--bg); padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+    .msg-bubble table { border-collapse: collapse; width: 100%; font-size: 13px; margin: 8px 0; }
+    .msg-bubble th { background: var(--bg); padding: 7px 10px; text-align: left; font-weight: 600; border-bottom: 1px solid var(--border); }
+    .msg-bubble td { padding: 7px 10px; border-bottom: 1px solid var(--border-light); }
+
+    .msg-meta {
+      margin-top: 6px;
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .chip.db { background: var(--accent-light); border-color: rgba(59,130,246,.35); color: #7fb0ff; }
+
+    .sql-toggle {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+    .sql-toggle summary {
+      padding: 6px 10px;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 500;
+      user-select: none;
+    }
+
+    .sql-toggle pre {
+      padding: 8px 10px;
+      font-size: 11.5px;
+      color: var(--accent);
+      overflow-x: auto;
+      border-top: 1px solid var(--border);
+      background: none;
+      border: none;
+    }
+
+    .doc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--accent-light);
+      border: 1px solid rgba(59,130,246,.35);
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: #7fb0ff;
+      font-weight: 500;
+    }
+
+    /* Typing indicator */
+    .typing-dots span {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--muted);
+      margin: 0 2px;
+      animation: blink 1.2s infinite;
+    }
+
+    .typing-dots span:nth-child(2) { animation-delay: .2s; }
+    .typing-dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink { 0%,80%,100%{opacity:.25} 40%{opacity:1} }
+
+    /* Input area */
+    .input-area {
+      flex-shrink: 0;
+      padding: 10px 24px 18px;
+      background: var(--bg);
+    }
+
+    .input-wrap {
+      max-width: 768px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      padding: 8px 8px 8px 12px;
+      box-shadow: var(--shadow-md);
+      transition: border-color .15s;
+    }
+
+    .input-wrap:focus-within { border-color: var(--accent); box-shadow: var(--shadow-md), 0 0 0 3px rgba(59,130,246,.15); }
+
+    .voice-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 7px;
+      font-size: 17px;
+      flex-shrink: 0;
+      transition: background .12s, color .12s;
+    }
+
+    .voice-btn:hover { color: var(--accent); background: var(--accent-light); }
+    .voice-btn.listening { color: var(--red); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    textarea#chatInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.55;
+      resize: none;
+      max-height: 160px;
+      padding: 4px 4px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    textarea#chatInput::placeholder { color: var(--muted); }
+
+    .send-btn {
+      background: linear-gradient(135deg,#1d4ed8,#3b82f6);
+      border: none;
+      color: white;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 16px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity .12s, box-shadow .12s;
+      box-shadow: 0 2px 10px rgba(59,130,246,.35);
+    }
+
+    .send-btn:hover { opacity: .9; box-shadow: 0 2px 14px rgba(59,130,246,.5); }
+    .send-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+    .stop-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      padding: 0 12px;
+      height: 34px;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+      display: none;
+      font-family: inherit;
+    }
+
+    .stop-btn.show { display: block; }
+
+    /* ── ANALYTICS PANEL ─────────────────────────────────────── */
+    #panel-analytics {
+      background: var(--bg);
+      padding: 24px;
+      gap: 16px;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .analytics-grid.full { grid-template-columns: 1fr; }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 16px;
+    }
+
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-num {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -.02em;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .chart-wrap { position: relative; height: 260px; }
+    .chart-wrap.tall { height: 320px; }
+
+    .pred-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .pred-item:last-child { border-bottom: none; }
+    .pred-crime { flex: 1; font-size: 13px; }
+    .pred-count { font-size: 15px; font-weight: 700; color: var(--navy); }
+    .pred-trend { font-size: 18px; }
+    .pred-trend.up { color: var(--red); }
+    .pred-trend.down { color: var(--green); }
+
+
+    .net-sidebar {
+      width: 260px; flex-shrink: 0; background: #1e293b;
+      border-right: 1px solid rgba(255,255,255,.08);
+      display: flex; flex-direction: column; overflow-y: auto;
+      color: #e2e8f0; font-size: 13px;
+    }
+    .net-sidebar-head {
+      padding: 16px; border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .net-sidebar-head h3 { font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 2px; }
+    .net-sidebar-head p { font-size: 11px; color: #94a3b8; }
+
+    .net-stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      padding: 12px 16px;
+    }
+    .net-stat-card {
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 8px; padding: 10px 12px;
+    }
+    .net-stat-num { font-size: 22px; font-weight: 700; color: #f1f5f9; letter-spacing: -.02em; }
+    .net-stat-label { font-size: 10px; color: #64748b; margin-top: 1px; text-transform: uppercase; letter-spacing: .05em; }
+
+    .net-section { padding: 10px 16px; border-top: 1px solid rgba(255,255,255,.06); }
+    .net-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #64748b; margin-bottom: 8px; }
+
+    .net-filter-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+    .net-filter-select {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      border-radius: 6px; padding: 7px 10px; color: #e2e8f0; font-size: 12px;
+      font-family: inherit; outline: none; width: 100%; cursor: pointer;
+    }
+    .net-filter-select option { background: #1e293b; }
+
+    .net-risk-pills { display: flex; gap: 4px; flex-wrap: wrap; }
+    .net-risk-pill {
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      cursor: pointer; border: 1.5px solid transparent; transition: all .15s;
+    }
+    .net-risk-pill[data-risk="critical"] { border-color: #ef4444; color: #ef4444; }
+    .net-risk-pill[data-risk="high"] { border-color: #f97316; color: #f97316; }
+    .net-risk-pill[data-risk="medium"] { border-color: #eab308; color: #eab308; }
+    .net-risk-pill[data-risk="low"] { border-color: #22c55e; color: #22c55e; }
+    .net-risk-pill.active[data-risk="critical"] { background: #ef4444; color: #fff; }
+    .net-risk-pill.active[data-risk="high"] { background: #f97316; color: #fff; }
+    .net-risk-pill.active[data-risk="medium"] { background: #eab308; color: #000; }
+    .net-risk-pill.active[data-risk="low"] { background: #22c55e; color: #fff; }
+
+    .net-search {
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+      border-radius: 6px; padding: 7px 10px; color: #e2e8f0; font-size: 12px;
+      font-family: inherit; outline: none; width: 100%;
+    }
+    .net-search::placeholder { color: #475569; }
+
+    .net-node-detail {
+      background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25);
+      border-radius: 8px; padding: 12px; margin: 0;
+    }
+    .net-node-name { font-size: 14px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px; }
+    .net-node-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11.5px; }
+    .net-node-key { color: #64748b; }
+    .net-node-val { color: #e2e8f0; font-weight: 500; }
+    .net-risk-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10.5px; font-weight: 700;
+    }
+    .net-risk-badge.critical { background: #ef444422; color: #ef4444; border: 1px solid #ef444444; }
+    .net-risk-badge.high { background: #f9731622; color: #f97316; border: 1px solid #f9731644; }
+    .net-risk-badge.medium { background: #eab30822; color: #eab308; border: 1px solid #eab30844; }
+    .net-risk-badge.low { background: #22c55e22; color: #22c55e; border: 1px solid #22c55e44; }
+
+    .net-legend { display: flex; flex-direction: column; gap: 6px; }
+    .net-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8; }
+    .net-legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+    .net-controls { display: flex; gap: 6px; padding: 10px 16px; border-top: 1px solid rgba(255,255,255,.06); }
+    .net-ctrl-btn {
+      flex: 1; padding: 7px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 6px; color: #94a3b8; font-size: 11.5px; cursor: pointer; font-family: inherit;
+      transition: all .15s; text-align: center;
+    }
+    .net-ctrl-btn:hover { background: rgba(255,255,255,.12); color: #f1f5f9; }
+
+    #network-container { flex: 1; min-width: 0; }
+    .net-loading {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      color: #64748b; font-size: 13px; text-align: center; pointer-events: none;
+    }
+    .net-loading-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      background: #3b82f6; margin: 0 3px; animation: netblink 1.2s infinite; }
+    .net-loading-dot:nth-child(2) { animation-delay: .2s; }
+    .net-loading-dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes netblink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+
+
+    .map-legend {
+      position: absolute;
+      bottom: 24px;
+      right: 16px;
+      background: rgba(13,19,33,.92);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius);
+      padding: 14px;
+      font-size: 12px;
+      z-index: 1000;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(8px);
+      color: #cbd5e1;
+    }
+
+    .map-legend h4 { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; font-weight: 700; }
+    .gradient-bar { height: 10px; border-radius: 4px; background: linear-gradient(to right, #16a34a, #d97706, #dc2626); margin-bottom: 5px; }
+    .gradient-labels { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; }
+
+    /* ── AUDIT PANEL ─────────────────────────────────────────── */
+    #panel-audit { background: var(--bg); padding: 24px; }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .panel-header h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .audit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .audit-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 10.5px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .audit-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    .audit-table tr:last-child td { border-bottom: none; }
+    .audit-table tr:hover td { background: var(--bg); }
+
+    .audit-sql {
+      color: var(--accent);
+      font-family: 'SF Mono', Consolas, monospace;
+      font-size: 11px;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .audit-sql:hover { white-space: normal; }
+
+    .db-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 10.5px;
+      font-weight: 600;
+    }
+
+    .db-badge.criminal { background: rgba(59,130,246,.12); color: #7fb0ff; border: 1px solid rgba(59,130,246,.3); }
+    .db-badge.ksp_crime { background: rgba(52,211,153,.1); color: var(--green); border: 1px solid rgba(52,211,153,.28); }
+    .db-badge.cases { background: rgba(251,191,36,.1); color: var(--amber); border: 1px solid rgba(251,191,36,.28); }
+
+    /* ── MODEL SWITCHER ──────────────────────────────────────── */
+    .model-bar {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--text-2);
+      min-width: 0;
+      max-width: 220px;
+      transition: border-color .12s;
+    }
+
+    .model-bar:hover { border-color: var(--accent); color: var(--text); }
+    .model-bar .model-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+
+    .model-dropdown {
+      position: fixed;
+      z-index: 1000;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      min-width: 300px;
+      max-height: 440px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .model-dropdown.open { display: block; }
+
+    .md-provider {
+      padding: 10px 14px 4px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      border-top: 1px solid var(--border-light);
+      font-weight: 700;
+    }
+
+    .md-provider:first-child { border-top: none; }
+    .md-avail { color: var(--green); margin-left: 5px; }
+    .md-unavail { color: var(--red); margin-left: 5px; }
+
+    .md-model {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-2);
+      transition: background .1s;
+    }
+
+    .md-model:hover { background: var(--bg); color: var(--text); }
+    .md-model.selected { color: var(--accent); background: var(--accent-light); }
+    .md-model .md-check { color: var(--accent); font-size: 13px; width: 16px; }
+    .md-model.unavail { opacity: .4; cursor: not-allowed; }
+    .md-model.unavail:hover { background: none; color: var(--muted); }
+
+    /* ── FILE UPLOAD PANEL ───────────────────────────────────── */
+    #panel-upload {
+      background: var(--bg);
+      padding: 24px;
+      gap: 14px;
+    }
+
+    #panel-upload h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    #panel-upload .sub {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .upload-zone {
+      background: var(--white);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .upload-zone .upload-icon { font-size: 26px; margin-bottom: 6px; }
+    .upload-zone strong { color: var(--text); }
+
+    .doc-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .doc-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      box-shadow: var(--shadow);
+    }
+
+    .doc-icon { font-size: 18px; flex-shrink: 0; }
+    .doc-info { flex: 1; min-width: 0; }
+    .doc-name { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+    .doc-meta { color: var(--muted); font-size: 11px; margin-top: 1px; }
+
+    .doc-del {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 15px;
+      padding: 3px 6px;
+      border-radius: 5px;
+      flex-shrink: 0;
+    }
+
+    .doc-del:hover { color: var(--red); background: rgba(248,113,113,.12); }
+
+    .howit-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .howit-box strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+
+    .howit-box ul {
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.9;
+      padding-left: 18px;
+    }
+
+    /* ── CASE SOLVER PANEL ───────────────────────────────────── */
+    #panel-solver {
+      background: var(--bg);
+      padding: 24px;
+      gap: 0;
+      overflow-y: auto;
+    }
+
+    .solver-header {
+      margin-bottom: 20px;
+    }
+
+    .solver-header h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .solver-header p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .solver-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .solver-col { display: flex; flex-direction: column; gap: 12px; }
+
+    .field-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    #solverInput {
+      width: 100%;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 15px;
+      color: var(--text);
+      font-size: 13.5px;
+      resize: vertical;
+      font-family: inherit;
+      line-height: 1.6;
+      outline: none;
+      box-shadow: var(--shadow);
+      transition: border-color .12s;
+    }
+
+    #solverInput:focus { border-color: var(--accent); }
+    #solverInput::placeholder { color: var(--muted); }
+
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .solver-chip {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .12s;
+      font-family: inherit;
+    }
+
+    .solver-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    #solverBtn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      padding: 12px 20px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .12s;
+    }
+
+    #solverBtn:hover { background: var(--accent-hover); }
+    #solverBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    #caseSearchInput {
+      flex: 1;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 13px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .12s;
+    }
+
+    #caseSearchInput:focus { border-color: var(--accent); }
+    #caseSearchInput::placeholder { color: var(--muted); }
+
+    .search-btn {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 16px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color .12s;
+    }
+
+    .search-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+
+    #solverOutput {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      font-size: 13.5px;
+      line-height: 1.7;
+      min-height: 300px;
+      color: var(--text);
+      overflow-y: auto;
+      max-height: 520px;
+      box-shadow: var(--shadow);
+    }
+
+    #solverOutput p { margin-bottom: 8px; }
+    #solverOutput h1, #solverOutput h2, #solverOutput h3 { color: var(--navy); font-weight: 700; margin: 12px 0 5px; font-size: 14px; }
+    #solverOutput ul, #solverOutput ol { margin: 6px 0 8px 18px; }
+    #solverOutput li { margin-bottom: 4px; }
+    #solverOutput strong { font-weight: 600; color: var(--navy); }
+    #solverOutput hr { border: none; border-top: 1px solid var(--border-light); margin: 12px 0; }
+    #solverOutput em { color: var(--muted); }
+
+    .similar-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 8px;
+    }
+
+    .similar-case-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color .12s, box-shadow .12s;
+      box-shadow: var(--shadow);
+    }
+
+    .similar-case-card:hover { border-color: var(--accent); }
+    .similar-case-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .similar-case-meta { font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+    .similar-case-breakthrough { font-size: 12px; color: var(--green); font-style: italic; }
+
+    .divider { height: 1px; background: var(--border-light); margin: 10px 0; }
+
+    /* ── INVESTIGATE SIDEBAR CHIPS ──────────────────────────── */
+    .investigate-section { padding: 0 10px 2px; }
+    .investigate-chips { display: flex; flex-direction: column; gap: 1px; }
+    .inv-chip-sidebar {
+      display: flex; align-items: center; gap: 7px; padding: 6px 10px;
+      border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;
+      color: var(--text-2); border: none; background: transparent;
+      width: 100%; text-align: left; transition: background .1s, color .1s;
+      font-family: inherit;
+    }
+    .inv-chip-sidebar:hover { background: var(--bg); color: var(--accent); }
+    .inv-chip-icon { font-size: 13px; width: 16px; text-align: center; flex-shrink: 0; }
+
+    /* ── WELCOME SCREEN CASE CHIPS ───────────────────────────── */
+    .welcome-section-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted); margin: 24px 0 8px; text-align: left;
+    }
+    .case-chip-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+      max-width: 560px; margin: 0 auto 4px;
+    }
+    .case-chip-btn {
+      background: var(--white); border: 1px solid var(--border); border-radius: 10px;
+      padding: 11px 8px; font-size: 11.5px; font-weight: 500; color: var(--text);
+      cursor: pointer; transition: border-color .12s, background .12s, color .12s;
+      text-align: center; font-family: inherit; box-shadow: var(--shadow);
+    }
+    .case-chip-btn:hover { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+    .case-chip-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .case-chip-icon { font-size: 17px; display: block; margin-bottom: 5px; }
+
+    .welcome-upload-hint {
+      max-width: 560px; margin: 12px auto 0;
+      border: 1.5px dashed var(--border); border-radius: 10px;
+      padding: 11px 16px; cursor: pointer; font-size: 13px; color: var(--muted);
+      display: flex; align-items: center; gap: 8px; transition: all .15s;
+    }
+    .welcome-upload-hint:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+    /* ── INLINE UPLOAD ZONE ──────────────────────────────────── */
+    .inline-upload-area {
+      max-width: 768px; margin: 0 auto; padding: 0 0 8px; display: none;
+    }
+    .inline-upload-zone {
+      border: 2px dashed var(--border); border-radius: 10px;
+      padding: 10px 16px; cursor: pointer; font-size: 13px; color: var(--muted);
+      display: flex; align-items: center; gap: 8px; transition: border-color .15s, background .15s;
+      background: var(--white);
+    }
+    .inline-upload-zone:hover, .inline-upload-zone.drag-over {
+      border-color: var(--accent); background: var(--accent-light); color: var(--accent);
+    }
+    .inline-upload-zone .upload-spinner { animation: spin 1s linear infinite; display: none; }
+    .inline-upload-zone.uploading .upload-spinner { display: inline; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .inline-doc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .inline-doc-chip {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--accent-light); border: 1px solid rgba(59,130,246,.35);
+      border-radius: 20px; padding: 3px 8px 3px 10px; font-size: 12px; color: #7fb0ff;
+    }
+    .inline-doc-chip button {
+      border: none; background: none; color: var(--accent); cursor: pointer;
+      font-size: 14px; line-height: 1; padding: 0 0 0 3px; opacity: .7;
+    }
+    .inline-doc-chip button:hover { opacity: 1; }
+
+    /* ── INTEL MAP PANEL ─────────────────────────────────────── */
+    #panel-intelmap { background: #070b14; overflow: hidden; }
+    #panel-intelmap.active { flex-direction: row; }
+    #intel-map { flex: 1; min-width: 0; width: 100%; height: 100%; }
+
+    .im-sidebar {
+      width: 256px; flex-shrink: 0;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; overflow-y: auto;
+      color: #cbd5e1; font-size: 13px;
+    }
+
+    /* Header */
+    .im-head {
+      padding: 14px 16px 13px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .im-badge {
+      width: 30px; height: 30px; flex-shrink: 0;
+      background: linear-gradient(140deg, #1e3a8a 0%, #3b82f6 100%);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 800; color: #fff; letter-spacing: .05em;
+    }
+    .im-head-text h3 { font-size: 13px; font-weight: 700; color: #f1f5f9; letter-spacing: -.01em; }
+    .im-head-text p  { font-size: 10px; color: #64748b; margin-top: 1px; letter-spacing: .02em; }
+
+    /* Stats — 4-column horizontal strip */
+    .im-stats {
+      display: grid; grid-template-columns: repeat(4,1fr);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .im-stat {
+      padding: 13px 6px 11px; text-align: center;
+      border-right: 1px solid rgba(255,255,255,.04);
+    }
+    .im-stat:last-child { border-right: none; }
+    .im-stat-num {
+      font-size: 19px; font-weight: 700; color: #f1f5f9;
+      letter-spacing: -.03em; line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+    .im-stat-lbl {
+      font-size: 8.5px; color: #64748b; text-transform: uppercase;
+      letter-spacing: .08em; margin-top: 4px; font-weight: 600;
+    }
+
+    /* Sections */
+    .im-section { padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .im-section-title {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: #526480; margin-bottom: 9px;
+    }
+
+    /* Layer buttons */
+    .im-layer-btn {
+      display: flex; align-items: center; gap: 8px; width: 100%;
+      padding: 7px 9px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.06);
+      background: transparent; color: #8fa3bd;
+      font-size: 11.5px; font-weight: 500; cursor: pointer; font-family: inherit;
+      margin-bottom: 4px; transition: all .15s; text-align: left;
+    }
+    .im-layer-btn:last-child { margin-bottom: 0; }
+    .im-layer-btn:hover { background: rgba(255,255,255,.04); color: #94a3b8; }
+    .im-layer-btn.active {
+      background: rgba(59,130,246,.07);
+      border-color: rgba(59,130,246,.18);
+      color: #93c5fd;
+    }
+    .im-layer-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .im-layer-state {
+      margin-left: auto; font-size: 9px; font-weight: 700;
+      letter-spacing: .06em; color: #526480; transition: color .15s;
+    }
+    .im-layer-btn.active .im-layer-state { color: #3b82f6; }
+
+    /* Risk pills */
+    .net-risk-pill {
+      padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 600;
+      cursor: pointer; border: 1px solid transparent; transition: all .15s;
+      letter-spacing: .03em;
+    }
+    .net-risk-pill[data-risk="critical"] { border-color: rgba(239,68,68,.3);  color: rgba(239,68,68,.5);  }
+    .net-risk-pill[data-risk="high"]     { border-color: rgba(249,115,22,.3); color: rgba(249,115,22,.5); }
+    .net-risk-pill[data-risk="medium"]   { border-color: rgba(234,179,8,.3);  color: rgba(234,179,8,.5);  }
+    .net-risk-pill[data-risk="low"]      { border-color: rgba(34,197,94,.3);  color: rgba(34,197,94,.5);  }
+    .net-risk-pill.active[data-risk="critical"] { background:rgba(239,68,68,.12);  border-color:rgba(239,68,68,.4);  color:#fca5a5; }
+    .net-risk-pill.active[data-risk="high"]     { background:rgba(249,115,22,.12); border-color:rgba(249,115,22,.4); color:#fdba74; }
+    .net-risk-pill.active[data-risk="medium"]   { background:rgba(234,179,8,.12);  border-color:rgba(234,179,8,.4);  color:#fde047; }
+    .net-risk-pill.active[data-risk="low"]      { background:rgba(34,197,94,.12);  border-color:rgba(34,197,94,.4);  color:#86efac; }
+
+    /* Legend — compact 2-column */
+    .im-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 7px 6px; }
+    .im-legend-row { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #8fa3bd; }
+    .im-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Node detail */
+    .net-node-detail {
+      background: rgba(239,68,68,.05); border: 1px solid rgba(239,68,68,.15);
+      border-radius: 7px; padding: 11px;
+    }
+
+    /* Control row */
+    .im-ctrl-row {
+      display: flex; gap: 5px; padding: 12px 16px;
+      border-top: 1px solid rgba(255,255,255,.05); margin-top: auto;
+    }
+    .im-ctrl-btn {
+      flex: 1; padding: 8px 4px;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.07); border-radius: 6px;
+      color: #8fa3bd; font-size: 11px; cursor: pointer; font-family: inherit;
+      transition: all .15s; text-align: center; font-weight: 500;
+    }
+    .im-ctrl-btn:hover { background: rgba(255,255,255,.09); color: #cbd5e1; border-color: rgba(255,255,255,.12); }
+    .im-ctrl-btn.im-ctrl-accent {
+      background: rgba(59,130,246,.1); border-color: rgba(59,130,246,.25); color: #93c5fd;
+    }
+    .im-ctrl-btn.im-ctrl-accent:hover { background: rgba(59,130,246,.18); color: #bfdbfe; }
+
+    /* Leaflet dark theme */
+    .leaflet-container { background: #0a0f1c; }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+      background: #0f1626; color: #e8eef8;
+      box-shadow: 0 10px 30px rgba(0,0,0,.6);
+      border: 1px solid #1c2740;
+    }
+    .leaflet-popup-close-button { color: #5c6b84 !important; }
+    .leaflet-bar a { background: #0f1626; color: #aab8ce; border-color: #1c2740; }
+    .leaflet-bar a:hover { background: #141d33; color: #e8eef8; }
+    .leaflet-control-attribution { background: rgba(10,15,28,.75) !important; color: #5c6b84 !important; }
+    .leaflet-control-attribution a { color: #7fb0ff !important; }
+
+    /* ── BROWSE PANEL ────────────────────────────────────────── */
+    #panel-browse {
+      background: var(--bg);
+      padding: 0;
+      flex-direction: column;
+    }
+
+    .browse-topbar {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      flex-shrink: 0;
+    }
+
+    .browse-db-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .db-pill {
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-2);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .12s;
+    }
+
+    .db-pill.active { background: linear-gradient(135deg,#1d4ed8,#3b82f6); color: white; border-color: rgba(59,130,246,.5); box-shadow: 0 2px 10px rgba(59,130,246,.25); }
+    .db-pill:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+    .browse-db-label {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-right: 4px;
+    }
+
+    .browse-view-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border-top: 1px solid var(--border-light);
+      overflow-x: auto;
+    }
+
+    .view-tab {
+      padding: 9px 16px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+      transition: color .12s, border-color .12s;
+    }
+
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .browse-toolbar {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .browse-search {
+      flex: 1;
+      max-width: 340px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 7px 12px;
+      font-size: 13px;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+      transition: border-color .12s;
+    }
+
+    .browse-search:focus { border-color: var(--accent); }
+    .browse-search::placeholder { color: var(--muted); }
+
+    .browse-search-btn {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color .12s;
+    }
+
+    .browse-search-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+
+    .browse-count {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .browse-table-wrap {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+    }
+
+    .browse-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      min-width: 600px;
+    }
+
+    .browse-table thead {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .browse-table th {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 9px 14px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      white-space: nowrap;
+    }
+
+    .browse-table td {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text);
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .browse-table tr:hover td { background: rgba(59,130,246,.07); cursor: pointer; }
+    .browse-table tr.selected td { background: rgba(59,130,246,.18); }
+
+    .browse-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 48px 20px;
+      font-size: 13px;
+    }
+
+    .browse-pagination {
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .page-btn {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-2);
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color .12s;
+    }
+
+    .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .page-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .page-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    .page-info {
+      font-size: 12px;
+      color: var(--muted);
+      flex: 1;
+      text-align: center;
+    }
+
+    .browse-loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ── WEB SEARCH OVERLAY ─────────────────────────────────── */
+    .ws-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+    }
+    .ws-overlay.open { display: flex; }
+
+    .ws-box {
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.18);
+      width: min(580px, 94vw);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .ws-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ws-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .ws-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--muted);
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+    }
+
+    .ws-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ws-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13.5px;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+      transition: border-color .12s;
+    }
+    .ws-input:focus { border-color: var(--accent); }
+
+    .ws-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .ws-btn:hover { background: var(--accent-hover); }
+    .ws-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .ws-insert-btn {
+      background: var(--white);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .ws-insert-btn:hover { background: var(--accent-light); }
+
+    .ws-results {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+      max-height: 320px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      display: none;
+    }
+
+    .ws-results.visible { display: block; }
+
+    .ws-spinner {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 8px 0;
+      display: none;
+    }
+
+    /* ── OLLAMA SETUP CARD ───────────────────────────────────── */
+    .ollama-card {
+      margin: 8px 14px;
+      background: rgba(59,130,246,.06);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 12px;
+    }
+
+    .ollama-card-title {
+      font-weight: 700;
+      color: #7fb0ff;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+    }
+
+    .ollama-steps {
+      color: var(--text-2);
+      line-height: 1.8;
+      margin-bottom: 8px;
+    }
+
+    .ollama-steps code {
+      background: rgba(59,130,246,.14);
+      color: #9cc2ff;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: monospace;
+      font-size: 11.5px;
+    }
+
+    .ollama-model-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .ollama-pull-btn {
+      background: linear-gradient(135deg,#1d4ed8,#3b82f6);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .ollama-pull-btn:hover { opacity: .88; }
+
+    .ollama-installed-tag {
+      background: rgba(52,211,153,.1);
+      color: var(--green);
+      border: 1px solid rgba(52,211,153,.3);
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* ── PRINT ────────────────────────────────────────────────── */
+    @media print {
+      body { background: white; }
+      .sidebar, .topbar, .input-area, .sql-toggle, .msg-meta { display: none !important; }
+      .panel { display: flex !important; overflow: visible; background: white; }
+      .messages { overflow: visible; }
+      .message { break-inside: avoid; }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .analytics-grid { grid-template-columns: 1fr; }
+      .stat-row { grid-template-columns: 1fr 1fr; }
+      .solver-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── LOGIN MODAL ─────────────────────────────────────────────── */
+    #loginModal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.9);
+      z-index: 9999; display: flex; align-items: center; justify-content: center;
+    }
+    .login-box {
+      background: #0f1626; border: 1px solid #1c2740; border-radius: 14px;
+      padding: 40px 36px; width: 380px; box-shadow: 0 30px 80px rgba(0,0,0,.8), 0 0 60px rgba(37,99,235,.12);
+    }
+    .login-box h2 { color: #f8fafc; font-size: 20px; margin: 0 0 4px; }
+    .login-box .sub { color: #64748b; font-size: 12px; margin: 0 0 28px; }
+    .login-field { margin-bottom: 14px; }
+    .login-field label { display: block; color: #94a3b8; font-size: 11px; font-weight: 700; letter-spacing: .05em; margin-bottom: 6px; }
+    .login-field input {
+      width: 100%; padding: 10px 12px; background: #0b1120; border: 1px solid #1c2740;
+      border-radius: 7px; color: #f8fafc; font-size: 14px; box-sizing: border-box;
+      outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    .login-field input:focus { box-shadow: 0 0 0 3px rgba(59,130,246,.18); }
+    .login-field input:focus { border-color: #2563eb; }
+    #loginError { color: #f87171; font-size: 12px; min-height: 18px; margin-bottom: 10px; text-align: center; }
+    .login-submit {
+      width: 100%; padding: 11px; background: linear-gradient(135deg,#1d4ed8,#2563eb);
+      color: #fff; border: none; border-radius: 7px; font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .login-submit:hover { opacity: .88; }
+    .login-demo { margin-top: 16px; padding: 12px; background: #0b1120; border-radius: 7px; border-left: 3px solid #1d4ed8; }
+    .login-demo .dm-label { color: #475569; font-size: 10px; font-weight: 700; letter-spacing: .06em; margin-bottom: 5px; }
+    .login-demo .dm-creds { color: #94a3b8; font-size: 11px; line-height: 1.8; }
+
+    /* ── ALERT STRIP (live ticker) ───────────────────────────────── */
+    #alertStrip {
+      display: none; gap: 10px; padding: 5px 14px; flex-shrink: 0;
+      background: #0a0f1c; border-bottom: 1px solid var(--border-light); align-items: center;
+    }
+    .alert-lbl { font-size: 10px; font-weight: 800; color: var(--muted); white-space: nowrap; letter-spacing: .07em; }
+    .live-dot {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      background: #ef4444; margin-right: 6px; vertical-align: middle;
+      animation: pulse 1.2s infinite;
+      box-shadow: 0 0 6px rgba(239,68,68,.8);
+    }
+    .alert-track {
+      flex: 1; overflow: hidden; min-width: 0;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 2.5%, #000 97.5%, transparent);
+              mask-image: linear-gradient(90deg, transparent, #000 2.5%, #000 97.5%, transparent);
+    }
+    .alert-track-inner { display: inline-flex; animation: alertTicker 55s linear infinite; }
+    .alert-track:hover .alert-track-inner { animation-play-state: paused; }
+    .alert-half { display: inline-flex; gap: 8px; padding-right: 8px; }
+    @keyframes alertTicker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .alert-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px; font-size: 11px; white-space: nowrap;
+      cursor: pointer; font-weight: 500; transition: filter .12s;
+    }
+    .alert-pill:hover { filter: brightness(1.4); }
+    .alert-pill.critical { background: rgba(220,38,38,.15); color: #fca5a5; border: 1px solid rgba(220,38,38,.3); }
+    .alert-pill.warning  { background: rgba(234,179, 8,.1);  color: #fde68a; border: 1px solid rgba(234,179,8,.25); }
+    .alert-time { font-size: 10px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+    /* ── OFFICER BADGE ────────────────────────────────────────────── */
+    .officer-badge {
+      display: flex; align-items: center; gap: 7px; padding: 4px 10px;
+      background: var(--sidebar); border: 1px solid var(--border);
+      border-radius: 7px; font-size: 12px; cursor: pointer; transition: background .15s;
+    }
+    .officer-badge:hover { background: var(--bg); }
+    .officer-role-tag {
+      font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 4px;
+      background: rgba(37,99,235,.2); color: #93c5fd; letter-spacing: .04em;
+    }
+    .officer-name { color: var(--text); font-weight: 600; }
+    .tts-btn {
+      background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px 7px;
+      border-radius: 6px; color: var(--muted); transition: all .15s;
+    }
+    .tts-btn:hover, .tts-btn.on { color: var(--accent); background: var(--accent-light); }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal">
+  <div class="login-box">
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="width:52px;height:52px;margin:0 auto 12px;background:linear-gradient(140deg,#1e3a8a 0%,#3b82f6 100%);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:.04em;box-shadow:0 6px 24px rgba(59,130,246,.4)">KSP</div>
+      <h2>Crime Intelligence</h2>
+      <p class="sub">Karnataka State Police — Restricted Access</p>
+    </div>
+    <div class="login-field">
+      <label>OFFICER ID</label>
+      <input id="officerId" placeholder="e.g. SP001" autocomplete="username" />
+    </div>
+    <div class="login-field">
+      <label>PASSWORD</label>
+      <input id="officerPw" type="password" placeholder="Enter password" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <div id="loginError"></div>
+    <button class="login-submit" onclick="doLogin()">Sign In to KSP System</button>
+    <div class="login-demo">
+      <div class="dm-label">DEMO CREDENTIALS</div>
+      <div class="dm-creds">
+        SP001 / sp@ksp2024 &nbsp;—&nbsp; Superintendent of Police<br>
+        INS001 / ins@ksp2024 &nbsp;—&nbsp; Inspector<br>
+        VIEW01 / view@ksp2024 &nbsp;—&nbsp; Viewer (read-only)
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <div class="logo-mark">KSP</div>
+      <div>
+        <div class="logo-name">Crime Intelligence</div>
+        <div class="logo-sub">Karnataka State Police</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Workspace</div>
+    <button class="nav-item active" onclick="switchTab('chat')" id="nav-chat">
+      <span class="nav-icon">💬</span> Chat &amp; Investigate
+    </button>
+    <button class="nav-item" onclick="switchTab('analytics')" id="nav-analytics">
+      <span class="nav-icon">📊</span> Analytics
+    </button>
+    <button class="nav-item" onclick="switchTab('browse')" id="nav-browse">
+      <span class="nav-icon">🗂️</span> Browse Records
+    </button>
+    <button class="nav-item" onclick="switchTab('audit')" id="nav-audit">
+      <span class="nav-icon">📋</span> Audit Trail
+    </button>
+
+    <div class="nav-group-label" style="margin-top:4px">Intelligence</div>
+    <button class="nav-item" onclick="switchTab('intelmap')" id="nav-intelmap">
+      <span class="nav-icon">🗺️</span> Intel Map
+    </button>
+    <button class="nav-item" onclick="switchTab('solver')" id="nav-solver">
+      <span class="nav-icon">🔍</span> Case Solver
+    </button>
+
+    <div class="nav-divider"></div>
+    <div class="investigate-section">
+      <div class="nav-group-label" style="padding-top:2px">Investigate</div>
+      <div class="investigate-chips">
+        <button class="inv-chip-sidebar" onclick="sendCaseScenario('murder')"><span class="inv-chip-icon">🔪</span> Suspicious Death</button>
+        <button class="inv-chip-sidebar" onclick="sendCaseScenario('rape')"><span class="inv-chip-icon">⚠️</span> Sexual Assault</button>
+        <button class="inv-chip-sidebar" onclick="sendCaseScenario('kidnap')"><span class="inv-chip-icon">👤</span> Kidnapping</button>
+        <button class="inv-chip-sidebar" onclick="sendCaseScenario('fraud')"><span class="inv-chip-icon">💰</span> Financial Fraud</button>
+        <button class="inv-chip-sidebar" onclick="sendCaseScenario('cyber')"><span class="inv-chip-icon">💻</span> Cyber Crime</button>
+        <button class="inv-chip-sidebar" onclick="sendCaseScenario('burglary')"><span class="inv-chip-icon">🏠</span> Burglary</button>
+        <button class="inv-chip-sidebar" onclick="sendCaseScenario('stalking')"><span class="inv-chip-icon">😰</span> Stalking</button>
+        <button class="inv-chip-sidebar" onclick="sendCaseScenario('missing')"><span class="inv-chip-icon">❓</span> Missing Person</button>
+      </div>
+    </div>
+    <div class="nav-divider"></div>
+    <button class="nav-item" onclick="newChat()">
+      <span class="nav-icon">✏️</span> New Chat
+    </button>
+  </nav>
+
+  <div class="chat-sessions" id="sessionList">
+    <div class="sessions-header">Recent</div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="status-badge">
+      <div class="dot" id="statusDot"></div>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <button class="tab-btn active" onclick="switchTab('chat')" id="tab-chat">Chat</button>
+    <button class="tab-btn" onclick="switchTab('intelmap')" id="tab-intelmap">Intel Map</button>
+    <button class="tab-btn" onclick="switchTab('analytics')" id="tab-analytics">Analytics</button>
+    <button class="tab-btn" onclick="switchTab('solver')" id="tab-solver">Case Solver</button>
+    <button class="tab-btn" onclick="switchTab('browse')" id="tab-browse">Browse</button>
+    <button class="tab-btn" onclick="switchTab('audit')" id="tab-audit">Audit</button>
+    <div class="topbar-right">
+      <div class="model-bar" onclick="toggleModelDropdown(event)" id="modelBar" title="Switch AI model">
+        <span style="font-size:13px">⚙️</span>
+        <span class="model-name" id="modelBarLabel">Loading...</span>
+        <span style="font-size:10px;color:var(--muted)">▾</span>
+      </div>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="langEN" onclick="setLang('en')">EN</button>
+        <button class="lang-btn" id="langKN" onclick="setLang('kn')">ಕನ್ನಡ</button>
+      </div>
+      <button class="tts-btn" id="ttsBtn" onclick="toggleTTS()" title="Enable voice output (TTS)">🔊</button>
+      <button class="icon-btn" onclick="exportPDF()" title="Export chat as PDF">📄 PDF</button>
+      <div class="officer-badge" onclick="logout()" id="officerBadge" title="Logged in as — click to log out" style="display:none">
+        <span class="officer-role-tag" id="officerRoleTag">SP</span>
+        <span class="officer-name" id="officerNameDisplay">SP001</span>
+        <span style="color:var(--muted);font-size:11px">↩</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERT STRIP -->
+  <div id="alertStrip">
+    <span class="alert-lbl">🚨 LIVE ALERTS</span>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div class="panel active" id="panel-chat">
+    <div class="messages" id="messages">
+      <div class="welcome-screen" id="welcome">
+        <div class="welcome-badge">🛡️ Karnataka State Police · Internal System</div>
+        <h1>KSP Crime Intelligence AI</h1>
+        <p>Query crime databases, get investigation briefs, or upload case files — all in one place.</p>
+
+        <div class="welcome-section-label">Investigate a case — pick a scenario</div>
+        <div class="case-chip-grid">
+          <button class="case-chip-btn" onclick="sendCaseScenario('murder')">
+            <span class="case-chip-icon">🔪</span>Suspicious Death
+          </button>
+          <button class="case-chip-btn" onclick="sendCaseScenario('rape')">
+            <span class="case-chip-icon">⚠️</span>Sexual Assault
+          </button>
+          <button class="case-chip-btn" onclick="sendCaseScenario('kidnap')">
+            <span class="case-chip-icon">👤</span>Kidnapping
+          </button>
+          <button class="case-chip-btn" onclick="sendCaseScenario('cyber')">
+            <span class="case-chip-icon">💻</span>Cyber Crime
+          </button>
+          <button class="case-chip-btn" onclick="sendCaseScenario('fraud')">
+            <span class="case-chip-icon">💰</span>Financial Fraud
+          </button>
+          <button class="case-chip-btn" onclick="sendCaseScenario('burglary')">
+            <span class="case-chip-icon">🏠</span>Burglary
+          </button>
+          <button class="case-chip-btn" onclick="sendCaseScenario('stalking')">
+            <span class="case-chip-icon">😰</span>Stalking
+          </button>
+          <button class="case-chip-btn" onclick="sendCaseScenario('missing')">
+            <span class="case-chip-icon">❓</span>Missing Person
+          </button>
+        </div>
+
+        <div class="welcome-upload-hint" onclick="toggleInlineUpload()">
+          <span style="font-size:16px">📎</span>
+          <span>Attach a case file (FIR, charge sheet, PDF, DOCX) to ask questions about it</span>
+          <span style="margin-left:auto;font-size:11px;opacity:.6">click to expand</span>
+        </div>
+
+        <div class="welcome-section-label" style="margin-top:22px">Query crime data</div>
+        <div class="example-grid">
+          <div class="example-card" onclick="fillExample(this)">
+            <strong>Crime Trends</strong>
+            How many thefts in Bengaluru in 2023?
+          </div>
+          <div class="example-card" onclick="fillExample(this)">
+            <strong>Repeat Offenders</strong>
+            Who are the top repeat offenders by district?
+          </div>
+          <div class="example-card" onclick="fillExample(this)">
+            <strong>Court Outcomes</strong>
+            Conviction rate by district in 2017?
+          </div>
+          <div class="example-card" onclick="fillExample(this)">
+            <strong>NCRB Benchmarks</strong>
+            NCRB cyber crime rate in Bengaluru 2024
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="input-area">
+      <div class="inline-upload-area" id="inlineUploadArea">
+        <div class="inline-upload-zone" id="inlineUploadZone"
+             ondragover="handleInlineDragOver(event)"
+             ondragleave="handleInlineDragLeave(event)"
+             ondrop="handleInlineDrop(event)"
+             onclick="document.getElementById('inlineFileInput').click()">
+          <span style="font-size:15px">📎</span>
+          <span class="upload-spinner">⏳</span>
+          <span id="inlineUploadLabel">Drop case file here or click to select — PDF, DOCX, TXT, CSV</span>
+          <input type="file" id="inlineFileInput" style="display:none" accept=".pdf,.docx,.doc,.txt,.md,.csv" onchange="handleInlineFileSelect(event)">
+        </div>
+        <div class="inline-doc-chips" id="inlineDocChips"></div>
+      </div>
+      <div class="input-wrap">
+        <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Voice input">🎤</button>
+        <textarea id="chatInput" rows="1" placeholder="Ask about Karnataka crime data... (English or ಕನ್ನಡ)" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="voice-btn" id="webSearchBtn" onclick="openWebSearch()" title="Search the web" style="font-size:15px">🌐</button>
+        <button class="voice-btn" id="uploadChatBtn" onclick="toggleInlineUpload()" title="Attach case file" style="font-size:15px">📎</button>
+        <span class="doc-badge" id="docCountBadge" style="display:none">📄 <span id="docCountNum">0</span></span>
+        <button class="stop-btn" id="stopBtn" onclick="stopChat()">Stop</button>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Send">↑</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS PANEL -->
+  <div class="panel" id="panel-analytics">
+    <div class="stat-row" id="statsRow">
+      <div class="stat-box"><div class="stat-num" id="statFIRs">—</div><div class="stat-label">Total FIRs</div></div>
+      <div class="stat-box"><div class="stat-num" id="statArrests">—</div><div class="stat-label">Total Arrests</div></div>
+      <div class="stat-box"><div class="stat-num" id="statVictims">—</div><div class="stat-label">Total Victims</div></div>
+      <div class="stat-box"><div class="stat-num" id="statChargesheet">—</div><div class="stat-label">Chargesheeted</div></div>
+    </div>
+    <div class="analytics-grid">
+      <div class="card">
+        <h3>FIR Trends · Year-wise</h3>
+        <div class="chart-wrap"><canvas id="trendsChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Top Districts by FIR Count</h3>
+        <div class="chart-wrap"><canvas id="districtChart"></canvas></div>
+      </div>
+    </div>
+    <div class="analytics-grid">
+      <div class="card">
+        <h3>Crime Types Over Years</h3>
+        <div class="chart-wrap tall"><canvas id="crimeTypeChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Predictive Forecast · Next Year</h3>
+        <div id="predList" style="padding-top:8px;"></div>
+      </div>
+    </div>
+    <div class="analytics-grid">
+      <div class="card">
+        <h3>Case Dispositions</h3>
+        <div class="chart-wrap"><canvas id="dispositionsChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Day of Week · Crime Pattern</h3>
+        <div class="chart-wrap"><canvas id="dayChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTEL MAP PANEL (Network + Hotspots merged) -->
+  <div class="panel" id="panel-intelmap">
+    <div class="im-sidebar">
+
+      <div class="im-head">
+        <div class="im-badge">KSP</div>
+        <div class="im-head-text">
+          <h3>Intel Map</h3>
+          <p>Criminal network · Karnataka</p>
+        </div>
+      </div>
+
+      <div class="im-stats">
+        <div class="im-stat">
+          <div class="im-stat-num" id="imNodes">—</div>
+          <div class="im-stat-lbl">Suspects</div>
+        </div>
+        <div class="im-stat">
+          <div class="im-stat-num" id="imEdges">—</div>
+          <div class="im-stat-lbl">Gangs</div>
+        </div>
+        <div class="im-stat">
+          <div class="im-stat-num" id="imCritical" style="color:#f97316">—</div>
+          <div class="im-stat-lbl">At Risk</div>
+        </div>
+        <div class="im-stat">
+          <div class="im-stat-num" id="imDistricts">—</div>
+          <div class="im-stat-lbl">Districts</div>
+        </div>
+      </div>
+
+      <div class="im-section">
+        <div class="im-section-title">Map layers</div>
+        <button class="im-layer-btn active" id="imBtnHotspots" onclick="toggleImLayer('hotspots',this)">
+          <span class="im-layer-dot" style="background:#f97316"></span>
+          Crime hotspots
+          <span class="im-layer-state">ON</span>
+        </button>
+<button class="im-layer-btn active" id="imBtnSuspects" onclick="toggleImLayer('suspects',this)">
+          <span class="im-layer-dot" style="background:#ef4444"></span>
+          Suspect markers
+          <span class="im-layer-state">ON</span>
+        </button>
+      </div>
+
+      <div class="im-section">
+        <div class="im-section-title">Risk filter</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          <button class="net-risk-pill active" data-risk="critical" onclick="toggleImRisk('critical',this)">Critical</button>
+          <button class="net-risk-pill active" data-risk="high" onclick="toggleImRisk('high',this)">High</button>
+          <button class="net-risk-pill active" data-risk="medium" onclick="toggleImRisk('medium',this)">Medium</button>
+          <button class="net-risk-pill active" data-risk="low" onclick="toggleImRisk('low',this)">Low</button>
+        </div>
+      </div>
+
+      <div class="im-section" id="imDetailSection" style="display:none">
+        <div class="im-section-title">Selected suspect</div>
+        <div class="net-node-detail" id="imNodeDetail"></div>
+      </div>
+
+      <div class="im-section">
+        <div class="im-section-title">Legend</div>
+        <div class="im-legend">
+          <div class="im-legend-row"><span class="im-legend-dot" style="background:#ef4444"></span>Critical</div>
+          <div class="im-legend-row"><span class="im-legend-dot" style="background:#f97316"></span>High risk</div>
+          <div class="im-legend-row"><span class="im-legend-dot" style="background:#eab308"></span>Medium</div>
+          <div class="im-legend-row"><span class="im-legend-dot" style="background:#22c55e"></span>Low risk</div>
+          <div class="im-legend-row"><span style="width:18px;height:0;border-top:1px dashed rgba(248,113,113,.5);flex-shrink:0"></span>Co-accused</div>
+          <div class="im-legend-row"><span style="width:14px;height:14px;border-radius:50%;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.35);flex-shrink:0"></span>Hotspot</div>
+        </div>
+      </div>
+
+      <div class="im-ctrl-row">
+        <button class="im-ctrl-btn" onclick="intelMapInstance && intelMapInstance.fitBounds(imAllBounds,{padding:[30,30]})">⊞ Fit</button>
+        <button class="im-ctrl-btn" onclick="reloadIntelMap()">↻ Reload</button>
+        <button class="im-ctrl-btn im-ctrl-accent" onclick="askNetworkInChat()">💬 Ask AI</button>
+      </div>
+
+    </div>
+    <div id="intel-map"></div>
+  </div>
+
+  <!-- MODEL DROPDOWN -->
+  <div class="model-dropdown" id="modelDropdown"></div>
+
+  <!-- UPLOAD PANEL -->
+  <div class="panel" id="panel-upload">
+    <h2>Case File Upload</h2>
+    <p class="sub">Upload FIR documents, charge sheets, or any PDF/DOCX/TXT. The AI will answer questions using the document content.</p>
+
+    <div class="upload-zone" id="uploadZone"
+         onclick="document.getElementById('fileInput').click()"
+         ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)"
+         ondrop="handleDrop(event)">
+      <div class="upload-icon">📄</div>
+      <strong>Click to upload or drag &amp; drop</strong><br/>
+      <span style="font-size:12px;margin-top:2px;display:block">PDF, DOCX, TXT, CSV — max 20 MB</span>
+      <input type="file" id="fileInput" style="display:none" accept=".pdf,.docx,.doc,.txt,.md,.csv" onchange="handleFileSelect(event)"/>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <span style="font-size:13px;font-weight:600;color:var(--navy)">Uploaded Documents</span>
+      <span style="font-size:11px;color:var(--muted)" id="uploadSessionNote"></span>
+    </div>
+
+    <div class="doc-list" id="docList">
+      <div style="color:var(--muted);font-size:13px;text-align:center;padding:24px">No files uploaded yet for this session</div>
+    </div>
+
+    <div class="howit-box">
+      <strong>How it works</strong>
+      <ul>
+        <li>Upload a case file — FIR, charge sheet, witness statement, post-mortem report, etc.</li>
+        <li>Switch to <strong>Chat</strong> and ask questions about the document</li>
+        <li>The AI reads the file and answers from its content + the crime database</li>
+        <li>Documents are linked to the current chat session only</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- WEB SEARCH OVERLAY -->
+  <div class="ws-overlay" id="wsOverlay" onclick="if(event.target===this)closeWebSearch()">
+    <div class="ws-box">
+      <div class="ws-header">
+        <span class="ws-title">🌐 Web Search</span>
+        <button class="ws-close" onclick="closeWebSearch()">×</button>
+      </div>
+      <div class="ws-row">
+        <input class="ws-input" id="wsInput" placeholder="Search anything — news, suspects, case context…" onkeydown="if(event.key==='Enter')runWebSearch()">
+        <button class="ws-btn" id="wsRunBtn" onclick="runWebSearch()">Search</button>
+      </div>
+      <div class="ws-spinner" id="wsSpinner">Searching the web…</div>
+      <div class="ws-results" id="wsResults"></div>
+      <div id="wsInsertRow" style="display:none; text-align:right">
+        <button class="ws-insert-btn" onclick="insertWebResultsToChat()">Send results to chat ↗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BROWSE RECORDS PANEL -->
+  <div class="panel" id="panel-browse">
+    <div class="browse-topbar">
+      <div class="browse-db-row">
+        <span class="browse-db-label">Database</span>
+        <button class="db-pill active" id="dbpill-fir" onclick="setBrowseDb('fir')">KSP FIR</button>
+        <button class="db-pill" id="dbpill-ksp_crime" onclick="setBrowseDb('ksp_crime')">ksp_crime</button>
+        <button class="db-pill" id="dbpill-criminal" onclick="setBrowseDb('criminal')">criminal</button>
+        <button class="db-pill" id="dbpill-cases" onclick="setBrowseDb('cases')">cases</button>
+      </div>
+      <div class="browse-view-row" id="browseViewRow"></div>
+    </div>
+    <div class="browse-toolbar">
+      <input class="browse-search" id="browseSearch" placeholder="Filter records..." onkeydown="if(event.key==='Enter')runBrowseSearch()">
+      <button class="browse-search-btn" onclick="runBrowseSearch()">Filter</button>
+      <button class="browse-search-btn" style="color:var(--muted)" onclick="clearBrowseSearch()">Clear</button>
+      <span class="browse-count" id="browseCount"></span>
+    </div>
+    <div class="browse-table-wrap" id="browseTableWrap">
+      <div class="browse-empty">Select a database and view above to browse records</div>
+    </div>
+    <div class="browse-pagination" id="browsePagination" style="display:none">
+      <button class="page-btn" id="btnFirst" onclick="loadBrowsePage(1)">« First</button>
+      <button class="page-btn" id="btnPrev" onclick="loadBrowsePage(browseState.page-1)">‹ Prev</button>
+      <span class="page-info" id="pageInfo"></span>
+      <button class="page-btn" id="btnNext" onclick="loadBrowsePage(browseState.page+1)">Next ›</button>
+      <button class="page-btn" id="btnLast" onclick="loadBrowsePage(browseState.pages)">Last »</button>
+      <span style="margin-left:12px;font-size:12px;color:var(--muted)">Go to:</span>
+      <input type="number" id="pageJumpInput" min="1" placeholder="#"
+        style="width:60px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;margin:0 4px;"
+        onkeydown="if(event.key==='Enter'){var p=parseInt(this.value);if(p>=1&&p<=browseState.pages)loadBrowsePage(p);}">
+      <button class="page-btn" onclick="var p=parseInt(document.getElementById('pageJumpInput').value);if(p>=1&&p<=browseState.pages)loadBrowsePage(p);">Go</button>
+      <select id="pageSizeSelect" style="margin-left:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;"
+        onchange="browseState.limit=+this.value;loadBrowsePage(1);">
+        <option value="50">50/page</option>
+        <option value="100" selected>100/page</option>
+        <option value="200">200/page</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- CASE SOLVER PANEL -->
+  <div class="panel" id="panel-solver">
+    <div class="solver-header">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <h2>Case Solver — AI Investigation Advisor</h2>
+          <p>Describe your case facts. The AI cross-references <strong style="color:var(--navy)">52 solved Indian criminal cases</strong> and generates a structured investigation brief.</p>
+        </div>
+        <span id="caseDbStats" style="font-size:11px;color:var(--muted);white-space:nowrap;padding-top:4px;"></span>
+      </div>
+    </div>
+
+    <div class="solver-grid">
+      <!-- Left -->
+      <div class="solver-col">
+        <div>
+          <span class="field-label">Case Facts</span>
+          <textarea id="solverInput" rows="8" placeholder="Describe the case: What happened, when, where, what evidence is available, any witnesses or suspects..."></textarea>
+        </div>
+
+        <div>
+          <span class="field-label" style="display:block;margin-bottom:6px;">Quick scenarios</span>
+          <div class="chips-row">
+            <button class="solver-chip" onclick="loadScenario('murder')">Suspicious Death</button>
+            <button class="solver-chip" onclick="loadScenario('rape')">Sexual Assault</button>
+            <button class="solver-chip" onclick="loadScenario('kidnap')">Kidnapping</button>
+            <button class="solver-chip" onclick="loadScenario('fraud')">Financial Fraud</button>
+            <button class="solver-chip" onclick="loadScenario('cyber')">Cyber Crime</button>
+            <button class="solver-chip" onclick="loadScenario('burglary')">Burglary</button>
+            <button class="solver-chip" onclick="loadScenario('stalking')">Stalking</button>
+            <button class="solver-chip" onclick="loadScenario('missing')">Missing Person</button>
+          </div>
+        </div>
+
+        <button onclick="runCaseSolver()" id="solverBtn">Analyse Case &amp; Get Investigation Brief</button>
+
+        <div class="divider"></div>
+
+        <div>
+          <span class="field-label" style="display:block;margin-bottom:6px;">Search case database</span>
+          <div class="search-row">
+            <input id="caseSearchInput" placeholder="e.g. DNA evidence murder Karnataka..." onkeydown="if(event.key==='Enter')searchCases()">
+            <button class="search-btn" onclick="searchCases()">Search</button>
+          </div>
+          <div id="caseSearchResults" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="solver-col">
+        <div>
+          <span class="field-label">Investigation Brief</span>
+          <div id="solverOutput">
+            <span style="color:var(--muted)">Enter case facts and click Analyse to generate an AI-powered investigation brief based on 52 solved Indian criminal cases...</span>
+          </div>
+        </div>
+
+        <div id="similarCasesPanel" style="display:none;">
+          <div class="similar-label">Similar Solved Cases</div>
+          <div id="similarCasesList" style="display:flex;flex-direction:column;gap:7px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUDIT PANEL -->
+  <div class="panel" id="panel-audit">
+    <div class="panel-header">
+      <h2>Audit Trail</h2>
+      <button class="icon-btn" onclick="loadAudit()">↻ Refresh</button>
+    </div>
+    <table class="audit-table" id="auditTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Timestamp</th>
+          <th>Question</th>
+          <th>Database</th>
+          <th>Language</th>
+          <th>SQL Generated</th>
+        </tr>
+      </thead>
+      <tbody id="auditBody"></tbody>
+    </table>
+  </div>
+
+</div><!-- .main -->
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────
+let currentTab = 'chat';
+let currentLang = 'en';
+let currentSession = null;
+let chatHistory = [];
+let loading = false;
+let abortCtrl = null;
+let voiceRecognition = null;
+let listening = false;
+let mapMarkers = [];
+let chartInstances = {};
+let activeProvider = null;
+let activeModel = null;
+let allProviders = [];
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  const tb = document.getElementById('tab-' + tab);
+  const nb = document.getElementById('nav-' + tab);
+  if (tb) tb.classList.add('active');
+  if (nb) nb.classList.add('active');
+  // Collapse left nav for Intel Map to maximise map canvas
+  document.querySelector('.sidebar').classList.toggle('sidebar-map-hidden', tab === 'intelmap');
+  currentTab = tab;
+  if (tab === 'analytics') loadAnalytics();
+  if (tab === 'intelmap') loadIntelMap();
+  if (tab === 'audit') loadAudit();
+  if (tab === 'browse') initBrowse();
+  if (tab === 'solver') loadCaseSolverStats();
+  closeModelDropdown();
+}
+
+// ─── LANGUAGE ─────────────────────────────────────────────────────────────
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('langEN').classList.toggle('active', lang === 'en');
+  document.getElementById('langKN').classList.toggle('active', lang === 'kn');
+  const ph = lang === 'kn' ? 'ಕ್ರೈಂ ಡೇಟಾ ಬಗ್ಗೆ ಕೇಳಿ...' : 'Ask about Karnataka crime data... (English or ಕನ್ನಡ)';
+  document.getElementById('chatInput').placeholder = ph;
+}
+
+// ─── VOICE INPUT ──────────────────────────────────────────────────────────
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Voice input not supported in this browser. Use Chrome or Edge.');
+    return;
+  }
+  if (listening) { voiceRecognition && voiceRecognition.stop(); return; }
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  voiceRecognition = new SpeechRecognition();
+  voiceRecognition.lang = currentLang === 'kn' ? 'kn-IN' : 'en-IN';
+  voiceRecognition.interimResults = false;
+  voiceRecognition.onstart = () => {
+    listening = true;
+    document.getElementById('voiceBtn').classList.add('listening');
+    document.getElementById('voiceBtn').title = 'Listening... (click to stop)';
+  };
+  voiceRecognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    const inp = document.getElementById('chatInput');
+    inp.value = transcript;
+    autoResize(inp);
+    // Auto-send after voice recognition
+    setTimeout(() => sendMessage(), 300);
+  };
+  voiceRecognition.onend = () => {
+    listening = false;
+    document.getElementById('voiceBtn').classList.remove('listening');
+    document.getElementById('voiceBtn').title = 'Voice input';
+  };
+  voiceRecognition.onerror = () => {
+    listening = false;
+    document.getElementById('voiceBtn').classList.remove('listening');
+  };
+  voiceRecognition.start();
+}
+
+// ─── PDF EXPORT ───────────────────────────────────────────────────────────
+function exportPDF() {
+  if (!window.jspdf) { window.print(); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, M = 14;
+
+  // Header bar
+  doc.setFillColor(15, 23, 42);
+  doc.rect(0, 0, W, 30, 'F');
+  doc.setTextColor(248, 250, 252);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.text('KSP Crime Intelligence', M, 13);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(148, 163, 184);
+  doc.text('Karnataka State Police — CONFIDENTIAL', M, 20);
+  const ts = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+  const officer = currentOfficer ? `${currentOfficer.id} (${currentOfficer.role})` : 'Unknown';
+  doc.text(`Exported: ${ts}  |  Officer: ${officer}`, M, 26);
+
+  let y = 40;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5);
+  doc.setTextColor(71, 85, 105);
+  doc.text('INVESTIGATION SESSION TRANSCRIPT', M, y);
+  doc.setDrawColor(30, 58, 95);
+  doc.line(M, y + 2, W - M, y + 2);
+  y += 10;
+
+  const messages = document.querySelectorAll('#messages .message');
+  for (const msg of messages) {
+    if (msg.id === 'typing-indicator') continue;
+    const isUser = msg.classList.contains('user');
+    const bubble = msg.querySelector('.msg-bubble');
+    if (!bubble) continue;
+    const text = bubble.innerText.trim();
+    if (!text) continue;
+
+    if (y > 262) { doc.addPage(); y = 18; }
+
+    // Role label
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7);
+    doc.setTextColor(isUser ? 30 : 22, isUser ? 64 : 101, isUser ? 175 : 52);
+    doc.text(isUser ? '▶ OFFICER QUERY' : '▶ KSP AI RESPONSE', M, y);
+    y += 4.5;
+
+    // Bubble
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+    doc.setTextColor(30, 41, 59);
+    const lines = doc.splitTextToSize(text, W - M * 2);
+    const bh = lines.length * 3.9;
+    if (y + bh > 268) { doc.addPage(); y = 18; }
+    doc.setFillColor(isUser ? 239 : 240, isUser ? 246 : 253, isUser ? 255 : 244);
+    doc.roundedRect(M - 2, y - 3, W - M * 2 + 4, bh + 5, 2, 2, 'F');
+    doc.text(lines, M, y);
+    y += bh + 7;
+
+    // SQL
+    const sqlEl = msg.querySelector('pre');
+    if (sqlEl) {
+      const sqlText = sqlEl.innerText.trim().slice(0, 600);
+      if (y > 265) { doc.addPage(); y = 18; }
+      doc.setFont('courier', 'normal'); doc.setFontSize(6.5); doc.setTextColor(100, 116, 139);
+      const sl = doc.splitTextToSize('SQL: ' + sqlText, W - M * 2 - 6);
+      const sh = sl.length * 2.9;
+      doc.setFillColor(248, 250, 252);
+      doc.roundedRect(M + 2, y - 2, W - M * 2 - 4, sh + 3, 1, 1, 'F');
+      doc.text(sl, M + 4, y);
+      y += sh + 7;
+    }
+  }
+
+  // Page footers
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(148, 163, 184);
+    doc.text(`Page ${i} of ${pages}  |  KSP Crime Intelligence  |  Strictly Confidential`, W / 2, 293, { align: 'center' });
+  }
+
+  doc.save(`KSP-Investigation-${new Date().toISOString().slice(0, 10)}.pdf`);
+}
+
+// ─── TTS (TEXT-TO-SPEECH) ─────────────────────────────────────────────────
+let ttsEnabled = false;
+function toggleTTS() {
+  ttsEnabled = !ttsEnabled;
+  const btn = document.getElementById('ttsBtn');
+  btn.classList.toggle('on', ttsEnabled);
+  btn.title = ttsEnabled ? 'Voice output ON — click to turn off' : 'Enable voice output (TTS)';
+  if (!ttsEnabled && window.speechSynthesis) window.speechSynthesis.cancel();
+}
+function speakText(text) {
+  if (!ttsEnabled || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const plain = text.replace(/[#*`>_~\[\]]/g, '').slice(0, 600);
+  const u = new SpeechSynthesisUtterance(plain);
+  u.lang = currentLang === 'kn' ? 'kn-IN' : 'en-IN';
+  u.rate = 0.93;
+  window.speechSynthesis.speak(u);
+}
+
+// ─── ROLE-BASED LOGIN ─────────────────────────────────────────────────────
+const _KSP_ROLES = {
+  'SP001/sp@ksp2024':    { id: 'SP001',   role: 'Superintendent of Police', tag: 'SP',  level: 3 },
+  'INS001/ins@ksp2024':  { id: 'INS001',  role: 'Inspector',                 tag: 'INS', level: 2 },
+  'VIEW01/view@ksp2024': { id: 'VIEW01',  role: 'Viewer',                    tag: 'VIEW',level: 1 },
+};
+let currentOfficer = null;
+
+function doLogin() {
+  const id = document.getElementById('officerId').value.trim();
+  const pw = document.getElementById('officerPw').value;
+  const officer = _KSP_ROLES[`${id}/${pw}`];
+  if (!officer) {
+    document.getElementById('loginError').textContent = 'Invalid credentials. Use the demo accounts below.';
+    document.getElementById('officerPw').value = '';
+    return;
+  }
+  currentOfficer = { ...officer };
+  sessionStorage.setItem('ksp_officer', JSON.stringify(currentOfficer));
+  document.getElementById('loginModal').style.display = 'none';
+  _applyOfficer(currentOfficer);
+  loadAlerts();
+}
+
+function _applyOfficer(officer) {
+  const badge = document.getElementById('officerBadge');
+  badge.style.display = 'flex';
+  document.getElementById('officerRoleTag').textContent = officer.tag;
+  document.getElementById('officerNameDisplay').textContent = officer.id;
+  // Role-gated tabs: hidden for Viewers, restored for Inspector/SP
+  const restricted = ['tab-solver', 'nav-solver', 'tab-audit', 'nav-audit'];
+  restricted.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = officer.level < 2 ? 'none' : '';
+  });
+  // If a viewer is currently on a restricted tab, bounce to chat
+  if (officer.level < 2 && (currentTab === 'solver' || currentTab === 'audit')) switchTab('chat');
+}
+
+function logout() {
+  if (!confirm('Log out of KSP Crime Intelligence?')) return;
+  sessionStorage.removeItem('ksp_officer');
+  currentOfficer = null;
+  document.getElementById('loginModal').style.display = 'flex';
+  document.getElementById('officerBadge').style.display = 'none';
+  document.getElementById('officerId').value = '';
+  document.getElementById('officerPw').value = '';
+  document.getElementById('loginError').textContent = '';
+}
+
+function checkLogin() {
+  const stored = sessionStorage.getItem('ksp_officer');
+  if (stored) {
+    try {
+      currentOfficer = JSON.parse(stored);
+      document.getElementById('loginModal').style.display = 'none';
+      _applyOfficer(currentOfficer);
+      return;
+    } catch {}
+  }
+  // Show login
+  document.getElementById('loginModal').style.display = 'flex';
+}
+
+// ─── EARLY WARNING ALERTS ─────────────────────────────────────────────────
+// Source: /api/analytics/alerts → ksp_fir.duckdb (CaseMaster). Compares each
+// district × crime-type count in the last 90 days vs the prior 90 days;
+// >20% rise with ≥5 cases = warning, ≥50% = critical. Polled every 60s.
+function escAttr(s) { return escHtml(s).replace(/"/g, '&quot;'); }
+
+async function loadAlerts() {
+  try {
+    const res = await fetch('/api/analytics/alerts');
+    if (!res.ok) return;
+    const data = await res.json();
+    renderAlerts(data.alerts || []);
+  } catch {}
+}
+
+function renderAlerts(alerts) {
+  const strip = document.getElementById('alertStrip');
+  if (!alerts.length) { strip.style.display = 'none'; return; }
+  const pills = alerts.slice(0, 15).map(a =>
+    `<div class="alert-pill ${a.severity}" data-d="${escAttr(a.district)}" data-c="${escAttr(a.crime_type)}" data-pct="${a.change_pct}"
+          title="${a.prior_count} → ${a.recent_count} cases (${escAttr(a.period)}) — click to analyze with AI">
+      ${a.severity === 'critical' ? '🚨' : '⚠️'}&nbsp;<strong>${escHtml(a.district)}</strong>:&nbsp;${escHtml(a.crime_type)}&nbsp;<strong>+${a.change_pct}%</strong>
+    </div>`
+  ).join('');
+  const t = new Date().toLocaleTimeString('en-IN', { hour12: false });
+  strip.innerHTML =
+    `<span class="alert-lbl"><span class="live-dot"></span>LIVE ALERTS</span>
+     <div class="alert-track"><div class="alert-track-inner">
+       <div class="alert-half">${pills}</div><div class="alert-half">${pills}</div>
+     </div></div>
+     <span class="alert-time">Updated ${t}</span>`;
+  strip.style.display = 'flex';
+  strip.onclick = (e) => {
+    const p = e.target.closest('.alert-pill');
+    if (p) askAlertInChat(p.dataset.d, p.dataset.c, p.dataset.pct);
+  };
+}
+
+function askAlertInChat(district, crime, pct) {
+  const input = document.getElementById('chatInput');
+  input.value = `Early-warning alert: ${crime} cases in ${district} district rose ${pct}% in the last 90 days. Analyze this spike — which police stations are affected, what patterns explain it, and what preventive deployment do you recommend?`;
+  switchTab('chat');
+  sendMessage();
+}
+
+// ─── CHAT ─────────────────────────────────────────────────────────────────
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function fillExample(el) {
+  document.getElementById('chatInput').value = el.textContent.trim().replace(/^.*\n/, '').trim();
+  document.getElementById('chatInput').focus();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderMarkdown(text) {
+  try { return marked.parse(text); }
+  catch { return escHtml(text).replace(/\n/g,'<br>'); }
+}
+
+function addMessage(role, text, meta = {}, scroll = true) {
+  document.getElementById('welcome').style.display = 'none';
+  const el = document.createElement('div');
+  el.className = 'message ' + role;
+  const isUser = role === 'user';
+  const label = isUser ? 'You' : 'KSP Crime AI';
+  const avatarClass = isUser ? 'user' : 'bot';
+  const avatarText = isUser ? 'U' : 'K';
+
+  let metaHtml = '';
+  if (meta.database || meta.used_case_file) {
+    metaHtml += `<div class="msg-meta">
+      ${meta.database ? `<span class="chip db">${escHtml(meta.database)}</span>` : ''}
+      ${meta.source ? `<span class="chip">${escHtml(meta.source)}</span>` : ''}
+      ${meta.used_case_file ? `<span class="doc-badge">📄 Case File</span>` : ''}
+      ${meta.correction ? `<span class="chip">${escHtml(meta.correction)}</span>` : ''}
+    </div>`;
+  }
+  let sqlHtml = '';
+  if (meta.sql) {
+    sqlHtml = `<details class="sql-toggle"><summary>View SQL Query · Explainable AI</summary><pre>${escHtml(meta.sql)}</pre></details>`;
+  }
+
+  const bubbleContent = isUser ? escHtml(text).replace(/\n/g,'<br>') : renderMarkdown(text);
+
+  el.innerHTML = `
+    <div class="avatar ${avatarClass}">${avatarText}</div>
+    <div class="msg-body">
+      <div class="msg-role">${label}</div>
+      <div class="msg-bubble">${bubbleContent}</div>
+      ${metaHtml}${sqlHtml}
+    </div>`;
+  document.getElementById('messages').appendChild(el);
+  if (scroll) el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+function showTyping() {
+  document.getElementById('welcome').style.display = 'none';
+  const el = document.createElement('div');
+  el.className = 'message bot'; el.id = 'typing-indicator';
+  el.innerHTML = `<div class="avatar bot">K</div>
+    <div class="msg-body">
+      <div class="msg-role">KSP Crime AI</div>
+      <div class="msg-bubble" style="min-width:60px"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+    </div>`;
+  document.getElementById('messages').appendChild(el);
+  el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+}
+
+function hideTyping() { document.getElementById('typing-indicator')?.remove(); }
+
+function setLoading(v) {
+  loading = v;
+  document.getElementById('sendBtn').disabled = v;
+  document.getElementById('stopBtn').classList.toggle('show', v);
+}
+
+function stopChat() { abortCtrl?.abort(); }
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || loading) return;
+  setLoading(true);
+  input.value = ''; input.style.height = 'auto';
+  addMessage('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  showTyping();
+  abortCtrl = new AbortController();
+  try {
+    const body = { message: text, language: currentLang };
+    if (currentSession) body.session_id = currentSession;
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: abortCtrl.signal,
+    });
+    hideTyping();
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      addMessage('bot', 'Error: ' + (err.detail || res.statusText));
+    } else {
+      const data = await res.json();
+      if (data.session_id) currentSession = data.session_id;
+      addMessage('bot', data.answer, { database: data.database, source: data.source, correction: data.correction_note, sql: data.sql, used_case_file: data.used_case_file });
+      chatHistory.push({ role: 'assistant', content: data.answer });
+      speakText(data.answer);
+      loadSessions();
+    }
+  } catch (e) {
+    hideTyping();
+    if (e.name === 'AbortError') addMessage('bot', 'Request stopped.');
+    else addMessage('bot', 'Cannot reach server. Make sure the API is running.');
+  } finally { abortCtrl = null; setLoading(false); input.focus(); }
+}
+
+// ─── SESSIONS ─────────────────────────────────────────────────────────────
+async function loadSessions() {
+  try {
+    const res = await fetch('/api/sessions');
+    if (!res.ok) return;
+    const sessions = await res.json();
+    renderSessions(sessions);
+  } catch {}
+}
+
+function renderSessions(sessions) {
+  const el = document.getElementById('sessionList');
+  const hdr = el.querySelector('.sessions-header');
+  el.innerHTML = ''; el.appendChild(hdr);
+  if (!sessions.length) {
+    const p = document.createElement('div');
+    p.style.cssText = 'font-size:12px;color:var(--muted);padding:4px 4px 8px;';
+    p.textContent = 'No saved chats yet'; el.appendChild(p); return;
+  }
+  for (const s of sessions) {
+    const btn = document.createElement('button');
+    btn.className = 'session-item' + (s.id === currentSession ? ' active' : '');
+    btn.innerHTML = `<span class="session-title">${escHtml(s.title)}</span>
+      <button class="session-del" title="Delete" onclick="delSession(event,'${s.id}')">&times;</button>`;
+    btn.onclick = (e) => { if (!e.target.classList.contains('session-del')) loadSession(s.id); };
+    el.appendChild(btn);
+  }
+}
+
+async function loadSession(id) {
+  if (loading) return;
+  const res = await fetch(`/api/sessions/${id}`); if (!res.ok) return;
+  const data = await res.json();
+  currentSession = data.id; chatHistory = [];
+
+  // Detach welcome element BEFORE clearing innerHTML, then re-attach
+  const welcome = document.getElementById('welcome');
+  const msgs = document.getElementById('messages');
+  if (welcome && welcome.parentNode === msgs) msgs.removeChild(welcome);
+  msgs.innerHTML = '';
+  welcome.style.display = data.messages.length ? 'none' : 'block';
+  msgs.appendChild(welcome);
+
+  for (const m of data.messages) {
+    const meta = m.metadata || {};
+    addMessage(m.role, m.content, { database: meta.database, source: meta.source, correction: meta.correction_note, sql: meta.sql }, false);
+    chatHistory.push({ role: m.role, content: m.content });
+  }
+  // Scroll to bottom and switch to chat tab
+  switchTab('chat');
+  setTimeout(() => msgs.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 50);
+  await loadSessions();
+  await loadDocList();
+}
+
+async function delSession(e, id) {
+  e.stopPropagation();
+  if (!confirm('Delete this chat?')) return;
+  await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
+  if (currentSession === id) { currentSession = null; chatHistory = []; newChat(); }
+  loadSessions();
+}
+
+function newChat() {
+  currentSession = null; chatHistory = [];
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+  const w = document.getElementById('welcome');
+  w.style.display = 'block'; msgs.appendChild(w);
+  document.getElementById('chatInput').focus();
+  loadSessions();
+}
+
+// ─── HEALTH CHECK ─────────────────────────────────────────────────────────
+async function checkHealth() {
+  try {
+    const res = await fetch('/api/health'); const d = await res.json();
+    const mode = d.llm_enabled ? `${d.llm_provider} · ${d.llm_model || ''}` : 'Fallback mode';
+    document.getElementById('statusText').textContent = mode;
+    document.getElementById('statusDot').className = 'dot' + (d.status === 'ok' ? '' : ' amber');
+  } catch {
+    document.getElementById('statusText').textContent = 'API offline';
+    document.getElementById('statusDot').className = 'dot red';
+  }
+}
+
+// ─── ANALYTICS ────────────────────────────────────────────────────────────
+function fmt(n) {
+  if (n == null) return '—';
+  return Number(n).toLocaleString('en-IN');
+}
+
+function destroyChart(id) { if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; } }
+
+const CHART_DEFAULTS = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#8fa3bd', font: { size: 11, family: 'Inter' } } } },
+  scales: {
+    x: { ticks: { color: '#5c6b84', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.05)' } },
+    y: { ticks: { color: '#5c6b84', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,.05)' } },
+  },
+};
+
+async function loadAnalytics() {
+  try {
+    const [trends, district, crimeTypes, preds, cases, behav] = await Promise.all([
+      fetch('/api/analytics/trends').then(r => r.json()),
+      fetch('/api/analytics/district-breakdown').then(r => r.json()),
+      fetch('/api/analytics/crime-type-trends').then(r => r.json()),
+      fetch('/api/analytics/predictions').then(r => r.json()),
+      fetch('/api/analytics/cases-summary').then(r => r.json()),
+      fetch('/api/analytics/behavioral-profile').then(r => r.json()),
+    ]);
+
+    const total = trends.data.reduce((a, r) => a + (r.total_firs || 0), 0);
+    const arrests = trends.data.reduce((a, r) => a + (r.total_arrests || 0), 0);
+    const victims = trends.data.reduce((a, r) => a + (r.total_victims || 0), 0);
+    const chsht = trends.data.reduce((a, r) => a + (r.total_chargesheeted || 0), 0);
+    document.getElementById('statFIRs').textContent = fmt(total);
+    document.getElementById('statArrests').textContent = fmt(arrests);
+    document.getElementById('statVictims').textContent = fmt(victims);
+    document.getElementById('statChargesheet').textContent = fmt(chsht);
+
+    destroyChart('trendsChart');
+    chartInstances['trendsChart'] = new Chart(document.getElementById('trendsChart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: trends.data.map(r => r.year),
+        datasets: [{
+          label: 'Total FIRs', data: trends.data.map(r => r.total_firs),
+          borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,.12)', fill: true, tension: 0.4, pointBackgroundColor: '#60a5fa',
+        }, {
+          label: 'Arrests', data: trends.data.map(r => r.total_arrests),
+          borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,.08)', fill: true, tension: 0.4, pointBackgroundColor: '#34d399',
+        }],
+      },
+      options: { ...CHART_DEFAULTS },
+    });
+
+    destroyChart('districtChart');
+    const topDist = (district.data || []).slice(0, 12);
+    chartInstances['districtChart'] = new Chart(document.getElementById('districtChart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: topDist.map(r => r.district),
+        datasets: [{ label: 'FIRs', data: topDist.map(r => r.firs), backgroundColor: 'rgba(96,165,250,.75)', borderRadius: 4 }],
+      },
+      options: { ...CHART_DEFAULTS, indexAxis: 'y' },
+    });
+
+    destroyChart('crimeTypeChart');
+    if (crimeTypes.labels && crimeTypes.labels.length) {
+      chartInstances['crimeTypeChart'] = new Chart(document.getElementById('crimeTypeChart').getContext('2d'), {
+        type: 'line',
+        data: { labels: crimeTypes.labels, datasets: crimeTypes.datasets.map(d => ({ ...d, fill: false, tension: 0.4 })) },
+        options: { ...CHART_DEFAULTS },
+      });
+    }
+
+    const predEl = document.getElementById('predList');
+    predEl.innerHTML = `<div style="margin-bottom:14px;font-size:13px;color:var(--muted)">
+      Forecast for <strong style="color:var(--navy)">${preds.next_year || ''}</strong> —
+      <strong style="color:var(--navy)">${fmt(preds.predicted_total_firs)}</strong> total FIRs
+      <em style="font-size:12px">(${preds.trend || ''})</em>
+    </div>`;
+    for (const p of (preds.crime_type_predictions || [])) {
+      const trendIcon = p.trend === 'up' ? '↑' : '↓';
+      const trendClass = p.trend === 'up' ? 'up' : 'down';
+      predEl.innerHTML += `<div class="pred-item">
+        <div class="pred-crime">${escHtml(p.crime_type)}</div>
+        <div class="pred-count">${fmt(p.predicted_count)}</div>
+        <div class="pred-trend ${trendClass}">${trendIcon} ${Math.abs(p.change_pct)}%</div>
+      </div>`;
+    }
+
+    destroyChart('dispositionsChart');
+    const dispData = (cases.dispositions || []).slice(0, 8);
+    if (dispData.length) {
+      const palette = ['#60a5fa','#34d399','#fbbf24','#f87171','#a78bfa','#22d3ee','#f472b6','#4ade80'];
+      chartInstances['dispositionsChart'] = new Chart(document.getElementById('dispositionsChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: dispData.map(r => r.disposition),
+          datasets: [{ data: dispData.map(r => r.count), backgroundColor: palette }],
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#8fa3bd', font: { size: 10 } } } }, borderColor: '#0f1626' },
+      });
+    }
+
+    destroyChart('dayChart');
+    const dayData = behav.by_day || [];
+    const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    if (dayData.length) {
+      const ordered = DAYS.map(d => dayData.find(r => r.day_of_week === d) || { count: 0 });
+      chartInstances['dayChart'] = new Chart(document.getElementById('dayChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: DAYS,
+          datasets: [{ label: 'FIRs', data: ordered.map(r => r.count), backgroundColor: DAYS.map((_, i) => i === 0 || i === 6 ? 'rgba(248,113,113,.75)' : 'rgba(96,165,250,.75)'), borderRadius: 4 }],
+        },
+        options: { ...CHART_DEFAULTS },
+      });
+    }
+  } catch (e) { console.error('Analytics error:', e); }
+}
+
+
+// ─── INTEL MAP (Network + Hotspots merged) ────────────────────────────────
+let intelMapInstance = null;
+let imHotspotLayer = null, imSuspectLayer = null;
+let imAllBounds = null;
+let _imRiskMarkers = {};
+let _activeImRisks = new Set(['critical','high','medium','low']);
+const IM_RISK_COLOR = { critical:'#ef4444', high:'#f97316', medium:'#eab308', low:'#22c55e' };
+
+async function loadIntelMap() {
+  if (intelMapInstance) return;
+  try {
+    intelMapInstance = L.map('intel-map', { center: [14.5, 75.7], zoom: 7 });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OSM © CartoDB', subdomains: 'abcd', maxZoom: 19,
+    }).addTo(intelMapInstance);
+
+    const [hotRes, netRes] = await Promise.all([
+      fetch('/api/analytics/hotspots'),
+      fetch('/api/analytics/network'),
+    ]);
+    const hotData = await hotRes.json();
+    const netData = await netRes.json();
+
+    const hotRows = (hotData.data || []).filter(r => r.latitude && r.longitude);
+    const distCoords = {};
+    hotRows.forEach(r => { distCoords[r.district] = { lat: +r.latitude, lng: +r.longitude, total: +r.total_firs, solved: +r.solved||0, pop: +r.population||0 }; });
+
+    // Layer 1: Hotspot glow circles
+    imHotspotLayer = L.layerGroup();
+    const maxFIR = Math.max(...hotRows.map(r => +r.total_firs));
+    hotRows.forEach(r => {
+      const ratio = r.total_firs / maxFIR;
+      const color = ratio > 0.6 ? '#ef4444' : ratio > 0.3 ? '#f97316' : '#eab308';
+      L.circle([r.latitude, r.longitude], {
+        radius: 8000 + ratio * 35000, color, fillColor: color, fillOpacity: 0.12, weight: 1.5, opacity: 0.45,
+      }).addTo(imHotspotLayer).bindPopup(`
+        <div style="font-family:Inter,sans-serif;min-width:170px">
+          <b style="color:#f1f5f9">${r.district}</b>
+          <div style="font-size:12px;color:#aab8ce;margin-top:6px;display:grid;grid-template-columns:1fr auto;gap:3px">
+            <span>Total FIRs</span><b>${(+r.total_firs).toLocaleString()}</b>
+            <span>Solved</span><b>${(+r.solved||0).toLocaleString()}</b>
+            <span>Population</span><b>${(+r.population||0).toLocaleString()}</b>
+          </div>
+        </div>`);
+    });
+    imHotspotLayer.addTo(intelMapInstance);
+
+    // Scatter suspect positions within district
+    const distOffset = {}, nodeCoords = {};
+    netData.nodes.forEach(n => {
+      const base = distCoords[n.district];
+      if (!base) return;
+      const idx = distOffset[n.district] = (distOffset[n.district] || 0) + 1;
+      const angle = idx * 2.399;
+      const r = 0.022 * Math.sqrt(idx);
+      nodeCoords[n.id] = { lat: base.lat + r * Math.sin(angle), lng: base.lng + r * Math.cos(angle) };
+    });
+
+    // Layer 2: Suspect markers grouped by risk (edge lines removed — too cluttered at scale)
+    imSuspectLayer = L.layerGroup();
+    _imRiskMarkers = { critical: [], high: [], medium: [], low: [] };
+    netData.nodes.forEach(n => {
+      const coords = nodeCoords[n.id];
+      if (!coords) return;
+      const color = IM_RISK_COLOR[n.risk] || IM_RISK_COLOR.high;
+      const marker = L.circleMarker([coords.lat, coords.lng], {
+        radius: Math.min(5 + n.score * 0.1, 13), color: '#fff', weight: 1.5, fillColor: color, fillOpacity: 0.9,
+      }).bindPopup(`
+        <div style="font-family:Inter,sans-serif;min-width:185px">
+          <b style="color:#f1f5f9">${n.label}</b>
+          <div style="font-size:11px;color:#5c6b84;margin-bottom:7px">${n.district}</div>
+          <div style="font-size:12px;color:#aab8ce;display:grid;grid-template-columns:auto auto;gap:3px 12px">
+            <span>Risk</span><b style="color:${color}">${n.risk.toUpperCase()}</b>
+            <span>Score</span><b>${n.score}</b>
+            <span>FIRs</span><b>${n.firs}</b>
+            <span>Age</span><b>${n.age||'—'}</b>
+            <span>Occupation</span><b>${n.occupation||'—'}</b>
+          </div>
+          <button onclick="askAboutSuspect('${n.label.replace(/'/g,"\\'")}','${n.district}')"
+            style="margin-top:8px;width:100%;padding:6px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);border:none;border-radius:4px;
+            color:white;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit">Ask AI</button>
+        </div>
+      `).on('click', () => showImDetail(n, color));
+      imSuspectLayer.addLayer(marker);
+      if (_imRiskMarkers[n.risk]) _imRiskMarkers[n.risk].push(marker);
+    });
+    imSuspectLayer.addTo(intelMapInstance);
+
+    document.getElementById('imNodes').textContent = netData.nodes.length;
+    document.getElementById('imEdges').textContent = netData.nodes.filter(n => n.in_gang).length;
+    document.getElementById('imCritical').textContent = netData.nodes.filter(n => n.risk === 'high' || n.risk === 'critical').length;
+    document.getElementById('imDistricts').textContent = hotRows.length;
+
+    const allCoords = Object.values(nodeCoords).map(c => [c.lat, c.lng]);
+    if (allCoords.length) {
+      imAllBounds = L.latLngBounds(allCoords);
+      intelMapInstance.fitBounds(imAllBounds, { padding: [30, 30] });
+    }
+  } catch(e) { console.error('Intel Map error:', e); }
+}
+
+function showImDetail(n, color) {
+  document.getElementById('imNodeDetail').innerHTML = `
+    <div class="net-node-name">${n.label}</div>
+    <div class="net-node-row"><span class="net-node-key">Risk</span><span class="net-risk-badge ${n.risk}">${n.risk.toUpperCase()}</span></div>
+    <div class="net-node-row"><span class="net-node-key">District</span><span class="net-node-val">${n.district}</span></div>
+    <div class="net-node-row"><span class="net-node-key">Score</span><span class="net-node-val">${n.score}</span></div>
+    <div class="net-node-row"><span class="net-node-key">FIRs</span><span class="net-node-val">${n.firs}</span></div>
+    <div class="net-node-row"><span class="net-node-key">Age</span><span class="net-node-val">${n.age||'—'}</span></div>
+    <div class="net-node-row"><span class="net-node-key">Occupation</span><span class="net-node-val">${n.occupation||'—'}</span></div>
+    <div style="margin-top:10px">
+      <button onclick="askAboutSuspect('${n.label.replace(/'/g,"\\'")}','${n.district}')"
+        style="width:100%;padding:7px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);
+        border-radius:6px;color:#ef4444;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600">
+        Ask AI about this suspect
+      </button>
+    </div>`;
+  document.getElementById('imDetailSection').style.display = 'block';
+}
+
+function toggleImLayer(name, btn) {
+  btn.classList.toggle('active');
+  const state = btn.querySelector('.im-layer-state');
+  if (state) state.textContent = btn.classList.contains('active') ? 'ON' : 'OFF';
+  const layer = name==='hotspots' ? imHotspotLayer : imSuspectLayer;
+  if (!layer || !intelMapInstance) return;
+  if (intelMapInstance.hasLayer(layer)) intelMapInstance.removeLayer(layer);
+  else intelMapInstance.addLayer(layer);
+}
+
+function toggleImRisk(risk, btn) {
+  btn.classList.toggle('active');
+  if (_activeImRisks.has(risk)) _activeImRisks.delete(risk); else _activeImRisks.add(risk);
+  (_imRiskMarkers[risk] || []).forEach(m => {
+    if (_activeImRisks.has(risk)) imSuspectLayer.addLayer(m); else imSuspectLayer.removeLayer(m);
+  });
+}
+
+function reloadIntelMap() {
+  if (intelMapInstance) { intelMapInstance.remove(); intelMapInstance = null; }
+  imHotspotLayer = null; imSuspectLayer = null;
+  imAllBounds = null; _imRiskMarkers = {};
+  _activeImRisks = new Set(['critical','high','medium','low']);
+  document.querySelectorAll('.net-risk-pill').forEach(b => b.classList.add('active'));
+  document.getElementById('imDetailSection').style.display = 'none';
+  loadIntelMap();
+}
+
+// keep askNetworkInChat / askAboutSuspect in place
+
+
+function askNetworkInChat() {
+  const input = document.getElementById('chatInput');
+  input.value = 'Give me a summary of the top 5 most dangerous repeat offenders in the criminal network — their district, crime pattern, and risk level.';
+  switchTab('chat');
+  sendMessage();
+}
+
+function askAboutSuspect(name, district) {
+  const input = document.getElementById('chatInput');
+  input.value = `Tell me about ${name} from ${district} — what crimes are they linked to, their FIR history, and any co-accused connections.`;
+  switchTab('chat');
+  sendMessage();
+}
+
+
+// ─── AUDIT ────────────────────────────────────────────────────────────────
+async function loadAudit() {
+  try {
+    const res = await fetch('/api/audit'); const d = await res.json();
+    const tbody = document.getElementById('auditBody');
+    tbody.innerHTML = '';
+    if (!d.logs.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:28px;font-size:13px">No audit records yet</td></tr>';
+      return;
+    }
+    for (const r of d.logs) {
+      const ts = new Date(r.ts).toLocaleString('en-IN');
+      const dbClass = r.database ? r.database.replace(/[^a-z_]/gi, '') : '';
+      tbody.innerHTML += `<tr>
+        <td style="color:var(--muted)">${r.id}</td>
+        <td style="color:var(--muted);white-space:nowrap;font-size:11.5px">${ts}</td>
+        <td>${escHtml(r.question || '')}</td>
+        <td>${r.database ? `<span class="db-badge ${dbClass}">${escHtml(r.database)}</span>` : '—'}</td>
+        <td>${r.language === 'kn' ? 'ಕನ್ನಡ' : 'EN'}</td>
+        <td class="audit-sql" title="${escHtml(r.sql || '')}">${escHtml(r.sql || '—')}</td>
+      </tr>`;
+    }
+  } catch (e) { console.error('Audit error:', e); }
+}
+
+// ─── MODEL SWITCHER ───────────────────────────────────────────────────────
+async function loadModels() {
+  try {
+    const res = await fetch('/api/models');
+    const d = await res.json();
+    allProviders = d.providers || [];
+    const active = d.active || {};
+    activeProvider = active.provider;
+    activeModel = active.model;
+    updateModelBar();
+  } catch {}
+}
+
+function updateModelBar() {
+  const cfg = allProviders.find(p => p.id === activeProvider);
+  const m = cfg?.models?.find(m => m.id === activeModel);
+  const label = m ? `${cfg.label.split(' ')[0]} · ${m.label.split(' ')[0]}` : (activeModel || 'Select model');
+  document.getElementById('modelBarLabel').textContent = label;
+}
+
+function toggleModelDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('modelDropdown');
+  if (dd.classList.contains('open')) { closeModelDropdown(); return; }
+  renderModelDropdown();
+  const bar = document.getElementById('modelBar');
+  const rect = bar.getBoundingClientRect();
+  dd.style.top = (rect.bottom + 6) + 'px';
+  dd.style.right = (window.innerWidth - rect.right) + 'px';
+  dd.classList.add('open');
+  setTimeout(() => document.addEventListener('click', closeModelDropdown, { once: true }), 50);
+}
+
+function closeModelDropdown() {
+  document.getElementById('modelDropdown').classList.remove('open');
+}
+
+function renderModelDropdown() {
+  const dd = document.getElementById('modelDropdown');
+  let html = '';
+  for (const prov of allProviders) {
+    const avail = prov.available;
+    const isOllama = prov.id === 'ollama';
+    const statusLabel = isOllama
+      ? (avail ? '● Running' : '○ Not running')
+      : (avail ? '● Online' : '○ No key');
+    html += `<div class="md-provider">${escHtml(prov.label)}<span class="${avail ? 'md-avail' : 'md-unavail'}">${statusLabel}</span></div>`;
+
+    if (isOllama && !avail) {
+      html += `<div class="ollama-card">
+        <div class="ollama-card-title">Install Ollama — free, unlimited, runs offline</div>
+        <div class="ollama-steps">
+          1. Download from <strong>ollama.com</strong> and install<br>
+          2. Open a terminal and run: <code>ollama pull llama3.2</code><br>
+          3. Click <strong>Refresh</strong> below once it's running
+        </div>
+        <button class="ollama-pull-btn" onclick="event.stopPropagation();checkOllamaAndRefresh()">↻ Refresh status</button>
+      </div>`;
+    } else if (isOllama && avail) {
+      html += `<div class="ollama-card">
+        <div class="ollama-card-title">Recommended models to pull</div>
+        <div class="ollama-model-list" id="ollamaModelList">Loading…</div>
+      </div>`;
+    }
+
+    for (const m of prov.models) {
+      const sel = prov.id === activeProvider && m.id === activeModel;
+      const disabled = !avail ? ' unavail' : '';
+      html += `<div class="md-model${sel ? ' selected' : ''}${disabled}" onclick="${avail ? `selectModel('${prov.id}','${m.id}')` : ''}">
+        <span class="md-check">${sel ? '✓' : ''}</span>
+        <span>${escHtml(m.label)}</span>
+      </div>`;
+    }
+  }
+  dd.innerHTML = html;
+
+  // If Ollama is running, populate the model pull list
+  if (allProviders.find(p => p.id === 'ollama')?.available) loadOllamaModels();
+}
+
+async function selectModel(provider, model) {
+  closeModelDropdown();
+  try {
+    const res = await fetch('/api/models/select', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ provider, model }),
+    });
+    const d = await res.json();
+    activeProvider = d.active?.provider;
+    activeModel = d.active?.model;
+    updateModelBar();
+  } catch {}
+}
+
+// ─── FILE UPLOAD ──────────────────────────────────────────────────────────
+let sessionDocs = [];
+
+function handleDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag-over'); }
+function handleDragLeave(e) { document.getElementById('uploadZone').classList.remove('drag-over'); }
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag-over');
+  const files = e.dataTransfer?.files;
+  if (files?.length) uploadFile(files[0]);
+}
+function handleFileSelect(e) {
+  const file = e.target.files?.[0];
+  if (file) uploadFile(file);
+  e.target.value = '';
+}
+
+async function uploadFile(file) {
+  if (!currentSession) {
+    const res = await fetch('/api/sessions', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({title: file.name}) });
+    if (res.ok) { const s = await res.json(); currentSession = s.id; loadSessions(); }
+  }
+  const zone = document.getElementById('uploadZone');
+  zone.innerHTML = '<div class="upload-icon">⏳</div>Uploading...';
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const res = await fetch(`/api/upload?session_id=${encodeURIComponent(currentSession)}`, { method: 'POST', body: fd });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
+      alert('Upload error: ' + err.detail);
+    } else {
+      await loadDocList();
+    }
+  } catch (e) {
+    alert('Upload failed: ' + e.message);
+  } finally {
+    zone.innerHTML = '<div class="upload-icon">📄</div><strong>Click to upload or drag &amp; drop</strong><br/><span style="font-size:12px;margin-top:2px;display:block">PDF, DOCX, TXT, CSV — max 20 MB</span>';
+  }
+}
+
+async function loadDocList() {
+  if (!currentSession) {
+    document.getElementById('docList').innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:24px">Start a chat session first, then upload files</div>';
+    return;
+  }
+  document.getElementById('uploadSessionNote').textContent = `Session: ${currentSession.slice(0,8)}…`;
+  try {
+    const res = await fetch(`/api/docs/${currentSession}`);
+    const d = await res.json();
+    sessionDocs = d.docs || [];
+    renderDocList();
+    updateDocBadge();
+    updateInlineDocChips();
+  } catch {}
+}
+
+function renderDocList() {
+  const el = document.getElementById('docList');
+  if (!sessionDocs.length) {
+    el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:24px">No files uploaded yet for this session</div>';
+    return;
+  }
+  const icons = { pdf: '📕', docx: '📘', doc: '📘', txt: '📄', md: '📝', csv: '📊' };
+  el.innerHTML = sessionDocs.map(d => `
+    <div class="doc-item">
+      <div class="doc-icon">${icons[d.file_type] || '📄'}</div>
+      <div class="doc-info">
+        <div class="doc-name">${escHtml(d.filename)}</div>
+        <div class="doc-meta">${d.file_type.toUpperCase()} · ${(d.size_bytes/1024).toFixed(1)} KB${d.page_count > 1 ? ` · ${d.page_count} pages` : ''} · ${new Date(d.uploaded_at).toLocaleString('en-IN')}</div>
+      </div>
+      <button class="doc-del" onclick="deleteDoc(${d.doc_id})" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+function updateDocBadge() {
+  const badge = document.getElementById('docCountBadge');
+  const num = document.getElementById('docCountNum');
+  if (sessionDocs.length > 0) { num.textContent = sessionDocs.length; badge.style.display = 'inline-flex'; }
+  else badge.style.display = 'none';
+}
+
+async function deleteDoc(docId) {
+  if (!confirm('Remove this file from the session?')) return;
+  await fetch(`/api/docs/${currentSession}/${docId}`, { method: 'DELETE' });
+  await loadDocList();
+}
+
+// ─── CASE SOLVER ──────────────────────────────────────────────────────────
+const SCENARIOS = {
+  murder: 'A 38-year-old man was found dead at home. Wife says he went to sleep normally but she found him dead in the morning. No obvious injuries visible. Neighbours report they heard an argument the night before. Victim had a life insurance policy of Rs 50 lakhs taken 6 months ago.',
+  rape: 'A 22-year-old woman was sexually assaulted near a bus stand at night. She was returning from work. Attacker was on a motorcycle, wore a helmet. She managed to scratch his arm before escaping. Her phone was taken. She noticed a tattoo of a snake on the attacker\'s left wrist.',
+  kidnap: 'A 10-year-old boy went missing from school. Last seen at 3:30pm leaving school gate. CCTV shows him talking to a man near a white van. The van has no visible number plate. Parents received a call from an unknown number demanding Rs 20 lakh ransom.',
+  fraud: 'A retired government employee lost Rs 8 lakhs to online fraud. He received a call from someone claiming to be from SBI, said his account was compromised. Was asked to install a remote access app and share OTPs. Money transferred in 3 transactions to different UPI IDs.',
+  cyber: 'A 19-year-old college student received morphed obscene images of herself via WhatsApp. The sender is threatening to share them with her family unless she sends money. She never shared any such photos. The WhatsApp number shows a foreign country code.',
+  burglary: 'A house in a gated community was burgled while the family was on vacation. Entry made through second floor window. Gold worth Rs 3 lakhs and Rs 50,000 cash taken. The family had posted holiday photos on Instagram. Security guard claims he saw nothing.',
+  stalking: 'A 25-year-old software engineer has been receiving threatening messages from her ex-boyfriend for 3 months. He has appeared outside her office twice. Yesterday he slashed her car tyres. She has screenshots of 200+ messages.',
+  missing: 'A 45-year-old businessman has been missing for 5 days. His car was found abandoned near a highway. Phone is switched off. He had a business dispute with his partner over property worth Rs 2 crore. His family says he withdrew Rs 5 lakhs cash 2 days before disappearing.'
+};
+
+async function loadCaseSolverStats() {
+  try {
+    const res = await fetch('/api/case-solver/stats');
+    const d = await res.json();
+    const el = document.getElementById('caseDbStats');
+    if (el) el.textContent = `${d.total} solved cases`;
+  } catch {}
+}
+
+function loadScenario(type) {
+  const el = document.getElementById('solverInput');
+  if (el) el.value = SCENARIOS[type] || '';
+}
+
+function renderMarkdown(text) {
+  try { return marked.parse(text); }
+  catch(e) { return '<pre>' + text + '</pre>'; }
+}
+
+async function runCaseSolver() {
+  const facts = document.getElementById('solverInput').value.trim();
+  if (!facts) return;
+  const btn = document.getElementById('solverBtn');
+  const out = document.getElementById('solverOutput');
+  btn.disabled = true;
+  btn.textContent = 'Analysing...';
+  out.innerHTML = '<span style="color:var(--muted)">Searching 52 solved cases and generating investigation brief...</span>';
+
+  try {
+    const res = await fetch('/api/case-solver', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ facts, use_llm: true })
+    });
+    const d = await res.json();
+    out.innerHTML = renderMarkdown(d.brief || 'No brief generated.');
+
+    const panel = document.getElementById('similarCasesPanel');
+    const list = document.getElementById('similarCasesList');
+    if (d.similar_cases && d.similar_cases.length > 0) {
+      list.innerHTML = d.similar_cases.map(c => `
+        <div class="similar-case-card">
+          <div class="similar-case-title">${c.title}</div>
+          <div class="similar-case-meta">${c.year} · ${c.location} · ${c.crime_type}</div>
+          <div class="similar-case-breakthrough">Breakthrough: ${c.breakthrough}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Outcome: ${c.outcome}</div>
+        </div>`).join('');
+      panel.style.display = 'block';
+    } else {
+      panel.style.display = 'none';
+    }
+  } catch(e) {
+    out.textContent = 'Error: ' + e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Analyse Case & Get Investigation Brief';
+  }
+}
+
+async function searchCases() {
+  const q = document.getElementById('caseSearchInput').value.trim();
+  if (!q) return;
+  const el = document.getElementById('caseSearchResults');
+  el.innerHTML = '<span style="font-size:12px;color:var(--muted)">Searching...</span>';
+  try {
+    const res = await fetch('/api/case-solver/search?q=' + encodeURIComponent(q) + '&limit=8');
+    const d = await res.json();
+    if (!d.results || d.results.length === 0) {
+      el.innerHTML = '<span style="font-size:12px;color:var(--muted)">No cases found.</span>';
+      return;
+    }
+    el.innerHTML = d.results.map(c => `
+      <div class="similar-case-card" onclick="loadCaseDetail(${c.id})">
+        <div class="similar-case-title">${c.title}</div>
+        <div class="similar-case-meta">${c.year || ''} · ${c.location || ''} · ${c.crime_type}</div>
+        <div class="similar-case-breakthrough">${c.breakthrough}</div>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<span style="font-size:12px;color:var(--muted)">Search failed.</span>';
+  }
+}
+
+async function loadCaseDetail(id) {
+  try {
+    const res = await fetch('/api/case-solver/' + id);
+    const c = await res.json();
+    const out = document.getElementById('solverOutput');
+    out.innerHTML = renderMarkdown(`## ${c.title}
+
+**Year:** ${c.year} · **Location:** ${c.location}, ${c.state}
+**Crime Type:** ${c.crime_type}
+
+### Victim
+${c.victim}
+
+### Accused
+${c.accused}
+
+### Modus Operandi
+${c.modus_operandi}
+
+### How It Was Solved
+${c.how_solved}
+
+### The Breakthrough
+**${c.breakthrough}**
+
+### Key Evidence
+${(c.key_evidence || []).map(e => `- ${e}`).join('\n')}
+
+### Outcome
+${c.outcome}
+**Sentence:** ${c.sentence}
+
+### Investigation Tips from This Case
+${(c.investigation_tips || []).map(t => `- ${t}`).join('\n')}
+
+---
+*Source: ${c.source}*`);
+  } catch(e) {}
+}
+
+// ─── WEB SEARCH ───────────────────────────────────────────────────────────
+let _wsLastResults = '';
+
+function openWebSearch() {
+  document.getElementById('wsOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('wsInput').focus(), 80);
+}
+
+function closeWebSearch() {
+  document.getElementById('wsOverlay').classList.remove('open');
+}
+
+async function runWebSearch() {
+  const q = document.getElementById('wsInput').value.trim();
+  if (!q) return;
+  const btn = document.getElementById('wsRunBtn');
+  const spinner = document.getElementById('wsSpinner');
+  const results = document.getElementById('wsResults');
+  const insertRow = document.getElementById('wsInsertRow');
+
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  results.classList.remove('visible');
+  insertRow.style.display = 'none';
+  _wsLastResults = '';
+
+  try {
+    const res = await fetch(`/api/web-search?q=${encodeURIComponent(q)}`);
+    const d = await res.json();
+    _wsLastResults = d.results || 'No results found.';
+    results.textContent = _wsLastResults;
+    results.classList.add('visible');
+    insertRow.style.display = 'block';
+  } catch (e) {
+    results.textContent = 'Search failed — check internet connection.';
+    results.classList.add('visible');
+  } finally {
+    btn.disabled = false;
+    spinner.style.display = 'none';
+  }
+}
+
+function insertWebResultsToChat() {
+  if (!_wsLastResults) return;
+  const q = document.getElementById('wsInput').value.trim();
+  const input = document.getElementById('chatInput');
+  input.value = `Web search results for "${q}":\n\n${_wsLastResults}\n\nSummarize these findings for an investigator.`;
+  autoResize(input);
+  closeWebSearch();
+  switchTab('chat');
+  input.focus();
+}
+
+// ─── OLLAMA ───────────────────────────────────────────────────────────────
+const OLLAMA_RECOMMENDED = [
+  { id: 'llama3.2', label: 'LLaMA 3.2 3B · fast, 2GB' },
+  { id: 'phi3',     label: 'Phi-3.5 Mini · tiny, 2.2GB' },
+  { id: 'gemma2',   label: 'Gemma 2 2B · great quality, 1.6GB' },
+  { id: 'mistral',  label: 'Mistral 7B · best quality, 4.1GB' },
+];
+
+async function loadOllamaModels() {
+  const el = document.getElementById('ollamaModelList');
+  if (!el) return;
+  try {
+    const res = await fetch('/api/ollama/status');
+    const d = await res.json();
+    const installed = new Set(d.models || []);
+    el.innerHTML = OLLAMA_RECOMMENDED.map(m => {
+      const isInstalled = [...installed].some(n => n.startsWith(m.id));
+      return isInstalled
+        ? `<span class="ollama-installed-tag">✓ ${escHtml(m.label)}</span>`
+        : `<button class="ollama-pull-btn" onclick="event.stopPropagation();pullOllamaModel('${m.id}','${escHtml(m.label)}')" title="Pull this model">↓ ${escHtml(m.label)}</button>`;
+    }).join('');
+  } catch {
+    if (el) el.textContent = 'Could not load model list.';
+  }
+}
+
+async function pullOllamaModel(modelId, label) {
+  const btn = [...document.querySelectorAll('.ollama-pull-btn')].find(b => b.textContent.includes(label));
+  if (btn) { btn.textContent = `Pulling ${label}…`; btn.disabled = true; }
+  try {
+    const res = await fetch('/api/ollama/pull', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelId }),
+    });
+    const d = await res.json();
+    if (btn) { btn.textContent = `✓ Pull started — check terminal`; }
+    setTimeout(() => loadOllamaModels(), 3000);
+  } catch {
+    if (btn) { btn.textContent = `✗ Failed`; btn.disabled = false; }
+  }
+}
+
+async function checkOllamaAndRefresh() {
+  const res = await fetch('/api/ollama/status');
+  const d = await res.json();
+  if (d.running) {
+    await loadModels();
+    renderModelDropdown();
+  } else {
+    alert('Ollama is not running yet.\n\n1. Install from ollama.com\n2. Run: ollama serve\n3. Then click Refresh again.');
+  }
+}
+
+// ─── DATABASE BROWSER ─────────────────────────────────────────────────────
+const browseState = {
+  db: 'fir', view: null, views: [],
+  page: 1, limit: 100, total: 0, pages: 0,
+  columns: [], rows: [], q: '', initialised: false,
+};
+
+async function initBrowse() {
+  if (!browseState.view) await setBrowseDb('fir');
+}
+
+async function setBrowseDb(db) {
+  // Update DB pills
+  document.querySelectorAll('.db-pill').forEach(b => b.classList.remove('active'));
+  document.getElementById('dbpill-' + db)?.classList.add('active');
+  browseState.db = db;
+  browseState.view = null;
+  browseState.page = 1;
+  browseState.q = '';
+  document.getElementById('browseSearch').value = '';
+  document.getElementById('browseTableWrap').innerHTML = '<div class="browse-loading">Loading…</div>';
+  document.getElementById('browsePagination').style.display = 'none';
+  document.getElementById('browseCount').textContent = '';
+
+  const res = await fetch(`/api/browse/${db}/schema`);
+  if (!res.ok) { document.getElementById('browseTableWrap').innerHTML = '<div class="browse-empty">Could not load schema</div>'; return; }
+  const d = await res.json();
+  browseState.views = d.views || [];
+
+  // Render view tabs — use data-view to avoid quote conflicts in onclick
+  const row = document.getElementById('browseViewRow');
+  row.innerHTML = browseState.views.map(v =>
+    `<button class="view-tab" data-view="${escHtml(v)}" onclick="setBrowseView(this.dataset.view)">${escHtml(v)}</button>`
+  ).join('');
+
+  // Auto-select first view
+  if (browseState.views.length) await setBrowseView(browseState.views[0]);
+}
+
+async function setBrowseView(view) {
+  browseState.view = view;
+  browseState.page = 1;
+  browseState.q = document.getElementById('browseSearch').value.trim();
+
+  // Highlight active tab
+  document.querySelectorAll('.view-tab').forEach(b => {
+    b.classList.toggle('active', b.textContent === view);
+  });
+
+  await loadBrowsePage(1);
+}
+
+async function loadBrowsePage(page) {
+  if (!browseState.view) return;
+  page = Math.max(1, page);
+  browseState.page = page;
+
+  const wrap = document.getElementById('browseTableWrap');
+  wrap.innerHTML = '<div class="browse-loading">Loading records…</div>';
+
+  const params = new URLSearchParams({
+    page, limit: browseState.limit, q: browseState.q,
+  });
+  const res = await fetch(`/api/browse/${browseState.db}/${encodeURIComponent(browseState.view)}?${params}`);
+  if (!res.ok) {
+    wrap.innerHTML = `<div class="browse-empty">Error loading data: ${res.statusText}</div>`;
+    return;
+  }
+  const d = await res.json();
+  browseState.total = d.total;
+  browseState.pages = d.pages;
+  browseState.columns = d.columns;
+  browseState.rows = d.rows;
+  renderBrowseTable();
+  updateBrowsePagination();
+  const start = (page - 1) * browseState.limit + 1;
+  const end = Math.min(page * browseState.limit, d.total);
+  document.getElementById('browseCount').textContent =
+    `${d.total.toLocaleString('en-IN')} records${browseState.q ? ' (filtered)' : ''}`;
+}
+
+function renderBrowseTable() {
+  const { columns, rows } = browseState;
+  if (!rows.length) {
+    document.getElementById('browseTableWrap').innerHTML = '<div class="browse-empty">No records found</div>';
+    return;
+  }
+  const thead = columns.map(c => `<th>${escHtml(c)}</th>`).join('');
+  const tbody = rows.map(row =>
+    `<tr onclick="selectBrowseRow(this)">` + row.map(cell => `<td title="${escHtml(cell)}">${escHtml(cell)}</td>`).join('') + `</tr>`
+  ).join('');
+  document.getElementById('browseTableWrap').innerHTML =
+    `<table class="browse-table"><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table>`;
+}
+
+function selectBrowseRow(tr) {
+  document.querySelectorAll('.browse-table tr.selected').forEach(r => r.classList.remove('selected'));
+  tr.classList.add('selected');
+}
+
+function updateBrowsePagination() {
+  const { page, pages, limit, total } = browseState;
+  const pag = document.getElementById('browsePagination');
+  pag.style.display = pages > 1 ? 'flex' : 'none';
+  const start = (page - 1) * limit + 1;
+  const end = Math.min(page * limit, total);
+  document.getElementById('pageInfo').textContent = `Page ${page} of ${pages} · rows ${start}–${end} of ${total.toLocaleString('en-IN')}`;
+  document.getElementById('btnFirst').disabled = page <= 1;
+  document.getElementById('btnPrev').disabled = page <= 1;
+  document.getElementById('btnNext').disabled = page >= pages;
+  document.getElementById('btnLast').disabled = page >= pages;
+}
+
+function runBrowseSearch() {
+  browseState.q = document.getElementById('browseSearch').value.trim();
+  loadBrowsePage(1);
+}
+
+function clearBrowseSearch() {
+  browseState.q = '';
+  document.getElementById('browseSearch').value = '';
+  loadBrowsePage(1);
+}
+
+// ─── CASE SCENARIO (unified chat handler) ────────────────────────────────
+function sendCaseScenario(type) {
+  const scenario = SCENARIOS[type];
+  if (!scenario) return;
+  // Disable all case chip buttons to prevent double-click
+  document.querySelectorAll('.case-chip-btn, .inv-chip-sidebar').forEach(b => b.disabled = true);
+  const prompt = `I have a case to investigate:\n\n${scenario}\n\nPlease give me a detailed investigation brief: evidence to collect, witness interviews, forensics, and cross-reference any similar solved cases.`;
+  const input = document.getElementById('chatInput');
+  input.value = prompt;
+  autoResize(input);
+  // If on another tab, switch to chat first
+  if (currentTab !== 'chat') switchTab('chat');
+  sendMessage().finally(() => {
+    document.querySelectorAll('.case-chip-btn, .inv-chip-sidebar').forEach(b => b.disabled = false);
+  });
+}
+
+// ─── INLINE FILE UPLOAD ───────────────────────────────────────────────────
+function toggleInlineUpload() {
+  const area = document.getElementById('inlineUploadArea');
+  const isVisible = area.style.display === 'block';
+  area.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) updateInlineDocChips();
+  // Highlight the 📎 button
+  document.getElementById('uploadChatBtn').style.color = isVisible ? '' : 'var(--accent)';
+}
+
+function handleInlineDragOver(e) {
+  e.preventDefault();
+  document.getElementById('inlineUploadZone').classList.add('drag-over');
+}
+function handleInlineDragLeave(e) {
+  document.getElementById('inlineUploadZone').classList.remove('drag-over');
+}
+function handleInlineDrop(e) {
+  e.preventDefault();
+  document.getElementById('inlineUploadZone').classList.remove('drag-over');
+  const files = e.dataTransfer?.files;
+  if (files?.length) uploadFileInline(files[0]);
+}
+function handleInlineFileSelect(e) {
+  const file = e.target.files?.[0];
+  if (file) uploadFileInline(file);
+  e.target.value = '';
+}
+
+async function uploadFileInline(file) {
+  const zone = document.getElementById('inlineUploadZone');
+  const label = document.getElementById('inlineUploadLabel');
+  zone.classList.add('uploading');
+  label.textContent = `Uploading ${file.name}…`;
+
+  if (!currentSession) {
+    const res = await fetch('/api/sessions', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({title: file.name})
+    });
+    if (res.ok) { const s = await res.json(); currentSession = s.id; loadSessions(); }
+  }
+
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const res = await fetch(`/api/upload?session_id=${encodeURIComponent(currentSession)}`, {
+      method: 'POST', body: fd
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Upload failed' }));
+      label.textContent = '✗ Upload failed: ' + err.detail;
+    } else {
+      await loadDocList();
+      // Show a confirmation message in chat
+      addMessage('bot', `📎 **${escHtml(file.name)}** attached. Ask me anything about this document — I'll answer using its content alongside the crime database.`, { source: 'document' });
+    }
+  } catch (err) {
+    label.textContent = '✗ Upload failed: ' + err.message;
+  } finally {
+    zone.classList.remove('uploading');
+    label.textContent = 'Drop case file here or click to select — PDF, DOCX, TXT, CSV';
+  }
+}
+
+function updateInlineDocChips() {
+  const el = document.getElementById('inlineDocChips');
+  if (!el) return;
+  if (!sessionDocs.length) { el.innerHTML = ''; return; }
+  const icons = { pdf:'📕', docx:'📘', doc:'📘', txt:'📄', md:'📝', csv:'📊' };
+  el.innerHTML = sessionDocs.map(d => `
+    <div class="inline-doc-chip">
+      ${icons[d.file_type] || '📄'} ${escHtml(d.filename)}
+      <button onclick="deleteDoc(${d.doc_id})" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+async function init() {
+  checkLogin();
+  await checkHealth();
+  await Promise.all([loadSessions(), loadModels()]);
+  loadAlerts();
+  setInterval(loadAlerts, 60_000);   // live refresh every 60s
+}
+init();
+</script>
+</body>
+</html>

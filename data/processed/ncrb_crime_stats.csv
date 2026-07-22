@@ -1,0 +1,784 @@
+crime_head,category,year,cases,crime_rate,ipc_cases,bns_cases,share_pct,source_table
+Rape,IPC,2022,31516.0,2.3,,,,table_1.2.xlsx
+Rape,IPC,2023,29670.0,2.1,,,,table_1.2.xlsx
+Rape,IPC,2024,19683.0,9853.0,19683.0,9853.0,0.8,table_1.2.xlsx
+Attempt to Commit Rape,IPC,2022,3288.0,0.2,,,,table_1.2.xlsx
+Attempt to Commit Rape,IPC,2023,2796.0,0.2,,,,table_1.2.xlsx
+Attempt to Commit Rape,IPC,2024,1503.0,1058.0,1503.0,1058.0,0.1,table_1.2.xlsx
+Sexual Intercourse by employing deceitful means,IPC,2022,,,,,,table_1.2.xlsx
+Sexual Intercourse by employing deceitful means,IPC,2023,,,,,,table_1.2.xlsx
+Sexual Intercourse by employing deceitful means,IPC,2024,0.0,1325.0,0.0,1325.0,0.0,table_1.2.xlsx
+Disclosure of Identity of Victim,IPC,2022,,,,,,table_1.2.xlsx
+Disclosure of Identity of Victim,IPC,2023,,,,,,table_1.2.xlsx
+Disclosure of Identity of Victim,IPC,2024,0.0,11.0,0.0,11.0,0.0,table_1.2.xlsx
+Assault on Women with Intent to Outrage her Modesty,IPC,2022,44867.0,3.3,,,,table_1.2.xlsx
+Assault on Women with Intent to Outrage her Modesty,IPC,2023,45086.0,3.2,,,,table_1.2.xlsx
+Assault on Women with Intent to Outrage her Modesty,IPC,2024,25829.0,22474.0,25829.0,22474.0,1.4,table_1.2.xlsx
+Sexual Harassment,IPC,2022,17809.0,1.3,,,,table_1.2.xlsx
+Sexual Harassment,IPC,2023,17544.0,1.3,,,,table_1.2.xlsx
+Sexual Harassment,IPC,2024,8130.0,7479.0,8130.0,7479.0,0.4,table_1.2.xlsx
+at Office Premises,IPC,2022,419.0,0.0,,,,table_1.2.xlsx
+at Office Premises,IPC,2023,381.0,0.0,,,,table_1.2.xlsx
+at Office Premises,IPC,2024,305.0,83.0,305.0,83.0,0.0,table_1.2.xlsx
+at Work Premises (Shops/Malls/Factories/Home etc),IPC,2022,,,,,,table_1.2.xlsx
+at Work Premises (Shops/Malls/Factories/Home etc),IPC,2023,,,,,,table_1.2.xlsx
+at Work Premises (Shops/Malls/Factories/Home etc),IPC,2024,0.0,512.0,0.0,512.0,0.0,table_1.2.xlsx
+In Public Transport System,IPC,2022,422.0,0.0,,,,table_1.2.xlsx
+In Public Transport System,IPC,2023,525.0,0.0,,,,table_1.2.xlsx
+In Public Transport System,IPC,2024,291.0,168.0,291.0,168.0,0.0,table_1.2.xlsx
+at Public Places/Pathway,IPC,2022,,,,,,table_1.2.xlsx
+at Public Places/Pathway,IPC,2023,,,,,,table_1.2.xlsx
+at Public Places/Pathway,IPC,2024,0.0,1469.0,0.0,1469.0,0.0,table_1.2.xlsx
+In Shelter Homes for women and Children,IPC,2022,523.0,0.0,,,,table_1.2.xlsx
+In Shelter Homes for women and Children,IPC,2023,401.0,0.0,,,,table_1.2.xlsx
+In Shelter Homes for women and Children,IPC,2024,105.0,84.0,105.0,84.0,0.0,table_1.2.xlsx
+Other Places,IPC,2022,16445.0,1.2,,,,table_1.2.xlsx
+Other Places,IPC,2023,16237.0,1.2,,,,table_1.2.xlsx
+Other Places,IPC,2024,7429.0,5163.0,7429.0,5163.0,0.4,table_1.2.xlsx
+Assault or use of Criminal Force on women with intent to Disrobe,IPC,2022,9101.0,0.7,,,,table_1.2.xlsx
+Assault or use of Criminal Force on women with intent to Disrobe,IPC,2023,9039.0,0.6,,,,table_1.2.xlsx
+Assault or use of Criminal Force on women with intent to Disrobe,IPC,2024,4463.0,3946.0,4463.0,3946.0,0.2,table_1.2.xlsx
+Voyeurism,IPC,2022,1451.0,0.1,,,,table_1.2.xlsx
+Voyeurism,IPC,2023,1727.0,0.1,,,,table_1.2.xlsx
+Voyeurism,IPC,2024,827.0,895.0,827.0,895.0,0.0,table_1.2.xlsx
+Stalking,IPC,2022,10116.0,0.7,,,,table_1.2.xlsx
+Stalking,IPC,2023,10495.0,0.8,,,,table_1.2.xlsx
+Stalking,IPC,2024,5374.0,4491.0,5374.0,4491.0,0.3,table_1.2.xlsx
+Insult to the Modesty of Women,IPC,2022,,,,,,table_1.2.xlsx
+Insult to the Modesty of Women,IPC,2023,,,,,,table_1.2.xlsx
+Insult to the Modesty of Women,IPC,2024,4495.0,4843.0,4495.0,4843.0,0.3,table_1.2.xlsx
+Dowry Deaths,IPC,2022,6450.0,0.5,,,,table_1.2.xlsx
+Dowry Deaths,IPC,2023,6156.0,0.4,,,,table_1.2.xlsx
+Dowry Deaths,IPC,2024,3057.0,2680.0,3057.0,2680.0,0.2,table_1.2.xlsx
+Cruelty by Husband or his Relatives,IPC,2022,,,,,,table_1.2.xlsx
+Cruelty by Husband or his Relatives,IPC,2023,,,,,,table_1.2.xlsx
+Cruelty by Husband or his Relatives,IPC,2024,78470.0,41757.0,78470.0,41757.0,3.4,table_1.2.xlsx
+"Kidnapping, Abducting or Inducing of Women to compel her for marriage",IPC,2022,,,,,,table_1.2.xlsx
+"Kidnapping, Abducting or Inducing of Women to compel her for marriage",IPC,2023,,,,,,table_1.2.xlsx
+"Kidnapping, Abducting or Inducing of Women to compel her for marriage",IPC,2024,17415.0,11534.0,17415.0,11534.0,0.8,table_1.2.xlsx
+Offences of Miscarriage,IPC,2022,236.0,,,,,table_1.2.xlsx
+Offences of Miscarriage,IPC,2023,309.0,,,,,table_1.2.xlsx
+Offences of Miscarriage,IPC,2024,172.0,127.0,172.0,127.0,0.0,table_1.2.xlsx
+Foeticide,IPC,2022,102.0,,,,,table_1.2.xlsx
+Foeticide,IPC,2023,88.0,,,,,table_1.2.xlsx
+Foeticide,IPC,2024,59.0,81.0,59.0,81.0,0.0,table_1.2.xlsx
+Infanticide,IPC,2022,83.0,,,,,table_1.2.xlsx
+Infanticide,IPC,2023,67.0,,,,,table_1.2.xlsx
+Infanticide,IPC,2024,31.0,25.0,31.0,25.0,0.0,table_1.2.xlsx
+Exposure and Abandonment,IPC,2022,818.0,,,,,table_1.2.xlsx
+Exposure and Abandonment,IPC,2023,653.0,,,,,table_1.2.xlsx
+Exposure and Abandonment,IPC,2024,331.0,406.0,331.0,406.0,0.0,table_1.2.xlsx
+"Hiring, employing or engaging a child to commit an offence",IPC,2022,,,,,,table_1.2.xlsx
+"Hiring, employing or engaging a child to commit an offence",IPC,2023,,,,,,table_1.2.xlsx
+"Hiring, employing or engaging a child to commit an offence",IPC,2024,0.0,1.0,0.0,1.0,0.0,table_1.2.xlsx
+Procuration of Children,IPC,2022,,,,,,table_1.2.xlsx
+Procuration of Children,IPC,2023,,,,,,table_1.2.xlsx
+Procuration of Children,IPC,2024,1019.0,654.0,1019.0,654.0,0.0,table_1.2.xlsx
+Kidnapping or Abducting a child with intent to steal from its persons,IPC,2022,,,,,,table_1.2.xlsx
+Kidnapping or Abducting a child with intent to steal from its persons,IPC,2023,,,,,,table_1.2.xlsx
+Kidnapping or Abducting a child with intent to steal from its persons,IPC,2024,0.0,16.0,0.0,16.0,0.0,table_1.2.xlsx
+Selling of Child for Prostitution,IPC,2022,9.0,0.0,,,,table_1.2.xlsx
+Selling of Child for Prostitution,IPC,2023,12.0,0.0,,,,table_1.2.xlsx
+Selling of Child for Prostitution,IPC,2024,4.0,8.0,4.0,8.0,0.0,table_1.2.xlsx
+Buying of Child for Prostitution,IPC,2022,3.0,0.0,,,,table_1.2.xlsx
+Buying of Child for Prostitution,IPC,2023,4.0,0.0,,,,table_1.2.xlsx
+Buying of Child for Prostitution,IPC,2024,1.0,3.0,1.0,3.0,0.0,table_1.2.xlsx
+Offences against Women and Child (Total of Sl. 1-22),IPC,2022,,,,,,table_1.2.xlsx
+Offences against Women and Child (Total of Sl. 1-22),IPC,2023,,,,,,table_1.2.xlsx
+Offences against Women and Child (Total of Sl. 1-22),IPC,2024,170863.0,113667.0,170863.0,113667.0,8.0,table_1.2.xlsx
+Murder,IPC,2022,28522.0,2.1,,,,table_1.2.xlsx
+Murder,IPC,2023,27721.0,2.0,,,,table_1.2.xlsx
+Murder,IPC,2024,14440.0,12609.0,14440.0,12609.0,0.8,table_1.2.xlsx
+Murder,IPC,2022,,,,,,table_1.2.xlsx
+Murder,IPC,2023,,,,,,table_1.2.xlsx
+Murder,IPC,2024,14440.0,12487.0,14440.0,12487.0,0.8,table_1.2.xlsx
+Murder by Group of 5 or more persons,IPC,2022,,,,,,table_1.2.xlsx
+Murder by Group of 5 or more persons,IPC,2023,,,,,,table_1.2.xlsx
+Murder by Group of 5 or more persons,IPC,2024,0.0,112.0,0.0,112.0,0.0,table_1.2.xlsx
+Murder by life convict,IPC,2022,,,,,,table_1.2.xlsx
+Murder by life convict,IPC,2023,,,,,,table_1.2.xlsx
+Murder by life convict,IPC,2024,0.0,10.0,0.0,10.0,0.0,table_1.2.xlsx
+Culpable Homicide not amounting to Murder,IPC,2022,3621.0,0.3,,,,table_1.2.xlsx
+Culpable Homicide not amounting to Murder,IPC,2023,3557.0,0.3,,,,table_1.2.xlsx
+Culpable Homicide not amounting to Murder,IPC,2024,2075.0,1793.0,2075.0,1793.0,0.1,table_1.2.xlsx
+Causing Death by Negligence,IPC,2022,159096.0,11.5,,,,table_1.2.xlsx
+Causing Death by Negligence,IPC,2023,165971.0,11.9,,,,table_1.2.xlsx
+Causing Death by Negligence,IPC,2024,89784.0,79709.0,89784.0,79709.0,4.8,table_1.2.xlsx
+Deaths due to Negligence relating to Road Accidents,IPC,2022,150998.0,10.9,,,,table_1.2.xlsx
+Deaths due to Negligence relating to Road Accidents,IPC,2023,157831.0,11.3,,,,table_1.2.xlsx
+Deaths due to Negligence relating to Road Accidents,IPC,2024,86373.0,76127.0,86373.0,76127.0,4.6,table_1.2.xlsx
+Hit and Run,IPC,2022,47806.0,3.5,,,,table_1.2.xlsx
+Hit and Run,IPC,2023,51780.0,3.7,,,,table_1.2.xlsx
+Hit and Run,IPC,2024,29169.0,24061.0,29169.0,24061.0,1.5,table_1.2.xlsx
+Other Accidents,IPC,2022,103192.0,7.5,,,,table_1.2.xlsx
+Other Accidents,IPC,2023,106051.0,7.6,,,,table_1.2.xlsx
+Other Accidents,IPC,2024,57204.0,52066.0,57204.0,52066.0,3.1,table_1.2.xlsx
+Deaths due to Negligence relating to Rail Accidents,IPC,2022,19.0,0.0,,,,table_1.2.xlsx
+Deaths due to Negligence relating to Rail Accidents,IPC,2023,7.0,0.0,,,,table_1.2.xlsx
+Deaths due to Negligence relating to Rail Accidents,IPC,2024,20.0,194.0,20.0,194.0,0.0,table_1.2.xlsx
+Deaths due to Medical Negligence,IPC,2022,118.0,0.0,,,,table_1.2.xlsx
+Deaths due to Medical Negligence,IPC,2023,114.0,0.0,,,,table_1.2.xlsx
+Deaths due to Medical Negligence,IPC,2024,82.0,787.0,82.0,787.0,0.0,table_1.2.xlsx
+Deaths due to Negligence of Civic Bodies,IPC,2022,70.0,0.0,,,,table_1.2.xlsx
+Deaths due to Negligence of Civic Bodies,IPC,2023,60.0,0.0,,,,table_1.2.xlsx
+Deaths due to Negligence of Civic Bodies,IPC,2024,16.0,38.0,16.0,38.0,0.0,table_1.2.xlsx
+Deaths due to other Negligence,IPC,2022,7891.0,0.6,,,,table_1.2.xlsx
+Deaths due to other Negligence,IPC,2023,7959.0,0.6,,,,table_1.2.xlsx
+Deaths due to other Negligence,IPC,2024,3293.0,2563.0,3293.0,2563.0,0.2,table_1.2.xlsx
+Abetment of Suicide,IPC,2022,9400.0,0.7,,,,table_1.2.xlsx
+Abetment of Suicide,IPC,2023,9386.0,0.7,,,,table_1.2.xlsx
+Abetment of Suicide,IPC,2024,4843.0,4050.0,4843.0,4050.0,0.3,table_1.2.xlsx
+Attempt to Commit Murder,IPC,2022,57256.0,4.1,,,,table_1.2.xlsx
+Attempt to Commit Murder,IPC,2023,56549.0,4.1,,,,table_1.2.xlsx
+Attempt to Commit Murder,IPC,2024,30998.0,27846.0,30998.0,27846.0,1.7,table_1.2.xlsx
+Attempt to commit Culpable Homicide,IPC,2022,10149.0,0.7,,,,table_1.2.xlsx
+Attempt to commit Culpable Homicide,IPC,2023,11954.0,0.9,,,,table_1.2.xlsx
+Attempt to commit Culpable Homicide,IPC,2024,7111.0,6274.0,7111.0,6274.0,0.4,table_1.2.xlsx
+Organised Crime,IPC,2022,,,,,,table_1.2.xlsx
+Organised Crime,IPC,2023,,,,,,table_1.2.xlsx
+Organised Crime,IPC,2024,0.0,840.0,0.0,840.0,0.0,table_1.2.xlsx
+Petty Organised Crime,IPC,2022,,,,,,table_1.2.xlsx
+Petty Organised Crime,IPC,2023,,,,,,table_1.2.xlsx
+Petty Organised Crime,IPC,2024,0.0,876.0,0.0,876.0,0.0,table_1.2.xlsx
+Terrorist Act,IPC,2022,,,,,,table_1.2.xlsx
+Terrorist Act,IPC,2023,,,,,,table_1.2.xlsx
+Terrorist Act,IPC,2024,0.0,24.0,0.0,24.0,0.0,table_1.2.xlsx
+Hurt,IPC,2022,627676.0,45.5,,,,table_1.2.xlsx
+Hurt,IPC,2023,636767.0,45.7,,,,table_1.2.xlsx
+Hurt,IPC,2024,257353.0,184643.0,257353.0,184643.0,12.5,table_1.2.xlsx
+Simple Hurt,IPC,2022,518792.0,37.6,,,,table_1.2.xlsx
+Simple Hurt,IPC,2023,537179.0,38.6,,,,table_1.2.xlsx
+Simple Hurt,IPC,2024,186313.0,0.0,186313.0,0.0,5.3,table_1.2.xlsx
+Voluntarily Causing Simple Hurt,IPC,2022,308238.0,22.3,,,,table_1.2.xlsx
+Voluntarily Causing Simple Hurt,IPC,2023,325028.0,23.3,,,,table_1.2.xlsx
+Voluntarily Causing Simple Hurt,IPC,2024,,,,,,table_1.2.xlsx
+Voluntarily causing hurt by Dangerous weapons or means,IPC,2022,177933.0,12.9,,,,table_1.2.xlsx
+Voluntarily causing hurt by Dangerous weapons or means,IPC,2023,180866.0,13.0,,,,table_1.2.xlsx
+Voluntarily causing hurt by Dangerous weapons or means,IPC,2024,161438.0,0.0,161438.0,0.0,4.6,table_1.2.xlsx
+Voluntarily Causing hurt/Force to deter public servant from his duty,IPC,2022,13969.0,1.0,,,,table_1.2.xlsx
+Voluntarily Causing hurt/Force to deter public servant from his duty,IPC,2023,13488.0,1.0,,,,table_1.2.xlsx
+Voluntarily Causing hurt/Force to deter public servant from his duty,IPC,2024,6967.0,0.0,6967.0,0.0,0.2,table_1.2.xlsx
+Causing Hurt by act endangering life/safety of others,IPC,2022,10160.0,0.7,,,,table_1.2.xlsx
+Causing Hurt by act endangering life/safety of others,IPC,2023,8408.0,0.6,,,,table_1.2.xlsx
+Causing Hurt by act endangering life/safety of others,IPC,2024,6890.0,0.0,6890.0,0.0,0.2,table_1.2.xlsx
+Other Simple Hurt,IPC,2022,8492.0,0.6,,,,table_1.2.xlsx
+Other Simple Hurt,IPC,2023,9389.0,0.7,,,,table_1.2.xlsx
+Other Simple Hurt,IPC,2024,11018.0,0.0,11018.0,0.0,0.3,table_1.2.xlsx
+Grievous Hurt,IPC,2022,108884.0,7.9,,,,table_1.2.xlsx
+Grievous Hurt,IPC,2023,99588.0,7.2,,,,table_1.2.xlsx
+Grievous Hurt,IPC,2024,71040.0,184643.0,71040.0,184643.0,7.2,table_1.2.xlsx
+Voluntarily causing grievous hurt,IPC,2022,84975.0,6.2,,,,table_1.2.xlsx
+Voluntarily causing grievous hurt,IPC,2023,72278.0,5.2,,,,table_1.2.xlsx
+Voluntarily causing grievous hurt,IPC,2024,52873.0,70392.0,52873.0,70392.0,3.5,table_1.2.xlsx
+Grievous Hurt resulting persistent vegetative state or permanent,IPC,2022,,,,,,table_1.2.xlsx
+Grievous Hurt resulting persistent vegetative state or permanent,IPC,2023,,,,,,table_1.2.xlsx
+Grievous Hurt resulting persistent vegetative state or permanent,IPC,2024,0.0,1092.0,0.0,1092.0,0.0,table_1.2.xlsx
+Grievous hurt caused by a group of 5 or more persons,IPC,2022,,,,,,table_1.2.xlsx
+Grievous hurt caused by a group of 5 or more persons,IPC,2023,,,,,,table_1.2.xlsx
+Grievous hurt caused by a group of 5 or more persons,IPC,2024,0.0,330.0,0.0,330.0,0.0,table_1.2.xlsx
+Voluntarily causing hurt or grievous hurt by dangerous weapons or means,IPC,2022,19163.0,1.4,,,,table_1.2.xlsx
+Voluntarily causing hurt or grievous hurt by dangerous weapons or means,IPC,2023,21579.0,1.5,,,,table_1.2.xlsx
+Voluntarily causing hurt or grievous hurt by dangerous weapons or means,IPC,2024,11681.0,76360.0,11681.0,76360.0,2.5,table_1.2.xlsx
+Voluntarily causing hurt or grievous hurt/Assault or criminal force to deter public servant from his duty,IPC,2022,1009.0,0.1,,,,table_1.2.xlsx
+Voluntarily causing hurt or grievous hurt/Assault or criminal force to deter public servant from his duty,IPC,2023,1166.0,0.1,,,,table_1.2.xlsx
+Voluntarily causing hurt or grievous hurt/Assault or criminal force to deter public servant from his duty,IPC,2024,886.0,5288.0,886.0,5288.0,0.2,table_1.2.xlsx
+Acid Attack,IPC,2022,202.0,0.0,,,,table_1.2.xlsx
+Acid Attack,IPC,2023,207.0,0.0,,,,table_1.2.xlsx
+Acid Attack,IPC,2024,122.0,85.0,122.0,85.0,0.0,table_1.2.xlsx
+Attempt to Acid Attack,IPC,2022,71.0,0.0,,,,table_1.2.xlsx
+Attempt to Acid Attack,IPC,2023,65.0,0.0,,,,table_1.2.xlsx
+Attempt to Acid Attack,IPC,2024,29.0,39.0,29.0,39.0,0.0,table_1.2.xlsx
+Act endangering life or personal safety of others,IPC,2022,2748.0,0.2,,,,table_1.2.xlsx
+Act endangering life or personal safety of others,IPC,2023,3691.0,0.3,,,,table_1.2.xlsx
+Act endangering life or personal safety of others,IPC,2024,3698.0,12640.0,3698.0,12640.0,0.5,table_1.2.xlsx
+Other Grievous Hurt,IPC,2022,716.0,0.1,,,,table_1.2.xlsx
+Other Grievous Hurt,IPC,2023,602.0,0.0,,,,table_1.2.xlsx
+Other Grievous Hurt,IPC,2024,1751.0,18417.0,1751.0,18417.0,0.6,table_1.2.xlsx
+Wrongful Restraint/Confinement,IPC,2022,25449.0,1.8,,,,table_1.2.xlsx
+Wrongful Restraint/Confinement,IPC,2023,32575.0,2.3,,,,table_1.2.xlsx
+Wrongful Restraint/Confinement,IPC,2024,24213.0,26668.0,24213.0,26668.0,1.4,table_1.2.xlsx
+Kidnapping and Abduction,IPC,2022,107588.0,7.8,,,,table_1.2.xlsx
+Kidnapping and Abduction,IPC,2023,113564.0,8.2,,,,table_1.2.xlsx
+Kidnapping and Abduction,IPC,2024,46637.0,49442.0,46637.0,49442.0,2.7,table_1.2.xlsx
+Kidnapping and Abduction,IPC,2022,63122.0,4.6,,,,table_1.2.xlsx
+Kidnapping and Abduction,IPC,2023,67480.0,4.8,,,,table_1.2.xlsx
+Kidnapping and Abduction,IPC,2024,39062.0,42133.0,39062.0,42133.0,2.3,table_1.2.xlsx
+Kidnapping and Abduction for the Purpose of Begging,IPC,2022,98.0,0.0,,,,table_1.2.xlsx
+Kidnapping and Abduction for the Purpose of Begging,IPC,2023,65.0,0.0,,,,table_1.2.xlsx
+Kidnapping and Abduction for the Purpose of Begging,IPC,2024,10.0,15.0,10.0,15.0,0.0,table_1.2.xlsx
+Kidnapping and Abduction in order to Murder,IPC,2022,454.0,0.0,,,,table_1.2.xlsx
+Kidnapping and Abduction in order to Murder,IPC,2023,355.0,0.0,,,,table_1.2.xlsx
+Kidnapping and Abduction in order to Murder,IPC,2024,171.0,147.0,171.0,147.0,0.0,table_1.2.xlsx
+Kidnapping for Ransom,IPC,2022,615.0,0.0,,,,table_1.2.xlsx
+Kidnapping for Ransom,IPC,2023,615.0,0.0,,,,table_1.2.xlsx
+Kidnapping for Ransom,IPC,2024,317.0,387.0,317.0,387.0,0.0,table_1.2.xlsx
+Kidnapping and Abducting of Women to compel her for marriage,IPC,2022,28656.0,2.1,,,,table_1.2.xlsx
+Kidnapping and Abducting of Women to compel her for marriage,IPC,2023,30496.0,2.2,,,,table_1.2.xlsx
+Kidnapping and Abducting of Women to compel her for marriage,IPC,2024,,,,,,table_1.2.xlsx
+Procuration of Children,IPC,2022,1827.0,0.1,,,,table_1.2.xlsx
+Procuration of Children,IPC,2023,1858.0,0.1,,,,table_1.2.xlsx
+Procuration of Children,IPC,2024,,,,,,table_1.2.xlsx
+Importation of Girl or Boy from Foreign Country,IPC,2022,1.0,0.0,,,,table_1.2.xlsx
+Importation of Girl or Boy from Foreign Country,IPC,2023,2.0,0.0,,,,table_1.2.xlsx
+Importation of Girl or Boy from Foreign Country,IPC,2024,1.0,3.0,1.0,3.0,0.0,table_1.2.xlsx
+Girls (Below 21 Yrs),IPC,2022,,,,,,table_1.2.xlsx
+Girls (Below 21 Yrs),IPC,2023,,,,,,table_1.2.xlsx
+Girls (Below 21 Yrs),IPC,2024,1.0,1.0,1.0,1.0,0.0,table_1.2.xlsx
+Boys (Below 18 Yrs),IPC,2022,,,,,,table_1.2.xlsx
+Boys (Below 18 Yrs),IPC,2023,,,,,,table_1.2.xlsx
+Boys (Below 18 Yrs),IPC,2024,0.0,2.0,0.0,2.0,0.0,table_1.2.xlsx
+Other Kidnapping & Abduction,IPC,2022,12815.0,0.9,,,,table_1.2.xlsx
+Other Kidnapping & Abduction,IPC,2023,12693.0,0.9,,,,table_1.2.xlsx
+Other Kidnapping & Abduction,IPC,2024,7076.0,6757.0,7076.0,6757.0,0.4,table_1.2.xlsx
+Attempt to Commit Suicide,IPC,2022,1769.0,0.1,,,,table_1.2.xlsx
+Attempt to Commit Suicide,IPC,2023,1717.0,0.1,,,,table_1.2.xlsx
+Attempt to Commit Suicide,IPC,2024,,,,,,table_1.2.xlsx
+Human Trafficking,IPC,2022,1200.0,0.1,,,,table_1.2.xlsx
+Human Trafficking,IPC,2023,1425.0,0.1,,,,table_1.2.xlsx
+Human Trafficking,IPC,2024,,,,,,table_1.2.xlsx
+Exploitation of Trafficked Person,IPC,2022,253.0,0.0,,,,table_1.2.xlsx
+Exploitation of Trafficked Person,IPC,2023,195.0,0.0,,,,table_1.2.xlsx
+Exploitation of Trafficked Person,IPC,2024,,,,,,table_1.2.xlsx
+Unnatural Offences,IPC,2022,987.0,0.1,,,,table_1.2.xlsx
+Unnatural Offences,IPC,2023,888.0,0.1,,,,table_1.2.xlsx
+Unnatural Offences,IPC,2024,,,,,,table_1.2.xlsx
+Offences against Human Body (Total of Sl.23-34 + E1-E4),IPC,2022,1158815.0,84.0,,,,table_1.2.xlsx
+Offences against Human Body (Total of Sl.23-34 + E1-E4),IPC,2023,1185915.0,85.2,,,,table_1.2.xlsx
+Offences against Human Body (Total of Sl.23-34 + E1-E4),IPC,2024,477454.0,394774.0,477454.0,394774.0,24.6,table_1.2.xlsx
+Offences of Woman & Child and Human Body (Total of Sl.1-34),IPC,2022,,,,,,table_1.2.xlsx
+Offences of Woman & Child and Human Body (Total of Sl.1-34),IPC,2023,,,,,,table_1.2.xlsx
+Offences of Woman & Child and Human Body (Total of Sl.1-34),IPC,2024,648317.0,508441.0,648317.0,508441.0,32.6,table_1.2.xlsx
+Offences against State,IPC,2022,68.0,0.0,,,,table_1.2.xlsx
+Offences against State,IPC,2023,58.0,0.0,,,,table_1.2.xlsx
+Offences against State,IPC,2024,26.0,57.0,26.0,57.0,0.0,table_1.2.xlsx
+Act endangering sovereignty unity and integrity of India,IPC,2022,,,,,,table_1.2.xlsx
+Act endangering sovereignty unity and integrity of India,IPC,2023,,,,,,table_1.2.xlsx
+Act endangering sovereignty unity and integrity of India,IPC,2024,0.0,28.0,0.0,28.0,0.0,table_1.2.xlsx
+Other Offences against State,IPC,2022,48.0,0.0,,,,table_1.2.xlsx
+Other Offences against State,IPC,2023,48.0,0.0,,,,table_1.2.xlsx
+Other Offences against State,IPC,2024,26.0,29.0,26.0,29.0,0.0,table_1.2.xlsx
+Sedition,IPC,2022,20.0,0.0,,,,table_1.2.xlsx
+Sedition,IPC,2023,10.0,0.0,,,,table_1.2.xlsx
+Sedition,IPC,2024,,,,,,table_1.2.xlsx
+Offences against the State (Total),IPC,2022,68.0,0.0,,,,table_1.2.xlsx
+Offences against the State (Total),IPC,2023,58.0,0.0,,,,table_1.2.xlsx
+Offences against the State (Total),IPC,2024,26.0,57.0,26.0,57.0,0.0,table_1.2.xlsx
+Unlawful Assembly,IPC,2022,11391.0,0.8,,,,table_1.2.xlsx
+Unlawful Assembly,IPC,2023,10002.0,0.7,,,,table_1.2.xlsx
+Unlawful Assembly,IPC,2024,3784.0,3290.0,3784.0,3290.0,0.2,table_1.2.xlsx
+Rioting,IPC,2022,37816.0,2.7,,,,table_1.2.xlsx
+Rioting,IPC,2023,39260.0,2.8,,,,table_1.2.xlsx
+Rioting,IPC,2024,17105.0,13243.0,17105.0,13243.0,0.9,table_1.2.xlsx
+Communal/Religious,IPC,2022,272.0,0.0,,,,table_1.2.xlsx
+Communal/Religious,IPC,2023,272.0,0.0,,,,table_1.2.xlsx
+Communal/Religious,IPC,2024,182.0,167.0,182.0,167.0,0.0,table_1.2.xlsx
+Ethnic or Community Groups Clash or Agitations,IPC,2022,,,,,,table_1.2.xlsx
+Ethnic or Community Groups Clash or Agitations,IPC,2023,,,,,,table_1.2.xlsx
+Ethnic or Community Groups Clash or Agitations,IPC,2024,0.0,30.0,0.0,30.0,0.0,table_1.2.xlsx
+Sectarian,IPC,2022,76.0,0.0,,,,table_1.2.xlsx
+Sectarian,IPC,2023,96.0,0.0,,,,table_1.2.xlsx
+Sectarian,IPC,2024,55.0,25.0,55.0,25.0,0.0,table_1.2.xlsx
+Industrial,IPC,2022,121.0,0.0,,,,table_1.2.xlsx
+Industrial,IPC,2023,97.0,0.0,,,,table_1.2.xlsx
+Industrial,IPC,2024,46.0,39.0,46.0,39.0,0.0,table_1.2.xlsx
+Political,IPC,2022,941.0,0.1,,,,table_1.2.xlsx
+Political,IPC,2023,565.0,0.0,,,,table_1.2.xlsx
+Political,IPC,2024,372.0,261.0,372.0,261.0,0.0,table_1.2.xlsx
+Caste Conflict,IPC,2022,179.0,0.0,,,,table_1.2.xlsx
+Caste Conflict,IPC,2023,203.0,0.0,,,,table_1.2.xlsx
+Caste Conflict,IPC,2024,91.0,75.0,91.0,75.0,0.0,table_1.2.xlsx
+Agrarian,IPC,2022,911.0,0.1,,,,table_1.2.xlsx
+Agrarian,IPC,2023,769.0,0.1,,,,table_1.2.xlsx
+Agrarian,IPC,2024,323.0,203.0,323.0,203.0,0.0,table_1.2.xlsx
+Students,IPC,2022,210.0,0.0,,,,table_1.2.xlsx
+Students,IPC,2023,251.0,0.0,,,,table_1.2.xlsx
+Students,IPC,2024,53.0,91.0,53.0,91.0,0.0,table_1.2.xlsx
+Money Dispute,IPC,2022,637.0,0.0,,,,table_1.2.xlsx
+Money Dispute,IPC,2023,442.0,0.0,,,,table_1.2.xlsx
+Money Dispute,IPC,2024,319.0,264.0,319.0,264.0,0.0,table_1.2.xlsx
+Water Dispute,IPC,2022,197.0,0.0,,,,table_1.2.xlsx
+Water Dispute,IPC,2023,121.0,0.0,,,,table_1.2.xlsx
+Water Dispute,IPC,2024,180.0,123.0,180.0,123.0,0.0,table_1.2.xlsx
+Land/Property Dispute,IPC,2022,7065.0,0.5,,,,table_1.2.xlsx
+Land/Property Dispute,IPC,2023,5380.0,0.4,,,,table_1.2.xlsx
+Land/Property Dispute,IPC,2024,2758.0,1881.0,2758.0,1881.0,0.1,table_1.2.xlsx
+Family Disputes,IPC,2022,3035.0,0.2,,,,table_1.2.xlsx
+Family Disputes,IPC,2023,2243.0,0.2,,,,table_1.2.xlsx
+Family Disputes,IPC,2024,1002.0,730.0,1002.0,730.0,0.0,table_1.2.xlsx
+Enmity/Rivalry,IPC,2022,4771.0,0.3,,,,table_1.2.xlsx
+Enmity/Rivalry,IPC,2023,4279.0,0.3,,,,table_1.2.xlsx
+Enmity/Rivalry,IPC,2024,2666.0,2155.0,2666.0,2155.0,0.1,table_1.2.xlsx
+Electricity/Power Supply Disputes,IPC,2022,10.0,0.0,,,,table_1.2.xlsx
+Electricity/Power Supply Disputes,IPC,2023,37.0,0.0,,,,table_1.2.xlsx
+Electricity/Power Supply Disputes,IPC,2024,8.0,14.0,8.0,14.0,0.0,table_1.2.xlsx
+Sudden Quarrel/Provocation,IPC,2022,,,,,,table_1.2.xlsx
+Sudden Quarrel/Provocation,IPC,2023,,,,,,table_1.2.xlsx
+Sudden Quarrel/Provocation,IPC,2024,0.0,807.0,0.0,807.0,0.0,table_1.2.xlsx
+Rioting while in Aandolan/Morcha,IPC,2022,781.0,0.1,,,,table_1.2.xlsx
+Rioting while in Aandolan/Morcha,IPC,2023,443.0,0.0,,,,table_1.2.xlsx
+Rioting while in Aandolan/Morcha,IPC,2024,233.0,189.0,233.0,189.0,0.0,table_1.2.xlsx
+Rioting/Attacks on Police Personnel or Govt Servants,IPC,2022,667.0,0.0,,,,table_1.2.xlsx
+Rioting/Attacks on Police Personnel or Govt Servants,IPC,2023,528.0,0.0,,,,table_1.2.xlsx
+Rioting/Attacks on Police Personnel or Govt Servants,IPC,2024,268.0,227.0,268.0,227.0,0.0,table_1.2.xlsx
+Other Rioting,IPC,2022,17943.0,1.3,,,,table_1.2.xlsx
+Other Rioting,IPC,2023,23534.0,1.7,,,,table_1.2.xlsx
+Other Rioting,IPC,2024,8549.0,5962.0,8549.0,5962.0,0.4,table_1.2.xlsx
+Promoting enmity between groups,IPC,2022,1491.0,0.1,,,,table_1.2.xlsx
+Promoting enmity between groups,IPC,2023,2111.0,0.2,,,,table_1.2.xlsx
+Promoting enmity between groups,IPC,2024,904.0,697.0,904.0,697.0,0.0,table_1.2.xlsx
+"Imputation, assertions prejudicial to national integration",IPC,2022,79.0,0.0,,,,table_1.2.xlsx
+"Imputation, assertions prejudicial to national integration",IPC,2023,44.0,0.0,,,,table_1.2.xlsx
+"Imputation, assertions prejudicial to national integration",IPC,2024,17.0,23.0,17.0,23.0,0.0,table_1.2.xlsx
+Affray,IPC,2022,6305.0,0.5,,,,table_1.2.xlsx
+Affray,IPC,2023,6830.0,0.5,,,,table_1.2.xlsx
+Affray,IPC,2024,2938.0,2348.0,2938.0,2348.0,0.1,table_1.2.xlsx
+Offences against Public Tranquillity (Total of Sl. 36-40),IPC,2022,57082.0,4.1,,,,table_1.2.xlsx
+Offences against Public Tranquillity (Total of Sl. 36-40),IPC,2023,58247.0,4.2,,,,table_1.2.xlsx
+Offences against Public Tranquillity (Total of Sl. 36-40),IPC,2024,24748.0,19601.0,24748.0,19601.0,1.3,table_1.2.xlsx
+Theft,IPC,2022,652731.0,47.3,,,,table_1.2.xlsx
+Theft,IPC,2023,689580.0,49.5,,,,table_1.2.xlsx
+Theft,IPC,2024,321139.0,300806.0,321139.0,300806.0,17.5,table_1.2.xlsx
+Household Theft (Dwelling Units/Houses),IPC,2022,,,,,,table_1.2.xlsx
+Household Theft (Dwelling Units/Houses),IPC,2023,,,,,,table_1.2.xlsx
+Household Theft (Dwelling Units/Houses),IPC,2024,0.0,29813.0,0.0,29813.0,0.8,table_1.2.xlsx
+Vehicle Theft,IPC,2022,252569.0,18.3,,,,table_1.2.xlsx
+Vehicle Theft,IPC,2023,250630.0,18.0,,,,table_1.2.xlsx
+Vehicle Theft,IPC,2024,122134.0,110899.0,122134.0,110899.0,6.6,table_1.2.xlsx
+Theft from Vehicles,IPC,2022,,,,,,table_1.2.xlsx
+Theft from Vehicles,IPC,2023,,,,,,table_1.2.xlsx
+Theft from Vehicles,IPC,2024,0.0,5643.0,0.0,5643.0,0.2,table_1.2.xlsx
+Theft of idol or icon from Place of Worship,IPC,2022,,,,,,table_1.2.xlsx
+Theft of idol or icon from Place of Worship,IPC,2023,,,,,,table_1.2.xlsx
+Theft of idol or icon from Place of Worship,IPC,2024,0.0,465.0,0.0,465.0,0.0,table_1.2.xlsx
+Theft of Government Property,IPC,2022,,,,,,table_1.2.xlsx
+Theft of Government Property,IPC,2023,,,,,,table_1.2.xlsx
+Theft of Government Property,IPC,2024,0.0,1037.0,0.0,1037.0,0.0,table_1.2.xlsx
+Theft by servant/employee,IPC,2022,,,,,,table_1.2.xlsx
+Theft by servant/employee,IPC,2023,,,,,,table_1.2.xlsx
+Theft by servant/employee,IPC,2024,0.0,1516.0,0.0,1516.0,0.0,table_1.2.xlsx
+Other Thefts,IPC,2022,400162.0,29.0,,,,table_1.2.xlsx
+Other Thefts,IPC,2023,438950.0,31.5,,,,table_1.2.xlsx
+Other Thefts,IPC,2024,199005.0,151433.0,199005.0,151433.0,9.9,table_1.2.xlsx
+Snatching,IPC,2022,,,,,,table_1.2.xlsx
+Snatching,IPC,2023,,,,,,table_1.2.xlsx
+Snatching,IPC,2024,0.0,12644.0,0.0,12644.0,0.4,table_1.2.xlsx
+Extortion,IPC,2022,11802.0,0.9,,,,table_1.2.xlsx
+Extortion,IPC,2023,12093.0,0.9,,,,table_1.2.xlsx
+Extortion,IPC,2024,6373.0,5746.0,6373.0,5746.0,0.3,table_1.2.xlsx
+Robbery,IPC,2022,28356.0,2.1,,,,table_1.2.xlsx
+Robbery,IPC,2023,26599.0,1.9,,,,table_1.2.xlsx
+Robbery,IPC,2024,13085.0,10060.0,13085.0,10060.0,0.7,table_1.2.xlsx
+Dacoity,IPC,2022,2666.0,0.2,,,,table_1.2.xlsx
+Dacoity,IPC,2023,3792.0,0.3,,,,table_1.2.xlsx
+Dacoity,IPC,2024,1282.0,1111.0,1282.0,1111.0,0.1,table_1.2.xlsx
+Dacoity,IPC,2022,2655.0,0.2,,,,table_1.2.xlsx
+Dacoity,IPC,2023,3778.0,0.3,,,,table_1.2.xlsx
+Dacoity,IPC,2024,1277.0,1096.0,1277.0,1096.0,0.1,table_1.2.xlsx
+Dacoity with Murder,IPC,2022,11.0,0.0,,,,table_1.2.xlsx
+Dacoity with Murder,IPC,2023,14.0,0.0,,,,table_1.2.xlsx
+Dacoity with Murder,IPC,2024,5.0,15.0,5.0,15.0,0.0,table_1.2.xlsx
+Attempt to Commit Dacoity/Robbery,IPC,2022,484.0,0.0,,,,table_1.2.xlsx
+Attempt to Commit Dacoity/Robbery,IPC,2023,505.0,0.0,,,,table_1.2.xlsx
+Attempt to Commit Dacoity/Robbery,IPC,2024,202.0,185.0,202.0,185.0,0.0,table_1.2.xlsx
+Making Preparation and Assembly for committing Dacoity,IPC,2022,4080.0,0.3,,,,table_1.2.xlsx
+Making Preparation and Assembly for committing Dacoity,IPC,2023,4016.0,0.3,,,,table_1.2.xlsx
+Making Preparation and Assembly for committing Dacoity,IPC,2024,1809.0,1189.0,1809.0,1189.0,0.1,table_1.2.xlsx
+Criminal Misappropriation,IPC,2022,158.0,0.0,,,,table_1.2.xlsx
+Criminal Misappropriation,IPC,2023,119.0,0.0,,,,table_1.2.xlsx
+Criminal Misappropriation,IPC,2024,100.0,131.0,100.0,131.0,0.0,table_1.2.xlsx
+Criminal Breach of Trust,IPC,2022,21814.0,1.6,,,,table_1.2.xlsx
+Criminal Breach of Trust,IPC,2023,22759.0,1.6,,,,table_1.2.xlsx
+Criminal Breach of Trust,IPC,2024,13457.0,7794.0,13457.0,7794.0,0.6,table_1.2.xlsx
+Dishonestly Receiving/Dealing-in Stolen Property,IPC,2022,9939.0,0.7,,,,table_1.2.xlsx
+Dishonestly Receiving/Dealing-in Stolen Property,IPC,2023,11271.0,0.8,,,,table_1.2.xlsx
+Dishonestly Receiving/Dealing-in Stolen Property,IPC,2024,5114.0,4244.0,5114.0,4244.0,0.3,table_1.2.xlsx
+Burglary,IPC,2022,107222.0,7.8,,,,table_1.2.xlsx
+Burglary,IPC,2023,107573.0,7.7,,,,table_1.2.xlsx
+Burglary,IPC,2024,54817.0,52715.0,54817.0,52715.0,3.0,table_1.2.xlsx
+Day Time,IPC,2022,17501.0,1.3,,,,table_1.2.xlsx
+Day Time,IPC,2023,18269.0,1.3,,,,table_1.2.xlsx
+Day Time,IPC,2024,9432.0,9038.0,9432.0,9038.0,0.5,table_1.2.xlsx
+Night,IPC,2022,89721.0,6.5,,,,table_1.2.xlsx
+Night,IPC,2023,89304.0,6.4,,,,table_1.2.xlsx
+Night,IPC,2024,45385.0,43677.0,45385.0,43677.0,2.5,table_1.2.xlsx
+Offences against Property (Total of Sl. 41-51),IPC,2022,839252.0,60.8,,,,table_1.2.xlsx
+Offences against Property (Total of Sl. 41-51),IPC,2023,878307.0,63.1,,,,table_1.2.xlsx
+Offences against Property (Total of Sl. 41-51),IPC,2024,417378.0,396625.0,417378.0,396625.0,23.0,table_1.2.xlsx
+Counterfeiting,IPC,2022,670.0,0.0,,,,table_1.2.xlsx
+Counterfeiting,IPC,2023,661.0,0.0,,,,table_1.2.xlsx
+Counterfeiting,IPC,2024,474.0,272.0,474.0,272.0,0.0,table_1.2.xlsx
+Counterfeit Coin,IPC,2022,10.0,0.0,,,,table_1.2.xlsx
+Counterfeit Coin,IPC,2023,16.0,0.0,,,,table_1.2.xlsx
+Counterfeit Coin,IPC,2024,5.0,20.0,5.0,20.0,0.0,table_1.2.xlsx
+Counterfeiting Government Stamp,IPC,2022,1.0,0.0,,,,table_1.2.xlsx
+Counterfeiting Government Stamp,IPC,2023,1.0,0.0,,,,table_1.2.xlsx
+Counterfeiting Government Stamp,IPC,2024,0.0,3.0,0.0,3.0,0.0,table_1.2.xlsx
+Counterfeiting of Seal or Mark,IPC,2022,12.0,0.0,,,,table_1.2.xlsx
+Counterfeiting of Seal or Mark,IPC,2023,15.0,0.0,,,,table_1.2.xlsx
+Counterfeiting of Seal or Mark,IPC,2024,11.0,8.0,11.0,8.0,0.0,table_1.2.xlsx
+Counterfeit Currency & Bank notes,IPC,2022,647.0,0.0,,,,table_1.2.xlsx
+Counterfeit Currency & Bank notes,IPC,2023,629.0,0.0,,,,table_1.2.xlsx
+Counterfeit Currency & Bank notes,IPC,2024,458.0,241.0,458.0,241.0,0.0,table_1.2.xlsx
+"Forgery, Cheating & Fraud",IPC,2022,170901.0,12.4,,,,table_1.2.xlsx
+"Forgery, Cheating & Fraud",IPC,2023,181553.0,13.0,,,,table_1.2.xlsx
+"Forgery, Cheating & Fraud",IPC,2024,129580.0,62802.0,129580.0,62802.0,5.4,table_1.2.xlsx
+Fraud,IPC,2022,29492.0,2.1,,,,table_1.2.xlsx
+Fraud,IPC,2023,46916.0,3.4,,,,table_1.2.xlsx
+Fraud,IPC,2024,34320.0,19452.0,34320.0,19452.0,1.5,table_1.2.xlsx
+Bank,IPC,2022,2814.0,0.2,,,,table_1.2.xlsx
+Bank,IPC,2023,6011.0,0.4,,,,table_1.2.xlsx
+Bank,IPC,2024,3430.0,3138.0,3430.0,3138.0,0.2,table_1.2.xlsx
+ATMs,IPC,2022,2569.0,0.2,,,,table_1.2.xlsx
+ATMs,IPC,2023,3198.0,0.2,,,,table_1.2.xlsx
+ATMs,IPC,2024,1533.0,1139.0,1533.0,1139.0,0.1,table_1.2.xlsx
+Credit Card/Debit Card,IPC,2022,3357.0,0.2,,,,table_1.2.xlsx
+Credit Card/Debit Card,IPC,2023,2753.0,0.2,,,,table_1.2.xlsx
+Credit Card/Debit Card,IPC,2024,2859.0,2199.0,2859.0,2199.0,0.1,table_1.2.xlsx
+Other Frauds,IPC,2022,20752.0,1.5,,,,table_1.2.xlsx
+Other Frauds,IPC,2023,34954.0,2.5,,,,table_1.2.xlsx
+Other Frauds,IPC,2024,26498.0,12976.0,26498.0,12976.0,1.1,table_1.2.xlsx
+Cheating,IPC,2022,121417.0,8.8,,,,table_1.2.xlsx
+Cheating,IPC,2023,112113.0,8.1,,,,table_1.2.xlsx
+Cheating,IPC,2024,78912.0,37307.0,78912.0,37307.0,3.3,table_1.2.xlsx
+Forgery,IPC,2022,19992.0,1.4,,,,table_1.2.xlsx
+Forgery,IPC,2023,22524.0,1.6,,,,table_1.2.xlsx
+Forgery,IPC,2024,16348.0,6043.0,16348.0,6043.0,0.6,table_1.2.xlsx
+Offences Relating to Documents & Property Marks (Total of 52&53),IPC,2022,171571.0,12.4,,,,table_1.2.xlsx
+Offences Relating to Documents & Property Marks (Total of 52&53),IPC,2023,182214.0,13.1,,,,table_1.2.xlsx
+Offences Relating to Documents & Property Marks (Total of 52&53),IPC,2024,130054.0,63074.0,130054.0,63074.0,5.4,table_1.2.xlsx
+Abetment outside India for offence in India,IPC,2022,,,,,,table_1.2.xlsx
+Abetment outside India for offence in India,IPC,2023,,,,,,table_1.2.xlsx
+Abetment outside India for offence in India,IPC,2024,0.0,1.0,0.0,1.0,0.0,table_1.2.xlsx
+Offences relating to Elections,IPC,2022,931.0,0.1,,,,table_1.2.xlsx
+Offences relating to Elections,IPC,2023,2124.0,0.2,,,,table_1.2.xlsx
+Offences relating to Elections,IPC,2024,1922.0,119.0,1922.0,119.0,0.1,table_1.2.xlsx
+Disobedience to order duly promulgated by Public Servant,IPC,2022,67350.0,4.9,,,,table_1.2.xlsx
+Disobedience to order duly promulgated by Public Servant,IPC,2023,52207.0,3.7,,,,table_1.2.xlsx
+Disobedience to order duly promulgated by Public Servant,IPC,2024,22867.0,33220.0,22867.0,33220.0,1.6,table_1.2.xlsx
+Harbouring an Offender,IPC,2022,75.0,0.0,,,,table_1.2.xlsx
+Harbouring an Offender,IPC,2023,54.0,0.0,,,,table_1.2.xlsx
+Harbouring an Offender,IPC,2024,32.0,28.0,32.0,28.0,0.0,table_1.2.xlsx
+Rash Driving on Public way,IPC,2022,489722.0,35.5,,,,table_1.2.xlsx
+Rash Driving on Public way,IPC,2023,526507.0,37.8,,,,table_1.2.xlsx
+Rash Driving on Public way,IPC,2024,230829.0,204344.0,230829.0,204344.0,12.3,table_1.2.xlsx
+Obstruction on Public way,IPC,2022,93548.0,6.8,,,,table_1.2.xlsx
+Obstruction on Public way,IPC,2023,151469.0,10.9,,,,table_1.2.xlsx
+Obstruction on Public way,IPC,2024,74917.0,67198.0,74917.0,67198.0,4.0,table_1.2.xlsx
+Sale of obscene Books/Objects,IPC,2022,49.0,0.0,,,,table_1.2.xlsx
+Sale of obscene Books/Objects,IPC,2023,283.0,0.0,,,,table_1.2.xlsx
+Sale of obscene Books/Objects,IPC,2024,28.0,64.0,28.0,64.0,0.0,table_1.2.xlsx
+Obscene Acts and Songs at Public Places,IPC,2022,25362.0,1.8,,,,table_1.2.xlsx
+Obscene Acts and Songs at Public Places,IPC,2023,32786.0,2.4,,,,table_1.2.xlsx
+Obscene Acts and Songs at Public Places,IPC,2024,20486.0,20433.0,20486.0,20433.0,1.2,table_1.2.xlsx
+Offences relating to Religion,IPC,2022,1872.0,0.1,,,,table_1.2.xlsx
+Offences relating to Religion,IPC,2023,2186.0,0.2,,,,table_1.2.xlsx
+Offences relating to Religion,IPC,2024,1206.0,1100.0,1206.0,1100.0,0.1,table_1.2.xlsx
+Cheating by Impersonation,IPC,2022,692.0,0.1,,,,table_1.2.xlsx
+Cheating by Impersonation,IPC,2023,406.0,0.0,,,,table_1.2.xlsx
+Cheating by Impersonation,IPC,2024,328.0,385.0,328.0,385.0,0.0,table_1.2.xlsx
+Offences related to Mischief,IPC,2022,3441.0,0.2,,,,table_1.2.xlsx
+Offences related to Mischief,IPC,2023,3707.0,0.3,,,,table_1.2.xlsx
+Offences related to Mischief,IPC,2024,2294.0,3067.0,2294.0,3067.0,0.2,table_1.2.xlsx
+Arson,IPC,2022,7811.0,0.6,,,,table_1.2.xlsx
+Arson,IPC,2023,13626.0,1.0,,,,table_1.2.xlsx
+Arson,IPC,2024,4663.0,2845.0,4663.0,2845.0,0.2,table_1.2.xlsx
+Criminal Trespass,IPC,2022,45299.0,3.3,,,,table_1.2.xlsx
+Criminal Trespass,IPC,2023,44695.0,3.2,,,,table_1.2.xlsx
+Criminal Trespass,IPC,2024,25449.0,13253.0,25449.0,13253.0,1.1,table_1.2.xlsx
+Circulate False/Fake News/Rumours,IPC,2022,858.0,0.1,,,,table_1.2.xlsx
+Circulate False/Fake News/Rumours,IPC,2023,1087.0,0.1,,,,table_1.2.xlsx
+Circulate False/Fake News/Rumours,IPC,2024,977.0,1426.0,977.0,1426.0,0.1,table_1.2.xlsx
+Offences relating to Adulteration or Sale of Food/Drugs,IPC,2022,4694.0,0.3,,,,table_1.2.xlsx
+Offences relating to Adulteration or Sale of Food/Drugs,IPC,2023,565.0,0.0,,,,table_1.2.xlsx
+Offences relating to Adulteration or Sale of Food/Drugs,IPC,2024,,,,,,table_1.2.xlsx
+Criminal Intimidation,IPC,2022,150932.0,10.9,,,,table_1.2.xlsx
+Criminal Intimidation,IPC,2023,167178.0,12.0,,,,table_1.2.xlsx
+Criminal Intimidation,IPC,2024,,,,,,table_1.2.xlsx
+Insult to the Modesty of Women,IPC,2022,8972.0,0.7,,,,table_1.2.xlsx
+Insult to the Modesty of Women,IPC,2023,8823.0,0.6,,,,table_1.2.xlsx
+Insult to the Modesty of Women,IPC,2024,,,,,,table_1.2.xlsx
+Cruelty by Husband or his Relatives,IPC,2022,140019.0,10.1,,,,table_1.2.xlsx
+Cruelty by Husband or his Relatives,IPC,2023,133676.0,9.6,,,,table_1.2.xlsx
+Cruelty by Husband or his Relatives,IPC,2024,,,,,,table_1.2.xlsx
+"Misc. BNS/IPC Crimes (Total of 54-57,E6-E7&A1-A2)",IPC,2022,1041627.0,75.5,,,,table_1.2.xlsx
+"Misc. BNS/IPC Crimes (Total of 54-57,E6-E7&A1-A2)",IPC,2023,1141379.0,82.0,,,,table_1.2.xlsx
+"Misc. BNS/IPC Crimes (Total of 54-57,E6-E7&A1-A2)",IPC,2024,385998.0,347483.0,385998.0,347483.0,20.7,table_1.2.xlsx
+Other BNS/IPC crimes,IPC,2022,292964.0,21.2,,,,table_1.2.xlsx
+Other BNS/IPC crimes,IPC,2023,316982.0,22.8,,,,table_1.2.xlsx
+Other BNS/IPC crimes,IPC,2024,296526.0,306280.0,296526.0,306280.0,17.0,table_1.2.xlsx
+The Dowry Prohibition Act,SLL,2022,13479.0,1.0,,,,table_1.3.xlsx
+The Dowry Prohibition Act,SLL,2023,15489.0,1.1,,,,table_1.3.xlsx
+The Dowry Prohibition Act,SLL,2024,12343.0,0.9,,,0.5,table_1.3.xlsx
+The Immoral Traffic (Prevention) Act,SLL,2022,1497.0,0.1,,,,table_1.3.xlsx
+The Immoral Traffic (Prevention) Act,SLL,2023,2166.0,0.2,,,,table_1.3.xlsx
+The Immoral Traffic (Prevention) Act,SLL,2024,2137.0,0.2,,,0.1,table_1.3.xlsx
+The Protection of Women from Domestic Violence Act,SLL,2022,468.0,0.0,,,,table_1.3.xlsx
+The Protection of Women from Domestic Violence Act,SLL,2023,632.0,0.0,,,,table_1.3.xlsx
+The Protection of Women from Domestic Violence Act,SLL,2024,616.0,0.0,,,0.0,table_1.3.xlsx
+The Indecent Representation of Women (Prohibition) Act,SLL,2022,28.0,0.0,,,,table_1.3.xlsx
+The Indecent Representation of Women (Prohibition) Act,SLL,2023,31.0,0.0,,,,table_1.3.xlsx
+The Indecent Representation of Women (Prohibition) Act,SLL,2024,21.0,0.0,,,0.0,table_1.3.xlsx
+Crime Against Women – Related Acts (Total of Sl.1-4),SLL,2022,15472.0,1.1,,,,table_1.3.xlsx
+Crime Against Women – Related Acts (Total of Sl.1-4),SLL,2023,18318.0,1.3,,,,table_1.3.xlsx
+Crime Against Women – Related Acts (Total of Sl.1-4),SLL,2024,15117.0,1.1,,,0.6,table_1.3.xlsx
+The Protection of Children from Sexual Offences Act,SLL,2022,63414.0,4.6,,,,table_1.3.xlsx
+The Protection of Children from Sexual Offences Act,SLL,2023,67694.0,4.9,,,,table_1.3.xlsx
+The Protection of Children from Sexual Offences Act,SLL,2024,69191.0,4.9,,,3.0,table_1.3.xlsx
+The Juvenile Justice (Care and Protection of Children) Act,SLL,2022,1830.0,0.1,,,,table_1.3.xlsx
+The Juvenile Justice (Care and Protection of Children) Act,SLL,2023,1974.0,0.1,,,,table_1.3.xlsx
+The Juvenile Justice (Care and Protection of Children) Act,SLL,2024,2313.0,0.2,,,0.1,table_1.3.xlsx
+The Prohibition of Child Marriage Act,SLL,2022,1002.0,0.1,,,,table_1.3.xlsx
+The Prohibition of Child Marriage Act,SLL,2023,6038.0,0.4,,,,table_1.3.xlsx
+The Prohibition of Child Marriage Act,SLL,2024,1499.0,0.1,,,0.1,table_1.3.xlsx
+The Pre-Natal Diagnostic Techniques (Reg and Prev of Misuse) Act,SLL,2022,57.0,0.0,,,,table_1.3.xlsx
+The Pre-Natal Diagnostic Techniques (Reg and Prev of Misuse) Act,SLL,2023,30.0,0.0,,,,table_1.3.xlsx
+The Pre-Natal Diagnostic Techniques (Reg and Prev of Misuse) Act,SLL,2024,31.0,0.0,,,0.0,table_1.3.xlsx
+The Child Labour (Prohibition & Regulation) Act,SLL,2022,751.0,0.1,,,,table_1.3.xlsx
+The Child Labour (Prohibition & Regulation) Act,SLL,2023,1390.0,0.1,,,,table_1.3.xlsx
+The Child Labour (Prohibition & Regulation) Act,SLL,2024,1235.0,0.1,,,0.1,table_1.3.xlsx
+The Medical Termination of Pregnancy Act,SLL,2022,32.0,0.0,,,,table_1.3.xlsx
+The Medical Termination of Pregnancy Act,SLL,2023,30.0,0.0,,,,table_1.3.xlsx
+The Medical Termination of Pregnancy Act,SLL,2024,15.0,0.0,,,0.0,table_1.3.xlsx
+Children Related – Acts (Total of Sl. 5-10),SLL,2022,67086.0,4.9,,,,table_1.3.xlsx
+Children Related – Acts (Total of Sl. 5-10),SLL,2023,77156.0,5.5,,,,table_1.3.xlsx
+Children Related – Acts (Total of Sl. 5-10),SLL,2024,74284.0,5.3,,,3.2,table_1.3.xlsx
+The SC/ST (Prevention of Atrocities) Act for Crimes against SCs,SLL,2022,4703.0,0.3,,,,table_1.3.xlsx
+The SC/ST (Prevention of Atrocities) Act for Crimes against SCs,SLL,2023,4345.0,0.3,,,,table_1.3.xlsx
+The SC/ST (Prevention of Atrocities) Act for Crimes against SCs,SLL,2024,6963.0,0.5,,,0.3,table_1.3.xlsx
+The SC/ST (Prevention of Atrocities) Act for Crimes against STs,SLL,2022,329.0,0.0,,,,table_1.3.xlsx
+The SC/ST (Prevention of Atrocities) Act for Crimes against STs,SLL,2023,848.0,0.1,,,,table_1.3.xlsx
+The SC/ST (Prevention of Atrocities) Act for Crimes against STs,SLL,2024,1375.0,0.1,,,0.1,table_1.3.xlsx
+The Protection of Civil Rights Act for Crimes against SCs,SLL,2022,13.0,0.0,,,,table_1.3.xlsx
+The Protection of Civil Rights Act for Crimes against SCs,SLL,2023,23.0,0.0,,,,table_1.3.xlsx
+The Protection of Civil Rights Act for Crimes against SCs,SLL,2024,13.0,0.0,,,0.0,table_1.3.xlsx
+The Protection of Civil Rights Act for Crimes against STs,SLL,2022,0.0,0.0,,,,table_1.3.xlsx
+The Protection of Civil Rights Act for Crimes against STs,SLL,2023,1.0,0.0,,,,table_1.3.xlsx
+The Protection of Civil Rights Act for Crimes against STs,SLL,2024,5.0,0.0,,,0.0,table_1.3.xlsx
+Scheduled Castes and Scheduled Tribes – Related Acts (Total of Sl. 11-14),SLL,2022,5045.0,0.4,,,,table_1.3.xlsx
+Scheduled Castes and Scheduled Tribes – Related Acts (Total of Sl. 11-14),SLL,2023,5217.0,0.4,,,,table_1.3.xlsx
+Scheduled Castes and Scheduled Tribes – Related Acts (Total of Sl. 11-14),SLL,2024,8356.0,0.6,,,0.4,table_1.3.xlsx
+The Prevention of Damage to Public Property Act,SLL,2022,4403.0,0.3,,,,table_1.3.xlsx
+The Prevention of Damage to Public Property Act,SLL,2023,3989.0,0.3,,,,table_1.3.xlsx
+The Prevention of Damage to Public Property Act,SLL,2024,4395.0,0.3,,,0.2,table_1.3.xlsx
+The Unlawful Activities (P) Act,SLL,2022,1005.0,0.1,,,,table_1.3.xlsx
+The Unlawful Activities (P) Act,SLL,2023,750.0,0.1,,,,table_1.3.xlsx
+The Unlawful Activities (P) Act,SLL,2024,649.0,0.0,,,0.0,table_1.3.xlsx
+The Official Secrets Act,SLL,2022,55.0,0.0,,,,table_1.3.xlsx
+The Official Secrets Act,SLL,2023,32.0,0.0,,,,table_1.3.xlsx
+The Official Secrets Act,SLL,2024,27.0,0.0,,,0.0,table_1.3.xlsx
+Offences against State - Related Acts (Total of Sl. 15-17),SLL,2022,5463.0,0.4,,,,table_1.3.xlsx
+Offences against State - Related Acts (Total of Sl. 15-17),SLL,2023,4771.0,0.3,,,,table_1.3.xlsx
+Offences against State - Related Acts (Total of Sl. 15-17),SLL,2024,5071.0,0.4,,,0.2,table_1.3.xlsx
+The Arms Act,SLL,2022,80118.0,5.8,,,,table_1.3.xlsx
+The Arms Act,SLL,2023,73388.0,5.3,,,,table_1.3.xlsx
+The Arms Act,SLL,2024,63564.0,4.5,,,2.7,table_1.3.xlsx
+Fire Arms,SLL,2022,52662.0,3.8,,,,table_1.3.xlsx
+Fire Arms,SLL,2023,43215.0,3.1,,,,table_1.3.xlsx
+Fire Arms,SLL,2024,36245.0,2.6,,,1.5,table_1.3.xlsx
+Legal/Licensed Arms,SLL,2022,302.0,0.0,,,,table_1.3.xlsx
+Legal/Licensed Arms,SLL,2023,268.0,0.0,,,,table_1.3.xlsx
+Legal/Licensed Arms,SLL,2024,361.0,0.0,,,0.0,table_1.3.xlsx
+Illegal/Unlicensed Arms,SLL,2022,52360.0,3.8,,,,table_1.3.xlsx
+Illegal/Unlicensed Arms,SLL,2023,42947.0,3.1,,,,table_1.3.xlsx
+Illegal/Unlicensed Arms,SLL,2024,35884.0,2.6,,,1.5,table_1.3.xlsx
+Other Arms,SLL,2022,27456.0,2.0,,,,table_1.3.xlsx
+Other Arms,SLL,2023,30173.0,2.2,,,,table_1.3.xlsx
+Other Arms,SLL,2024,27319.0,1.9,,,1.2,table_1.3.xlsx
+The Explosives Act,SLL,2022,2248.0,0.2,,,,table_1.3.xlsx
+The Explosives Act,SLL,2023,2611.0,0.2,,,,table_1.3.xlsx
+The Explosives Act,SLL,2024,2574.0,0.2,,,0.1,table_1.3.xlsx
+The Explosive Substances Act,SLL,2022,2108.0,0.2,,,,table_1.3.xlsx
+The Explosive Substances Act,SLL,2023,1554.0,0.1,,,,table_1.3.xlsx
+The Explosive Substances Act,SLL,2024,1433.0,0.1,,,0.1,table_1.3.xlsx
+Arms/Explosive - Related Acts (Total of Sl. 18-20),SLL,2022,84474.0,6.1,,,,table_1.3.xlsx
+Arms/Explosive - Related Acts (Total of Sl. 18-20),SLL,2023,77553.0,5.6,,,,table_1.3.xlsx
+Arms/Explosive - Related Acts (Total of Sl. 18-20),SLL,2024,67571.0,4.8,,,2.9,table_1.3.xlsx
+The Information Technology Act,SLL,2022,31908.0,2.3,,,,table_1.3.xlsx
+The Information Technology Act,SLL,2023,44237.0,3.2,,,,table_1.3.xlsx
+The Information Technology Act,SLL,2024,44872.0,3.2,,,1.9,table_1.3.xlsx
+The Copy Right Act,SLL,2022,1866.0,0.1,,,,table_1.3.xlsx
+The Copy Right Act,SLL,2023,1942.0,0.1,,,,table_1.3.xlsx
+The Copy Right Act,SLL,2024,1840.0,0.1,,,0.1,table_1.3.xlsx
+The Trade Marks Act,SLL,2022,217.0,0.0,,,,table_1.3.xlsx
+The Trade Marks Act,SLL,2023,139.0,0.0,,,,table_1.3.xlsx
+The Trade Marks Act,SLL,2024,128.0,0.0,,,0.0,table_1.3.xlsx
+Information Technology/Intellectual Property – Related Acts (Total of Sl. 21-23),SLL,2022,33991.0,2.5,,,,table_1.3.xlsx
+Information Technology/Intellectual Property – Related Acts (Total of Sl. 21-23),SLL,2023,46318.0,3.3,,,,table_1.3.xlsx
+Information Technology/Intellectual Property – Related Acts (Total of Sl. 21-23),SLL,2024,46840.0,3.3,,,2.0,table_1.3.xlsx
+The Lotteries (Regulation) Act,SLL,2022,4882.0,0.4,,,,table_1.3.xlsx
+The Lotteries (Regulation) Act,SLL,2023,8538.0,0.6,,,,table_1.3.xlsx
+The Lotteries (Regulation) Act,SLL,2024,7899.0,0.6,,,0.3,table_1.3.xlsx
+The Chit Funds Acts,SLL,2022,69.0,0.0,,,,table_1.3.xlsx
+The Chit Funds Acts,SLL,2023,64.0,0.0,,,,table_1.3.xlsx
+The Chit Funds Acts,SLL,2024,56.0,0.0,,,0.0,table_1.3.xlsx
+The Negotiable Instruments Act,SLL,2022,21.0,0.0,,,,table_1.3.xlsx
+The Negotiable Instruments Act,SLL,2023,17.0,0.0,,,,table_1.3.xlsx
+The Negotiable Instruments Act,SLL,2024,18.0,0.0,,,0.0,table_1.3.xlsx
+The Benami Transaction (Prohibition) Act,SLL,2022,1.0,0.0,,,,table_1.3.xlsx
+The Benami Transaction (Prohibition) Act,SLL,2023,2.0,0.0,,,,table_1.3.xlsx
+The Benami Transaction (Prohibition) Act,SLL,2024,0.0,0.0,,,0.0,table_1.3.xlsx
+The Mines and Minerals (Development and Regulation) Act,SLL,2022,14219.0,1.0,,,,table_1.3.xlsx
+The Mines and Minerals (Development and Regulation) Act,SLL,2023,13162.0,0.9,,,,table_1.3.xlsx
+The Mines and Minerals (Development and Regulation) Act,SLL,2024,14300.0,1.0,,,0.6,table_1.3.xlsx
+Prevention of Corruption Act,SLL,2022,1078.0,0.1,,,,table_1.3.xlsx
+Prevention of Corruption Act,SLL,2023,1139.0,0.1,,,,table_1.3.xlsx
+Prevention of Corruption Act,SLL,2024,989.0,0.1,,,0.0,table_1.3.xlsx
+Finance & Economic Acts (Total of Sl.24-29),SLL,2022,20270.0,1.5,,,,table_1.3.xlsx
+Finance & Economic Acts (Total of Sl.24-29),SLL,2023,22922.0,1.6,,,,table_1.3.xlsx
+Finance & Economic Acts (Total of Sl.24-29),SLL,2024,23262.0,1.7,,,1.0,table_1.3.xlsx
+Prohibition Act (State),SLL,2022,704281.0,51.0,,,,table_1.3.xlsx
+Prohibition Act (State),SLL,2023,781910.0,56.2,,,,table_1.3.xlsx
+Prohibition Act (State),SLL,2024,797026.0,56.7,,,34.0,table_1.3.xlsx
+The Excise Act,SLL,2022,357833.0,25.9,,,,table_1.3.xlsx
+The Excise Act,SLL,2023,364497.0,26.2,,,,table_1.3.xlsx
+The Excise Act,SLL,2024,332638.0,23.7,,,14.2,table_1.3.xlsx
+The Narcotic Drugs & Psychotropic Substances Act,SLL,2022,115236.0,8.4,,,,table_1.3.xlsx
+The Narcotic Drugs & Psychotropic Substances Act,SLL,2023,120010.0,8.6,,,,table_1.3.xlsx
+The Narcotic Drugs & Psychotropic Substances Act,SLL,2024,109890.0,7.8,,,4.7,table_1.3.xlsx
+Possession of drugs for Personal use/Consumption,SLL,2022,77172.0,5.6,,,,table_1.3.xlsx
+Possession of drugs for Personal use/Consumption,SLL,2023,78581.0,5.6,,,,table_1.3.xlsx
+Possession of drugs for Personal use/Consumption,SLL,2024,72184.0,5.1,,,3.1,table_1.3.xlsx
+Possession of drugs for Trafficking,SLL,2022,38064.0,2.8,,,,table_1.3.xlsx
+Possession of drugs for Trafficking,SLL,2023,41429.0,3.0,,,,table_1.3.xlsx
+Possession of drugs for Trafficking,SLL,2024,37706.0,2.7,,,1.6,table_1.3.xlsx
+Liquor & Narcotic Drugs – Related Acts (Total of Sl.30-32),SLL,2022,1177350.0,85.3,,,,table_1.3.xlsx
+Liquor & Narcotic Drugs – Related Acts (Total of Sl.30-32),SLL,2023,1266417.0,91.0,,,,table_1.3.xlsx
+Liquor & Narcotic Drugs – Related Acts (Total of Sl.30-32),SLL,2024,1239554.0,88.2,,,52.9,table_1.3.xlsx
+The Forest Act & The Forest Conservation Act,SLL,2022,1921.0,0.1,,,,table_1.3.xlsx
+The Forest Act & The Forest Conservation Act,SLL,2023,2076.0,0.1,,,,table_1.3.xlsx
+The Forest Act & The Forest Conservation Act,SLL,2024,1425.0,0.1,,,0.1,table_1.3.xlsx
+The Wildlife Protection Act,SLL,2022,535.0,0.0,,,,table_1.3.xlsx
+The Wildlife Protection Act,SLL,2023,526.0,0.0,,,,table_1.3.xlsx
+The Wildlife Protection Act,SLL,2024,497.0,0.0,,,0.0,table_1.3.xlsx
+The Environmental (Protection) Act,SLL,2022,329.0,0.0,,,,table_1.3.xlsx
+The Environmental (Protection) Act,SLL,2023,389.0,0.0,,,,table_1.3.xlsx
+The Environmental (Protection) Act,SLL,2024,754.0,0.1,,,0.0,table_1.3.xlsx
+The Air & The Water (Prevention & Control of Pollution) Act,SLL,2022,78.0,0.0,,,,table_1.3.xlsx
+The Air & The Water (Prevention & Control of Pollution) Act,SLL,2023,68.0,0.0,,,,table_1.3.xlsx
+The Air & The Water (Prevention & Control of Pollution) Act,SLL,2024,18.0,0.0,,,0.0,table_1.3.xlsx
+The Cigarette and Other Tobacco Products Act,SLL,2022,42642.0,3.1,,,,table_1.3.xlsx
+The Cigarette and Other Tobacco Products Act,SLL,2023,59279.0,4.3,,,,table_1.3.xlsx
+The Cigarette and Other Tobacco Products Act,SLL,2024,46333.0,3.3,,,2.0,table_1.3.xlsx
+Noise Pollution Acts,SLL,2022,7378.0,0.5,,,,table_1.3.xlsx
+Noise Pollution Acts,SLL,2023,6640.0,0.5,,,,table_1.3.xlsx
+Noise Pollution Acts,SLL,2024,8639.0,0.6,,,0.4,table_1.3.xlsx
+The National Green Tribunal Act,SLL,2022,37.0,0.0,,,,table_1.3.xlsx
+The National Green Tribunal Act,SLL,2023,16.0,0.0,,,,table_1.3.xlsx
+The National Green Tribunal Act,SLL,2024,4.0,0.0,,,0.0,table_1.3.xlsx
+Environment & Pollution– Related Acts (Total of Sl. 33-39),SLL,2022,52920.0,3.8,,,,table_1.3.xlsx
+Environment & Pollution– Related Acts (Total of Sl. 33-39),SLL,2023,68994.0,5.0,,,,table_1.3.xlsx
+Environment & Pollution– Related Acts (Total of Sl. 33-39),SLL,2024,57670.0,4.1,,,2.5,table_1.3.xlsx
+The Registration of Foreigners Act & The Foreigners Act,SLL,2022,1270.0,0.1,,,,table_1.3.xlsx
+The Registration of Foreigners Act & The Foreigners Act,SLL,2023,1344.0,0.1,,,,table_1.3.xlsx
+The Registration of Foreigners Act & The Foreigners Act,SLL,2024,1494.0,0.1,,,0.1,table_1.3.xlsx
+The Passport Act,SLL,2022,513.0,0.0,,,,table_1.3.xlsx
+The Passport Act,SLL,2023,841.0,0.1,,,,table_1.3.xlsx
+The Passport Act,SLL,2024,1185.0,0.1,,,0.1,table_1.3.xlsx
+The Emigration Act,SLL,2022,94.0,0.0,,,,table_1.3.xlsx
+The Emigration Act,SLL,2023,95.0,0.0,,,,table_1.3.xlsx
+The Emigration Act,SLL,2024,194.0,0.0,,,0.0,table_1.3.xlsx
+The Citizenship Act,SLL,2022,1.0,0.0,,,,table_1.3.xlsx
+The Citizenship Act,SLL,2023,10.0,0.0,,,,table_1.3.xlsx
+The Citizenship Act,SLL,2024,1.0,0.0,,,0.0,table_1.3.xlsx
+Foreigner & Passport – Related Acts (Total of Sl. 40-43),SLL,2022,1878.0,0.1,,,,table_1.3.xlsx
+Foreigner & Passport – Related Acts (Total of Sl. 40-43),SLL,2023,2290.0,0.2,,,,table_1.3.xlsx
+Foreigner & Passport – Related Acts (Total of Sl. 40-43),SLL,2024,2874.0,0.2,,,0.1,table_1.3.xlsx
+The Indian Railways Act,SLL,2022,171.0,0.0,,,,table_1.3.xlsx
+The Indian Railways Act,SLL,2023,96.0,0.0,,,,table_1.3.xlsx
+The Indian Railways Act,SLL,2024,116.0,0.0,,,0.0,table_1.3.xlsx
+The Railway Property (Unlawful Possession) Act,SLL,2022,9.0,0.0,,,,table_1.3.xlsx
+The Railway Property (Unlawful Possession) Act,SLL,2023,3.0,0.0,,,,table_1.3.xlsx
+The Railway Property (Unlawful Possession) Act,SLL,2024,2.0,0.0,,,0.0,table_1.3.xlsx
+Railways – Related Acts (Total of Sl.44&45),SLL,2022,180.0,0.0,,,,table_1.3.xlsx
+Railways – Related Acts (Total of Sl.44&45),SLL,2023,99.0,0.0,,,,table_1.3.xlsx
+Railways – Related Acts (Total of Sl.44&45),SLL,2024,118.0,0.0,,,0.0,table_1.3.xlsx
+The Indian Telegraph Act,SLL,2022,40.0,0.0,,,,table_1.3.xlsx
+The Indian Telegraph Act,SLL,2023,30.0,0.0,,,,table_1.3.xlsx
+The Indian Telegraph Act,SLL,2024,29.0,0.0,,,0.0,table_1.3.xlsx
+The Telegraph Wire (Unlawful Possession) Act,SLL,2022,5.0,0.0,,,,table_1.3.xlsx
+The Telegraph Wire (Unlawful Possession) Act,SLL,2023,11.0,0.0,,,,table_1.3.xlsx
+The Telegraph Wire (Unlawful Possession) Act,SLL,2024,4.0,0.0,,,0.0,table_1.3.xlsx
+The Cinematograph Act,SLL,2022,8.0,0.0,,,,table_1.3.xlsx
+The Cinematograph Act,SLL,2023,8.0,0.0,,,,table_1.3.xlsx
+The Cinematograph Act,SLL,2024,5.0,0.0,,,0.0,table_1.3.xlsx
+The Cable Television Networks (Regulation) Act,SLL,2022,2.0,0.0,,,,table_1.3.xlsx
+The Cable Television Networks (Regulation) Act,SLL,2023,1.0,0.0,,,,table_1.3.xlsx
+The Cable Television Networks (Regulation) Act,SLL,2024,1.0,0.0,,,0.0,table_1.3.xlsx
+Telegraph/Cinematograph Acts (Total of Sl.46-49),SLL,2022,55.0,0.0,,,,table_1.3.xlsx
+Telegraph/Cinematograph Acts (Total of Sl.46-49),SLL,2023,50.0,0.0,,,,table_1.3.xlsx
+Telegraph/Cinematograph Acts (Total of Sl.46-49),SLL,2024,39.0,0.0,,,0.0,table_1.3.xlsx
+The Essential Commodities Act,SLL,2022,5621.0,0.4,,,,table_1.3.xlsx
+The Essential Commodities Act,SLL,2023,4083.0,0.3,,,,table_1.3.xlsx
+The Essential Commodities Act,SLL,2024,4042.0,0.3,,,0.2,table_1.3.xlsx
+The Prevention of Food Adulteration Act,SLL,2022,17.0,0.0,,,,table_1.3.xlsx
+The Prevention of Food Adulteration Act,SLL,2023,9.0,0.0,,,,table_1.3.xlsx
+The Prevention of Food Adulteration Act,SLL,2024,12.0,0.0,,,0.0,table_1.3.xlsx
+The Food Safety & Standards Act,SLL,2022,237.0,0.0,,,,table_1.3.xlsx
+The Food Safety & Standards Act,SLL,2023,234.0,0.0,,,,table_1.3.xlsx
+The Food Safety & Standards Act,SLL,2024,210.0,0.0,,,0.0,table_1.3.xlsx
+"Food, Drugs and Essential Commodities Acts (Total of Sl. 50-52)",SLL,2022,5875.0,0.4,,,,table_1.3.xlsx
+"Food, Drugs and Essential Commodities Acts (Total of Sl. 50-52)",SLL,2023,4326.0,0.3,,,,table_1.3.xlsx
+"Food, Drugs and Essential Commodities Acts (Total of Sl. 50-52)",SLL,2024,4264.0,0.3,,,0.2,table_1.3.xlsx
+MCOCA/Control of Organised Crimes,SLL,2022,54.0,0.0,,,,table_1.3.xlsx
+MCOCA/Control of Organised Crimes,SLL,2023,62.0,0.0,,,,table_1.3.xlsx
+MCOCA/Control of Organised Crimes,SLL,2024,16.0,0.0,,,0.0,table_1.3.xlsx
+The Gambling Act,SLL,2022,169254.0,12.3,,,,table_1.3.xlsx
+The Gambling Act,SLL,2023,166273.0,11.9,,,,table_1.3.xlsx
+The Gambling Act,SLL,2024,145224.0,10.3,,,6.2,table_1.3.xlsx
+The Electricity Act,SLL,2022,282705.0,20.5,,,,table_1.3.xlsx
+The Electricity Act,SLL,2023,306671.0,22.0,,,,table_1.3.xlsx
+The Electricity Act,SLL,2024,212212.0,15.1,,,9.1,table_1.3.xlsx
+The Antiques and Art Treasures Act,SLL,2022,10.0,0.0,,,,table_1.3.xlsx
+The Antiques and Art Treasures Act,SLL,2023,11.0,0.0,,,,table_1.3.xlsx
+The Antiques and Art Treasures Act,SLL,2024,13.0,0.0,,,0.0,table_1.3.xlsx
+The Representation of the People Act,SLL,2022,168.0,0.0,,,,table_1.3.xlsx
+The Representation of the People Act,SLL,2023,423.0,0.0,,,,table_1.3.xlsx
+The Representation of the People Act,SLL,2024,507.0,0.0,,,0.0,table_1.3.xlsx
+The Bonded Labour System (Abolition) Act,SLL,2022,1421.0,0.1,,,,table_1.3.xlsx
+The Bonded Labour System (Abolition) Act,SLL,2023,1246.0,0.1,,,,table_1.3.xlsx
+The Bonded Labour System (Abolition) Act,SLL,2024,657.0,0.0,,,0.0,table_1.3.xlsx
+For Crimes against SCs,SLL,2022,1315.0,0.1,,,,table_1.3.xlsx
+For Crimes against SCs,SLL,2023,1171.0,0.1,,,,table_1.3.xlsx
+For Crimes against SCs,SLL,2024,591.0,0.0,,,0.0,table_1.3.xlsx
+For Crimes against STs,SLL,2022,33.0,0.0,,,,table_1.3.xlsx
+For Crimes against STs,SLL,2023,21.0,0.0,,,,table_1.3.xlsx
+For Crimes against STs,SLL,2024,38.0,0.0,,,0.0,table_1.3.xlsx
+Against others,SLL,2022,73.0,0.0,,,,table_1.3.xlsx
+Against others,SLL,2023,54.0,0.0,,,,table_1.3.xlsx
+Against others,SLL,2024,28.0,0.0,,,0.0,table_1.3.xlsx
+The Prevention of Insults to National Honour Act,SLL,2022,85.0,0.0,,,,table_1.3.xlsx
+The Prevention of Insults to National Honour Act,SLL,2023,50.0,0.0,,,,table_1.3.xlsx
+The Prevention of Insults to National Honour Act,SLL,2024,57.0,0.0,,,0.0,table_1.3.xlsx
+Defacement of Public Property Acts,SLL,2022,3415.0,0.2,,,,table_1.3.xlsx
+Defacement of Public Property Acts,SLL,2023,4327.0,0.3,,,,table_1.3.xlsx
+Defacement of Public Property Acts,SLL,2024,5469.0,0.4,,,0.2,table_1.3.xlsx
+The Transplantation of Human Organs Act,SLL,2022,3.0,0.0,,,,table_1.3.xlsx
+The Transplantation of Human Organs Act,SLL,2023,1.0,0.0,,,,table_1.3.xlsx
+The Transplantation of Human Organs Act,SLL,2024,4.0,0.0,,,0.0,table_1.3.xlsx
+Transgender Persons (Protection of Rights) Act,SLL,2022,1.0,0.0,,,,table_1.3.xlsx
+Transgender Persons (Protection of Rights) Act,SLL,2023,11.0,0.0,,,,table_1.3.xlsx
+Transgender Persons (Protection of Rights) Act,SLL,2024,10.0,0.0,,,0.0,table_1.3.xlsx
+"Rights of Persons with Disabilities Act, 2016",SLL,2022,,,,,,table_1.3.xlsx
+"Rights of Persons with Disabilities Act, 2016",SLL,2023,56.0,0.0,,,,table_1.3.xlsx
+"Rights of Persons with Disabilities Act, 2016",SLL,2024,,,,,,table_1.3.xlsx
+Prevention of Cruelty to Animal Act,SLL,2022,,,,,,table_1.3.xlsx
+Prevention of Cruelty to Animal Act,SLL,2023,9039.0,0.6,,,,table_1.3.xlsx
+Prevention of Cruelty to Animal Act,SLL,2024,,,,,,table_1.3.xlsx
+The Mental Health Act,SLL,2022,350.0,0.0,,,,table_1.3.xlsx
+The Mental Health Act,SLL,2023,325.0,0.0,,,,table_1.3.xlsx
+The Mental Health Act,SLL,2024,379.0,0.0,,,0.0,table_1.3.xlsx
+Motor Vehicle Act,SLL,2022,94450.0,6.8,,,,table_1.3.xlsx
+Motor Vehicle Act,SLL,2023,191828.0,13.8,,,,table_1.3.xlsx
+Motor Vehicle Act,SLL,2024,195967.0,13.9,,,8.4,table_1.3.xlsx
+City/Town Police Acts,SLL,2022,48501.0,3.5,,,,table_1.3.xlsx
+City/Town Police Acts,SLL,2023,50018.0,3.6,,,,table_1.3.xlsx
+City/Town Police Acts,SLL,2024,58372.0,4.2,,,2.5,table_1.3.xlsx
+Other State Local Acts,SLL,2022,117426.0,8.5,,,,table_1.3.xlsx
+Other State Local Acts,SLL,2023,109118.0,7.8,,,,table_1.3.xlsx
+Other State Local Acts,SLL,2024,104820.0,7.5,,,4.5,table_1.3.xlsx
+Other Regulatory & Enforcement – Acts (Total of Sl.53-68),SLL,2022,717843.0,52.0,,,,table_1.3.xlsx
+Other Regulatory & Enforcement – Acts (Total of Sl.53-68),SLL,2023,830364.0,59.6,,,,table_1.3.xlsx
+Other Regulatory & Enforcement – Acts (Total of Sl.53-68),SLL,2024,732802.0,52.2,,,31.3,table_1.3.xlsx
+Other SLL Crimes,SLL,2022,75665.0,5.5,,,,table_1.3.xlsx
+Other SLL Crimes,SLL,2023,53670.0,3.9,,,,table_1.3.xlsx
+Other SLL Crimes,SLL,2024,63437.0,4.5,,,2.7,table_1.3.xlsx

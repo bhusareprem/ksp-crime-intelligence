@@ -1,0 +1,49 @@
+{
+  "version": "unified_demo_v1",
+  "years": [
+    2018,
+    2024
+  ],
+  "fir_id_range": [
+    1000001,
+    1025000
+  ],
+  "person_count": 2500,
+  "fir_count": 25000,
+  "court_case_count": 11477,
+  "co_accused_links": 21302,
+  "districts": [
+    "Bengaluru Urban",
+    "Bengaluru Rural",
+    "Mysuru",
+    "Belagavi",
+    "Kalaburagi",
+    "Dakshina Kannada",
+    "Udupi",
+    "Hassan",
+    "Shivamogga",
+    "Tumakuru",
+    "Ballari",
+    "Vijayapura",
+    "Raichur",
+    "Dharwad",
+    "Gadag",
+    "Haveri",
+    "Chitradurga",
+    "Chikkamagaluru",
+    "Kodagu",
+    "Mandya",
+    "Kolar",
+    "Chikkaballapur",
+    "Ramanagara",
+    "Yadgir",
+    "Bidar",
+    "Koppal",
+    "Bagalkot",
+    "Uttara Kannada",
+    "Davanagere",
+    "Vijayanagara",
+    "Chamarajanagar"
+  ],
+  "alignment_notes": "Same fir_id in criminal.db and ksp_crime.db; cases.db linked via linked_fir_id; person names in persons + ksp criminals"
+}

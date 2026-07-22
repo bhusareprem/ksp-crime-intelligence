@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Receive-Job -Id 1 -Keep 2>&1)"
+    ]
+  }
+}

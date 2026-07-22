@@ -1,0 +1,16 @@
+sl_no,complaint_type,num_complaints,num_firs,num_online_efir,year,source_table
+1,Oral Complaints,9171426,717242,0,2024,table_1.1.xlsx
+1.1,Narrated to O/C / SHO,961973,645919,0,2024,table_1.1.xlsx
+1.2,Distress call over phone/Dial 100 etc,8209453,71323,0,2024,table_1.1.xlsx
+2,Written Complaints,10245560,4970720,197905,2024,table_1.1.xlsx
+2.1,To O/C / SHO,5263134,3345313,0,2024,table_1.1.xlsx
+2.2,To SP/Senior Officers,1356812,137758,0,2024,table_1.1.xlsx
+2.3,Electronic Form,926733,29571,197905,2024,table_1.1.xlsx
+2.4,Court Complaints,95958,89092,0,2024,table_1.1.xlsx
+2.5,NHRC & SHRC,21948,1177,0,2024,table_1.1.xlsx
+2.6,Commissions for SCs,6133,613,0,2024,table_1.1.xlsx
+2.7,Commissions for STs,913,75,0,2024,table_1.1.xlsx
+2.8,National/State Commission for Women,34040,3091,0,2024,table_1.1.xlsx
+2.9,Children Welfare Boards/Commission,3639,1035,0,2024,table_1.1.xlsx
+2.10,Complaints Initiated Suo-moto by police,1220062,1197555,0,2024,table_1.1.xlsx
+2.11,Any Others Written Complaints,1316188,165440,0,2024,table_1.1.xlsx

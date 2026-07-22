@@ -1,0 +1,556 @@
+city,state,year,total_cases,ipc_cases,bns_cases,crime_rate,chargesheet_rate,stat_type,source_table
+Bengaluru,Karnataka,2022,28666,,,,,overall,table_1b.1.xlsx
+Bengaluru,Karnataka,2023,41637,,,,,overall,table_1b.1.xlsx
+Bengaluru,Karnataka,2024,34715,20300.0,14415.0,408.5,63.4,overall,table_1b.1.xlsx
+Chennai,Tamil Nadu,2022,15086,,,,,overall,table_1b.1.xlsx
+Chennai,Tamil Nadu,2023,15698,,,,,overall,table_1b.1.xlsx
+Chennai,Tamil Nadu,2024,15765,9867.0,5898.0,181.3,71.6,overall,table_1b.1.xlsx
+Coimbatore,Tamil Nadu,2022,4542,,,,,overall,table_1b.1.xlsx
+Coimbatore,Tamil Nadu,2023,4697,,,,,overall,table_1b.1.xlsx
+Coimbatore,Tamil Nadu,2024,4844,2781.0,2063.0,225.2,74.0,overall,table_1b.1.xlsx
+Delhi City,,2022,298988,,,,,overall,table_1b.1.xlsx
+Delhi City,,2023,323549,,,,,overall,table_1b.1.xlsx
+Delhi City,,2024,275402,136669.0,138733.0,1688.0,31.9,overall,table_1b.1.xlsx
+Ghaziabad,Uttar Pradesh,2022,9860,,,,,overall,table_1b.1.xlsx
+Ghaziabad,Uttar Pradesh,2023,9227,,,,,overall,table_1b.1.xlsx
+Ghaziabad,Uttar Pradesh,2024,8963,4856.0,4107.0,379.9,52.3,overall,table_1b.1.xlsx
+Hyderabad,Telangana,2022,20668,,,,,overall,table_1b.1.xlsx
+Hyderabad,Telangana,2023,21774,,,,,overall,table_1b.1.xlsx
+Hyderabad,Telangana,2024,27031,16114.0,10917.0,348.8,56.9,overall,table_1b.1.xlsx
+Indore,Madhya Pradesh,2022,16636,,,,,overall,table_1b.1.xlsx
+Indore,Madhya Pradesh,2023,18126,,,,,overall,table_1b.1.xlsx
+Indore,Madhya Pradesh,2024,12169,7059.0,5110.0,561.6,63.4,overall,table_1b.1.xlsx
+Jaipur,Rajasthan,2022,28171,,,,,overall,table_1b.1.xlsx
+Jaipur,Rajasthan,2023,29971,,,,,overall,table_1b.1.xlsx
+Jaipur,Rajasthan,2024,27743,17771.0,9972.0,902.8,37.4,overall,table_1b.1.xlsx
+Kanpur,Uttar Pradesh,2022,11721,,,,,overall,table_1b.1.xlsx
+Kanpur,Uttar Pradesh,2023,10652,,,,,overall,table_1b.1.xlsx
+Kanpur,Uttar Pradesh,2024,12350,6183.0,6167.0,422.9,77.3,overall,table_1b.1.xlsx
+Kochi,Kerala,2022,13273,,,,,overall,table_1b.1.xlsx
+Kochi,Kerala,2023,24729,,,,,overall,table_1b.1.xlsx
+Kochi,Kerala,2024,10043,6343.0,3700.0,474.2,92.9,overall,table_1b.1.xlsx
+Kolkata,West Bengal,2022,11038,,,,,overall,table_1b.1.xlsx
+Kolkata,West Bengal,2023,10943,,,,,overall,table_1b.1.xlsx
+Kolkata,West Bengal,2024,11864,6138.0,5726.0,84.1,95.3,overall,table_1b.1.xlsx
+Kozhikode,Kerala,2022,8074,,,,,overall,table_1b.1.xlsx
+Kozhikode,Kerala,2023,10605,,,,,overall,table_1b.1.xlsx
+Kozhikode,Kerala,2024,10310,5683.0,4627.0,507.6,93.5,overall,table_1b.1.xlsx
+Lucknow,Uttar Pradesh,2022,15115,,,,,overall,table_1b.1.xlsx
+Lucknow,Uttar Pradesh,2023,16023,,,,,overall,table_1b.1.xlsx
+Lucknow,Uttar Pradesh,2024,14467,10318.0,4149.0,498.7,69.3,overall,table_1b.1.xlsx
+Mumbai,Maharashtra,2022,69289,,,,,overall,table_1b.1.xlsx
+Mumbai,Maharashtra,2023,44873,,,,,overall,table_1b.1.xlsx
+Mumbai,Maharashtra,2024,51428,29792.0,21636.0,279.3,74.7,overall,table_1b.1.xlsx
+Nagpur,Maharashtra,2022,12889,,,,,overall,table_1b.1.xlsx
+Nagpur,Maharashtra,2023,17297,,,,,overall,table_1b.1.xlsx
+Nagpur,Maharashtra,2024,15787,9291.0,6496.0,632.0,69.8,overall,table_1b.1.xlsx
+Patna,Bihar,2022,12522,,,,,overall,table_1b.1.xlsx
+Patna,Bihar,2023,14317,,,,,overall,table_1b.1.xlsx
+Patna,Bihar,2024,12468,8139.0,4329.0,609.1,69.9,overall,table_1b.1.xlsx
+Pune,Maharashtra,2022,11074,,,,,overall,table_1b.1.xlsx
+Pune,Maharashtra,2023,12542,,,,,overall,table_1b.1.xlsx
+Pune,Maharashtra,2024,13708,7628.0,6080.0,271.4,76.7,overall,table_1b.1.xlsx
+Surat,Gujarat,2022,9872,,,,,overall,table_1b.1.xlsx
+Surat,Gujarat,2023,11453,,,,,overall,table_1b.1.xlsx
+Surat,Gujarat,2024,11233,5771.0,5462.0,245.0,87.7,overall,table_1b.1.xlsx
+Bengaluru,Karnataka,2022,17521,,,,,sll,table_1b.2.xlsx
+Bengaluru,Karnataka,2023,26883,,,,,sll,table_1b.2.xlsx
+Bengaluru,Karnataka,2024,22840,,,268.7,40.7,sll,table_1b.2.xlsx
+Chennai,Tamil Nadu,2022,24052,,,,,sll,table_1b.2.xlsx
+Chennai,Tamil Nadu,2023,20804,,,,,sll,table_1b.2.xlsx
+Chennai,Tamil Nadu,2024,30001,,,345.0,99.6,sll,table_1b.2.xlsx
+Coimbatore,Tamil Nadu,2022,4708,,,,,sll,table_1b.2.xlsx
+Coimbatore,Tamil Nadu,2023,4115,,,,,sll,table_1b.2.xlsx
+Coimbatore,Tamil Nadu,2024,3098,,,144.0,91.4,sll,table_1b.2.xlsx
+Delhi City,,2022,19567,,,,,sll,table_1b.2.xlsx
+Delhi City,,2023,19934,,,,,sll,table_1b.2.xlsx
+Delhi City,,2024,22264,,,136.5,98.9,sll,table_1b.2.xlsx
+Ghaziabad,Uttar Pradesh,2022,3347,,,,,sll,table_1b.2.xlsx
+Ghaziabad,Uttar Pradesh,2023,2157,,,,,sll,table_1b.2.xlsx
+Ghaziabad,Uttar Pradesh,2024,1567,,,66.4,69.1,sll,table_1b.2.xlsx
+Hyderabad,Telangana,2022,2515,,,,,sll,table_1b.2.xlsx
+Hyderabad,Telangana,2023,3975,,,,,sll,table_1b.2.xlsx
+Hyderabad,Telangana,2024,3278,,,42.3,75.9,sll,table_1b.2.xlsx
+Indore,Madhya Pradesh,2022,10491,,,,,sll,table_1b.2.xlsx
+Indore,Madhya Pradesh,2023,5949,,,,,sll,table_1b.2.xlsx
+Indore,Madhya Pradesh,2024,5191,,,239.5,99.8,sll,table_1b.2.xlsx
+Jaipur,Rajasthan,2022,8790,,,,,sll,table_1b.2.xlsx
+Jaipur,Rajasthan,2023,9266,,,,,sll,table_1b.2.xlsx
+Jaipur,Rajasthan,2024,9203,,,299.5,94.4,sll,table_1b.2.xlsx
+Kanpur,Uttar Pradesh,2022,3539,,,,,sll,table_1b.2.xlsx
+Kanpur,Uttar Pradesh,2023,2462,,,,,sll,table_1b.2.xlsx
+Kanpur,Uttar Pradesh,2024,2426,,,83.1,95.0,sll,table_1b.2.xlsx
+Kochi,Kerala,2022,15493,,,,,sll,table_1b.2.xlsx
+Kochi,Kerala,2023,42887,,,,,sll,table_1b.2.xlsx
+Kochi,Kerala,2024,11473,,,541.7,99.6,sll,table_1b.2.xlsx
+Kolkata,West Bengal,2022,1175,,,,,sll,table_1b.2.xlsx
+Kolkata,West Bengal,2023,900,,,,,sll,table_1b.2.xlsx
+Kolkata,West Bengal,2024,1355,,,9.6,95.9,sll,table_1b.2.xlsx
+Kozhikode,Kerala,2022,3515,,,,,sll,table_1b.2.xlsx
+Kozhikode,Kerala,2023,7397,,,,,sll,table_1b.2.xlsx
+Kozhikode,Kerala,2024,5444,,,268.0,99.2,sll,table_1b.2.xlsx
+Lucknow,Uttar Pradesh,2022,3943,,,,,sll,table_1b.2.xlsx
+Lucknow,Uttar Pradesh,2023,13449,,,,,sll,table_1b.2.xlsx
+Lucknow,Uttar Pradesh,2024,16954,,,584.4,61.9,sll,table_1b.2.xlsx
+Mumbai,Maharashtra,2022,19809,,,,,sll,table_1b.2.xlsx
+Mumbai,Maharashtra,2023,20568,,,,,sll,table_1b.2.xlsx
+Mumbai,Maharashtra,2024,18626,,,101.2,99.4,sll,table_1b.2.xlsx
+Nagpur,Maharashtra,2022,6278,,,,,sll,table_1b.2.xlsx
+Nagpur,Maharashtra,2023,6739,,,,,sll,table_1b.2.xlsx
+Nagpur,Maharashtra,2024,6111,,,244.6,99.1,sll,table_1b.2.xlsx
+Patna,Bihar,2022,8871,,,,,sll,table_1b.2.xlsx
+Patna,Bihar,2023,9213,,,,,sll,table_1b.2.xlsx
+Patna,Bihar,2024,4749,,,232.0,100.0,sll,table_1b.2.xlsx
+Pune,Maharashtra,2022,3099,,,,,sll,table_1b.2.xlsx
+Pune,Maharashtra,2023,4480,,,,,sll,table_1b.2.xlsx
+Pune,Maharashtra,2024,4852,,,96.1,97.2,sll,table_1b.2.xlsx
+Surat,Gujarat,2022,45428,,,,,sll,table_1b.2.xlsx
+Surat,Gujarat,2023,51689,,,,,sll,table_1b.2.xlsx
+Surat,Gujarat,2024,51933,,,1132.7,99.9,sll,table_1b.2.xlsx
+Bengaluru,Karnataka,2022,46187,,,,,total_ipc_sll,table_1b.3.xlsx
+Bengaluru,Karnataka,2023,68520,,,,,total_ipc_sll,table_1b.3.xlsx
+Bengaluru,Karnataka,2024,57555,,,677.2,54.4,total_ipc_sll,table_1b.3.xlsx
+Chennai,Tamil Nadu,2022,39138,,,,,total_ipc_sll,table_1b.3.xlsx
+Chennai,Tamil Nadu,2023,36502,,,,,total_ipc_sll,table_1b.3.xlsx
+Chennai,Tamil Nadu,2024,45766,,,526.3,93.8,total_ipc_sll,table_1b.3.xlsx
+Coimbatore,Tamil Nadu,2022,9250,,,,,total_ipc_sll,table_1b.3.xlsx
+Coimbatore,Tamil Nadu,2023,8812,,,,,total_ipc_sll,table_1b.3.xlsx
+Coimbatore,Tamil Nadu,2024,7942,,,369.2,80.0,total_ipc_sll,table_1b.3.xlsx
+Delhi City,,2022,318555,,,,,total_ipc_sll,table_1b.3.xlsx
+Delhi City,,2023,343483,,,,,total_ipc_sll,table_1b.3.xlsx
+Delhi City,,2024,297666,,,1824.5,36.8,total_ipc_sll,table_1b.3.xlsx
+Ghaziabad,Uttar Pradesh,2022,13207,,,,,total_ipc_sll,table_1b.3.xlsx
+Ghaziabad,Uttar Pradesh,2023,11384,,,,,total_ipc_sll,table_1b.3.xlsx
+Ghaziabad,Uttar Pradesh,2024,10530,,,446.4,55.1,total_ipc_sll,table_1b.3.xlsx
+Hyderabad,Telangana,2022,23183,,,,,total_ipc_sll,table_1b.3.xlsx
+Hyderabad,Telangana,2023,25749,,,,,total_ipc_sll,table_1b.3.xlsx
+Hyderabad,Telangana,2024,30309,,,391.1,59.0,total_ipc_sll,table_1b.3.xlsx
+Indore,Madhya Pradesh,2022,27127,,,,,total_ipc_sll,table_1b.3.xlsx
+Indore,Madhya Pradesh,2023,24075,,,,,total_ipc_sll,table_1b.3.xlsx
+Indore,Madhya Pradesh,2024,17360,,,801.1,73.9,total_ipc_sll,table_1b.3.xlsx
+Jaipur,Rajasthan,2022,36961,,,,,total_ipc_sll,table_1b.3.xlsx
+Jaipur,Rajasthan,2023,39237,,,,,total_ipc_sll,table_1b.3.xlsx
+Jaipur,Rajasthan,2024,36946,,,1202.3,51.5,total_ipc_sll,table_1b.3.xlsx
+Kanpur,Uttar Pradesh,2022,15260,,,,,total_ipc_sll,table_1b.3.xlsx
+Kanpur,Uttar Pradesh,2023,13114,,,,,total_ipc_sll,table_1b.3.xlsx
+Kanpur,Uttar Pradesh,2024,14776,,,506.0,80.4,total_ipc_sll,table_1b.3.xlsx
+Kochi,Kerala,2022,28766,,,,,total_ipc_sll,table_1b.3.xlsx
+Kochi,Kerala,2023,67616,,,,,total_ipc_sll,table_1b.3.xlsx
+Kochi,Kerala,2024,21516,,,1015.9,96.5,total_ipc_sll,table_1b.3.xlsx
+Kolkata,West Bengal,2022,12213,,,,,total_ipc_sll,table_1b.3.xlsx
+Kolkata,West Bengal,2023,11843,,,,,total_ipc_sll,table_1b.3.xlsx
+Kolkata,West Bengal,2024,13219,,,93.7,95.4,total_ipc_sll,table_1b.3.xlsx
+Kozhikode,Kerala,2022,11589,,,,,total_ipc_sll,table_1b.3.xlsx
+Kozhikode,Kerala,2023,18002,,,,,total_ipc_sll,table_1b.3.xlsx
+Kozhikode,Kerala,2024,15754,,,775.7,95.6,total_ipc_sll,table_1b.3.xlsx
+Lucknow,Uttar Pradesh,2022,19058,,,,,total_ipc_sll,table_1b.3.xlsx
+Lucknow,Uttar Pradesh,2023,29472,,,,,total_ipc_sll,table_1b.3.xlsx
+Lucknow,Uttar Pradesh,2024,31421,,,1083.1,67.4,total_ipc_sll,table_1b.3.xlsx
+Mumbai,Maharashtra,2022,89098,,,,,total_ipc_sll,table_1b.3.xlsx
+Mumbai,Maharashtra,2023,65441,,,,,total_ipc_sll,table_1b.3.xlsx
+Mumbai,Maharashtra,2024,70054,,,380.4,80.8,total_ipc_sll,table_1b.3.xlsx
+Nagpur,Maharashtra,2022,19167,,,,,total_ipc_sll,table_1b.3.xlsx
+Nagpur,Maharashtra,2023,24036,,,,,total_ipc_sll,table_1b.3.xlsx
+Nagpur,Maharashtra,2024,21898,,,876.6,77.9,total_ipc_sll,table_1b.3.xlsx
+Patna,Bihar,2022,21393,,,,,total_ipc_sll,table_1b.3.xlsx
+Patna,Bihar,2023,23530,,,,,total_ipc_sll,table_1b.3.xlsx
+Patna,Bihar,2024,17217,,,841.1,78.3,total_ipc_sll,table_1b.3.xlsx
+Pune,Maharashtra,2022,14173,,,,,total_ipc_sll,table_1b.3.xlsx
+Pune,Maharashtra,2023,17022,,,,,total_ipc_sll,table_1b.3.xlsx
+Pune,Maharashtra,2024,18560,,,367.5,80.9,total_ipc_sll,table_1b.3.xlsx
+Surat,Gujarat,2022,55300,,,,,total_ipc_sll,table_1b.3.xlsx
+Surat,Gujarat,2023,63142,,,,,total_ipc_sll,table_1b.3.xlsx
+Surat,Gujarat,2024,63166,,,1377.7,97.7,total_ipc_sll,table_1b.3.xlsx
+Bengaluru,Karnataka,2022,3924,,,,,women,table_3b.1.xlsx
+Bengaluru,Karnataka,2023,4870,,,,,women,table_3b.1.xlsx
+Bengaluru,Karnataka,2024,4748,,,117.0,70.5,women,table_3b.1.xlsx
+Chennai,Tamil Nadu,2022,736,,,,,women,table_3b.1.xlsx
+Chennai,Tamil Nadu,2023,745,,,,,women,table_3b.1.xlsx
+Chennai,Tamil Nadu,2024,1093,,,25.4,93.9,women,table_3b.1.xlsx
+Coimbatore,Tamil Nadu,2022,138,,,,,women,table_3b.1.xlsx
+Coimbatore,Tamil Nadu,2023,244,,,,,women,table_3b.1.xlsx
+Coimbatore,Tamil Nadu,2024,377,,,35.1,95.6,women,table_3b.1.xlsx
+Delhi City,,2022,14158,,,,,women,table_3b.1.xlsx
+Delhi City,,2023,13366,,,,,women,table_3b.1.xlsx
+Delhi City,,2024,13396,,,176.8,73.6,women,table_3b.1.xlsx
+Ghaziabad,Uttar Pradesh,2022,1063,,,,,women,table_3b.1.xlsx
+Ghaziabad,Uttar Pradesh,2023,904,,,,,women,table_3b.1.xlsx
+Ghaziabad,Uttar Pradesh,2024,1265,,,114.8,65.8,women,table_3b.1.xlsx
+Hyderabad,Telangana,2022,3145,,,,,women,table_3b.1.xlsx
+Hyderabad,Telangana,2023,3822,,,,,women,table_3b.1.xlsx
+Hyderabad,Telangana,2024,3255,,,86.5,76.3,women,table_3b.1.xlsx
+Indore,Madhya Pradesh,2022,1809,,,,,women,table_3b.1.xlsx
+Indore,Madhya Pradesh,2023,1919,,,,,women,table_3b.1.xlsx
+Indore,Madhya Pradesh,2024,1884,,,181.5,76.2,women,table_3b.1.xlsx
+Jaipur,Rajasthan,2022,3479,,,,,women,table_3b.1.xlsx
+Jaipur,Rajasthan,2023,3872,,,,,women,table_3b.1.xlsx
+Jaipur,Rajasthan,2024,2894,,,199.0,55.7,women,table_3b.1.xlsx
+Kanpur,Uttar Pradesh,2022,2099,,,,,women,table_3b.1.xlsx
+Kanpur,Uttar Pradesh,2023,2071,,,,,women,table_3b.1.xlsx
+Kanpur,Uttar Pradesh,2024,1950,,,146.1,84.4,women,table_3b.1.xlsx
+Kochi,Kerala,2022,754,,,,,women,table_3b.1.xlsx
+Kochi,Kerala,2023,783,,,,,women,table_3b.1.xlsx
+Kochi,Kerala,2024,783,,,72.8,91.2,women,table_3b.1.xlsx
+Kolkata,West Bengal,2022,1890,,,,,women,table_3b.1.xlsx
+Kolkata,West Bengal,2023,1746,,,,,women,table_3b.1.xlsx
+Kolkata,West Bengal,2024,1958,,,28.8,98.5,women,table_3b.1.xlsx
+Kozhikode,Kerala,2022,759,,,,,women,table_3b.1.xlsx
+Kozhikode,Kerala,2023,627,,,,,women,table_3b.1.xlsx
+Kozhikode,Kerala,2024,665,,,62.5,92.6,women,table_3b.1.xlsx
+Lucknow,Uttar Pradesh,2022,2231,,,,,women,table_3b.1.xlsx
+Lucknow,Uttar Pradesh,2023,2902,,,,,women,table_3b.1.xlsx
+Lucknow,Uttar Pradesh,2024,2571,,,186.0,83.7,women,table_3b.1.xlsx
+Mumbai,Maharashtra,2022,6176,,,,,women,table_3b.1.xlsx
+Mumbai,Maharashtra,2023,6025,,,,,women,table_3b.1.xlsx
+Mumbai,Maharashtra,2024,6358,,,74.6,81.4,women,table_3b.1.xlsx
+Nagpur,Maharashtra,2022,1259,,,,,women,table_3b.1.xlsx
+Nagpur,Maharashtra,2023,1556,,,,,women,table_3b.1.xlsx
+Nagpur,Maharashtra,2024,1513,,,123.8,78.6,women,table_3b.1.xlsx
+Patna,Bihar,2022,812,,,,,women,table_3b.1.xlsx
+Patna,Bihar,2023,1162,,,,,women,table_3b.1.xlsx
+Patna,Bihar,2024,1239,,,129.2,82.7,women,table_3b.1.xlsx
+Pune,Maharashtra,2022,2074,,,,,women,table_3b.1.xlsx
+Pune,Maharashtra,2023,2550,,,,,women,table_3b.1.xlsx
+Pune,Maharashtra,2024,2631,,,110.1,75.9,women,table_3b.1.xlsx
+Surat,Gujarat,2022,797,,,,,women,table_3b.1.xlsx
+Surat,Gujarat,2023,869,,,,,women,table_3b.1.xlsx
+Surat,Gujarat,2024,945,,,47.9,83.0,women,table_3b.1.xlsx
+Bengaluru,Karnataka,2022,1578,,,,,children,table_4b.1.xlsx
+Bengaluru,Karnataka,2023,1982,,,,,children,table_4b.1.xlsx
+Bengaluru,Karnataka,2024,2026,,,,,children,table_4b.1.xlsx
+Chennai,Tamil Nadu,2022,514,,,,,children,table_4b.1.xlsx
+Chennai,Tamil Nadu,2023,573,,,,,children,table_4b.1.xlsx
+Chennai,Tamil Nadu,2024,719,,,,,children,table_4b.1.xlsx
+Coimbatore,Tamil Nadu,2022,83,,,,,children,table_4b.1.xlsx
+Coimbatore,Tamil Nadu,2023,193,,,,,children,table_4b.1.xlsx
+Coimbatore,Tamil Nadu,2024,243,,,,,children,table_4b.1.xlsx
+Delhi City,,2022,7400,,,,,children,table_4b.1.xlsx
+Delhi City,,2023,7731,,,,,children,table_4b.1.xlsx
+Delhi City,,2024,7662,,,,,children,table_4b.1.xlsx
+Ghaziabad,Uttar Pradesh,2022,189,,,,,children,table_4b.1.xlsx
+Ghaziabad,Uttar Pradesh,2023,208,,,,,children,table_4b.1.xlsx
+Ghaziabad,Uttar Pradesh,2024,713,,,,,children,table_4b.1.xlsx
+Hyderabad,Telangana,2022,645,,,,,children,table_4b.1.xlsx
+Hyderabad,Telangana,2023,692,,,,,children,table_4b.1.xlsx
+Hyderabad,Telangana,2024,920,,,,,children,table_4b.1.xlsx
+Indore,Madhya Pradesh,2022,1082,,,,,children,table_4b.1.xlsx
+Indore,Madhya Pradesh,2023,1236,,,,,children,table_4b.1.xlsx
+Indore,Madhya Pradesh,2024,1157,,,,,children,table_4b.1.xlsx
+Jaipur,Rajasthan,2022,980,,,,,children,table_4b.1.xlsx
+Jaipur,Rajasthan,2023,1099,,,,,children,table_4b.1.xlsx
+Jaipur,Rajasthan,2024,863,,,,,children,table_4b.1.xlsx
+Kanpur,Uttar Pradesh,2022,437,,,,,children,table_4b.1.xlsx
+Kanpur,Uttar Pradesh,2023,426,,,,,children,table_4b.1.xlsx
+Kanpur,Uttar Pradesh,2024,379,,,,,children,table_4b.1.xlsx
+Kochi,Kerala,2022,206,,,,,children,table_4b.1.xlsx
+Kochi,Kerala,2023,230,,,,,children,table_4b.1.xlsx
+Kochi,Kerala,2024,267,,,,,children,table_4b.1.xlsx
+Kolkata,West Bengal,2022,602,,,,,children,table_4b.1.xlsx
+Kolkata,West Bengal,2023,297,,,,,children,table_4b.1.xlsx
+Kolkata,West Bengal,2024,468,,,,,children,table_4b.1.xlsx
+Kozhikode,Kerala,2022,265,,,,,children,table_4b.1.xlsx
+Kozhikode,Kerala,2023,250,,,,,children,table_4b.1.xlsx
+Kozhikode,Kerala,2024,245,,,,,children,table_4b.1.xlsx
+Lucknow,Uttar Pradesh,2022,398,,,,,children,table_4b.1.xlsx
+Lucknow,Uttar Pradesh,2023,844,,,,,children,table_4b.1.xlsx
+Lucknow,Uttar Pradesh,2024,880,,,,,children,table_4b.1.xlsx
+Mumbai,Maharashtra,2022,3178,,,,,children,table_4b.1.xlsx
+Mumbai,Maharashtra,2023,3110,,,,,children,table_4b.1.xlsx
+Mumbai,Maharashtra,2024,3374,,,,,children,table_4b.1.xlsx
+Nagpur,Maharashtra,2022,765,,,,,children,table_4b.1.xlsx
+Nagpur,Maharashtra,2023,802,,,,,children,table_4b.1.xlsx
+Nagpur,Maharashtra,2024,977,,,,,children,table_4b.1.xlsx
+Patna,Bihar,2022,127,,,,,children,table_4b.1.xlsx
+Patna,Bihar,2023,144,,,,,children,table_4b.1.xlsx
+Patna,Bihar,2024,653,,,,,children,table_4b.1.xlsx
+Pune,Maharashtra,2022,732,,,,,children,table_4b.1.xlsx
+Pune,Maharashtra,2023,1234,,,,,children,table_4b.1.xlsx
+Pune,Maharashtra,2024,1330,,,,,children,table_4b.1.xlsx
+Surat,Gujarat,2022,540,,,,,children,table_4b.1.xlsx
+Surat,Gujarat,2023,550,,,,,children,table_4b.1.xlsx
+Surat,Gujarat,2024,559,,,,,children,table_4b.1.xlsx
+Ahmedabad,Gujarat,2022,238,,,,,senior,vol2-6b.1.xlsx
+Ahmedabad,Gujarat,2023,184,,,,,senior,vol2-6b.1.xlsx
+Ahmedabad,Gujarat,2024,166,98.0,68.0,,51.1,senior,vol2-6b.1.xlsx
+Bengaluru,Karnataka,2022,458,,,,,senior,vol2-6b.1.xlsx
+Bengaluru,Karnataka,2023,649,,,,,senior,vol2-6b.1.xlsx
+Bengaluru,Karnataka,2024,660,442.0,218.0,,57.4,senior,vol2-6b.1.xlsx
+Chennai,Tamil Nadu,2022,391,,,,,senior,vol2-6b.1.xlsx
+Chennai,Tamil Nadu,2023,399,,,,,senior,vol2-6b.1.xlsx
+Chennai,Tamil Nadu,2024,251,124.0,127.0,,89.7,senior,vol2-6b.1.xlsx
+Coimbatore,Tamil Nadu,2022,6,,,,,senior,vol2-6b.1.xlsx
+Coimbatore,Tamil Nadu,2023,24,,,,,senior,vol2-6b.1.xlsx
+Coimbatore,Tamil Nadu,2024,49,29.0,20.0,,92.3,senior,vol2-6b.1.xlsx
+Delhi City,,2022,1313,,,,,senior,vol2-6b.1.xlsx
+Delhi City,,2023,1361,,,,,senior,vol2-6b.1.xlsx
+Delhi City,,2024,1267,779.0,488.0,,51.6,senior,vol2-6b.1.xlsx
+Ghaziabad,Uttar Pradesh,2022,0,,,,,senior,vol2-6b.1.xlsx
+Ghaziabad,Uttar Pradesh,2023,0,,,,,senior,vol2-6b.1.xlsx
+Ghaziabad,Uttar Pradesh,2024,0,0.0,0.0,,,senior,vol2-6b.1.xlsx
+Hyderabad,Telangana,2022,331,,,,,senior,vol2-6b.1.xlsx
+Hyderabad,Telangana,2023,292,,,,,senior,vol2-6b.1.xlsx
+Hyderabad,Telangana,2024,1,0.0,1.0,,,senior,vol2-6b.1.xlsx
+Indore,Madhya Pradesh,2022,207,,,,,senior,vol2-6b.1.xlsx
+Indore,Madhya Pradesh,2023,273,,,,,senior,vol2-6b.1.xlsx
+Indore,Madhya Pradesh,2024,113,74.0,39.0,,96.0,senior,vol2-6b.1.xlsx
+Jaipur,Rajasthan,2022,83,,,,,senior,vol2-6b.1.xlsx
+Jaipur,Rajasthan,2023,185,,,,,senior,vol2-6b.1.xlsx
+Jaipur,Rajasthan,2024,72,49.0,23.0,,15.6,senior,vol2-6b.1.xlsx
+Kanpur,Uttar Pradesh,2022,0,,,,,senior,vol2-6b.1.xlsx
+Kanpur,Uttar Pradesh,2023,0,,,,,senior,vol2-6b.1.xlsx
+Kanpur,Uttar Pradesh,2024,0,0.0,0.0,,,senior,vol2-6b.1.xlsx
+Kochi,Kerala,2022,74,,,,,senior,vol2-6b.1.xlsx
+Kochi,Kerala,2023,126,,,,,senior,vol2-6b.1.xlsx
+Kochi,Kerala,2024,263,150.0,113.0,,81.8,senior,vol2-6b.1.xlsx
+Kolkata,West Bengal,2022,2,,,,,senior,vol2-6b.1.xlsx
+Kolkata,West Bengal,2023,6,,,,,senior,vol2-6b.1.xlsx
+Kolkata,West Bengal,2024,3,2.0,1.0,,100.0,senior,vol2-6b.1.xlsx
+Kozhikode,Kerala,2022,52,,,,,senior,vol2-6b.1.xlsx
+Kozhikode,Kerala,2023,93,,,,,senior,vol2-6b.1.xlsx
+Kozhikode,Kerala,2024,103,54.0,49.0,,96.0,senior,vol2-6b.1.xlsx
+Lucknow,Uttar Pradesh,2022,0,,,,,senior,vol2-6b.1.xlsx
+Lucknow,Uttar Pradesh,2023,0,,,,,senior,vol2-6b.1.xlsx
+Lucknow,Uttar Pradesh,2024,0,0.0,0.0,,,senior,vol2-6b.1.xlsx
+Mumbai,Maharashtra,2022,572,,,,,senior,vol2-6b.1.xlsx
+Mumbai,Maharashtra,2023,518,,,,,senior,vol2-6b.1.xlsx
+Mumbai,Maharashtra,2024,791,482.0,309.0,,51.6,senior,vol2-6b.1.xlsx
+Nagpur,Maharashtra,2022,167,,,,,senior,vol2-6b.1.xlsx
+Nagpur,Maharashtra,2023,231,,,,,senior,vol2-6b.1.xlsx
+Nagpur,Maharashtra,2024,204,117.0,87.0,,51.1,senior,vol2-6b.1.xlsx
+Patna,Bihar,2022,0,,,,,senior,vol2-6b.1.xlsx
+Patna,Bihar,2023,0,,,,,senior,vol2-6b.1.xlsx
+Patna,Bihar,2024,0,0.0,0.0,,,senior,vol2-6b.1.xlsx
+Pune,Maharashtra,2022,69,,,,,senior,vol2-6b.1.xlsx
+Pune,Maharashtra,2023,57,,,,,senior,vol2-6b.1.xlsx
+Pune,Maharashtra,2024,151,75.0,76.0,,35.4,senior,vol2-6b.1.xlsx
+Surat,Gujarat,2022,33,,,,,senior,vol2-6b.1.xlsx
+Surat,Gujarat,2023,14,,,,,senior,vol2-6b.1.xlsx
+Surat,Gujarat,2024,13,11.0,2.0,,61.5,senior,vol2-6b.1.xlsx
+Ahmedabad,Gujarat,2022,189,,,,,sc,vol2-7b.1.xlsx
+Ahmedabad,Gujarat,2023,177,,,,,sc,vol2-7b.1.xlsx
+Ahmedabad,Gujarat,2024,126,,,,,sc,vol2-7b.1.xlsx
+Bengaluru,Karnataka,2022,231,,,,,sc,vol2-7b.1.xlsx
+Bengaluru,Karnataka,2023,285,,,,,sc,vol2-7b.1.xlsx
+Bengaluru,Karnataka,2024,280,,,,,sc,vol2-7b.1.xlsx
+Chennai,Tamil Nadu,2022,25,,,,,sc,vol2-7b.1.xlsx
+Chennai,Tamil Nadu,2023,24,,,,,sc,vol2-7b.1.xlsx
+Chennai,Tamil Nadu,2024,34,,,,,sc,vol2-7b.1.xlsx
+Coimbatore,Tamil Nadu,2022,21,,,,,sc,vol2-7b.1.xlsx
+Coimbatore,Tamil Nadu,2023,8,,,,,sc,vol2-7b.1.xlsx
+Coimbatore,Tamil Nadu,2024,18,,,,,sc,vol2-7b.1.xlsx
+Delhi City,,2022,129,,,,,sc,vol2-7b.1.xlsx
+Delhi City,,2023,126,,,,,sc,vol2-7b.1.xlsx
+Delhi City,,2024,133,,,,,sc,vol2-7b.1.xlsx
+Ghaziabad,Uttar Pradesh,2022,72,,,,,sc,vol2-7b.1.xlsx
+Ghaziabad,Uttar Pradesh,2023,63,,,,,sc,vol2-7b.1.xlsx
+Ghaziabad,Uttar Pradesh,2024,52,,,,,sc,vol2-7b.1.xlsx
+Hyderabad,Telangana,2022,113,,,,,sc,vol2-7b.1.xlsx
+Hyderabad,Telangana,2023,134,,,,,sc,vol2-7b.1.xlsx
+Hyderabad,Telangana,2024,153,,,,,sc,vol2-7b.1.xlsx
+Indore,Madhya Pradesh,2022,47,,,,,sc,vol2-7b.1.xlsx
+Indore,Madhya Pradesh,2023,46,,,,,sc,vol2-7b.1.xlsx
+Indore,Madhya Pradesh,2024,28,,,,,sc,vol2-7b.1.xlsx
+Jaipur,Rajasthan,2022,381,,,,,sc,vol2-7b.1.xlsx
+Jaipur,Rajasthan,2023,489,,,,,sc,vol2-7b.1.xlsx
+Jaipur,Rajasthan,2024,396,,,,,sc,vol2-7b.1.xlsx
+Kanpur,Uttar Pradesh,2022,376,,,,,sc,vol2-7b.1.xlsx
+Kanpur,Uttar Pradesh,2023,263,,,,,sc,vol2-7b.1.xlsx
+Kanpur,Uttar Pradesh,2024,271,,,,,sc,vol2-7b.1.xlsx
+Kochi,Kerala,2022,22,,,,,sc,vol2-7b.1.xlsx
+Kochi,Kerala,2023,43,,,,,sc,vol2-7b.1.xlsx
+Kochi,Kerala,2024,42,,,,,sc,vol2-7b.1.xlsx
+Kolkata,West Bengal,2022,10,,,,,sc,vol2-7b.1.xlsx
+Kolkata,West Bengal,2023,10,,,,,sc,vol2-7b.1.xlsx
+Kolkata,West Bengal,2024,7,,,,,sc,vol2-7b.1.xlsx
+Kozhikode,Kerala,2022,27,,,,,sc,vol2-7b.1.xlsx
+Kozhikode,Kerala,2023,30,,,,,sc,vol2-7b.1.xlsx
+Kozhikode,Kerala,2024,23,,,,,sc,vol2-7b.1.xlsx
+Lucknow,Uttar Pradesh,2022,420,,,,,sc,vol2-7b.1.xlsx
+Lucknow,Uttar Pradesh,2023,517,,,,,sc,vol2-7b.1.xlsx
+Lucknow,Uttar Pradesh,2024,490,,,,,sc,vol2-7b.1.xlsx
+Mumbai,Maharashtra,2022,58,,,,,sc,vol2-7b.1.xlsx
+Mumbai,Maharashtra,2023,52,,,,,sc,vol2-7b.1.xlsx
+Mumbai,Maharashtra,2024,62,,,,,sc,vol2-7b.1.xlsx
+Nagpur,Maharashtra,2022,35,,,,,sc,vol2-7b.1.xlsx
+Nagpur,Maharashtra,2023,40,,,,,sc,vol2-7b.1.xlsx
+Nagpur,Maharashtra,2024,66,,,,,sc,vol2-7b.1.xlsx
+Patna,Bihar,2022,96,,,,,sc,vol2-7b.1.xlsx
+Patna,Bihar,2023,105,,,,,sc,vol2-7b.1.xlsx
+Patna,Bihar,2024,253,,,,,sc,vol2-7b.1.xlsx
+Pune,Maharashtra,2022,61,,,,,sc,vol2-7b.1.xlsx
+Pune,Maharashtra,2023,70,,,,,sc,vol2-7b.1.xlsx
+Pune,Maharashtra,2024,121,,,,,sc,vol2-7b.1.xlsx
+Surat,Gujarat,2022,34,,,,,sc,vol2-7b.1.xlsx
+Surat,Gujarat,2023,38,,,,,sc,vol2-7b.1.xlsx
+Surat,Gujarat,2024,51,,,,,sc,vol2-7b.1.xlsx
+Ahmedabad,Gujarat,2022,18,,,,,st,vol2-7d.1.xlsx
+Ahmedabad,Gujarat,2023,18,,,,,st,vol2-7d.1.xlsx
+Ahmedabad,Gujarat,2024,12,,,,,st,vol2-7d.1.xlsx
+Bengaluru,Karnataka,2022,16,,,,,st,vol2-7d.1.xlsx
+Bengaluru,Karnataka,2023,16,,,,,st,vol2-7d.1.xlsx
+Bengaluru,Karnataka,2024,23,,,,,st,vol2-7d.1.xlsx
+Chennai,Tamil Nadu,2022,0,,,,,st,vol2-7d.1.xlsx
+Chennai,Tamil Nadu,2023,0,,,,,st,vol2-7d.1.xlsx
+Chennai,Tamil Nadu,2024,0,,,,,st,vol2-7d.1.xlsx
+Coimbatore,Tamil Nadu,2022,1,,,,,st,vol2-7d.1.xlsx
+Coimbatore,Tamil Nadu,2023,0,,,,,st,vol2-7d.1.xlsx
+Coimbatore,Tamil Nadu,2024,0,,,,,st,vol2-7d.1.xlsx
+Delhi City,,2022,0,,,,,st,vol2-7d.1.xlsx
+Delhi City,,2023,2,,,,,st,vol2-7d.1.xlsx
+Delhi City,,2024,4,,,,,st,vol2-7d.1.xlsx
+Ghaziabad,Uttar Pradesh,2022,0,,,,,st,vol2-7d.1.xlsx
+Ghaziabad,Uttar Pradesh,2023,0,,,,,st,vol2-7d.1.xlsx
+Ghaziabad,Uttar Pradesh,2024,0,,,,,st,vol2-7d.1.xlsx
+Hyderabad,Telangana,2022,31,,,,,st,vol2-7d.1.xlsx
+Hyderabad,Telangana,2023,30,,,,,st,vol2-7d.1.xlsx
+Hyderabad,Telangana,2024,30,,,,,st,vol2-7d.1.xlsx
+Indore,Madhya Pradesh,2022,9,,,,,st,vol2-7d.1.xlsx
+Indore,Madhya Pradesh,2023,16,,,,,st,vol2-7d.1.xlsx
+Indore,Madhya Pradesh,2024,7,,,,,st,vol2-7d.1.xlsx
+Jaipur,Rajasthan,2022,214,,,,,st,vol2-7d.1.xlsx
+Jaipur,Rajasthan,2023,228,,,,,st,vol2-7d.1.xlsx
+Jaipur,Rajasthan,2024,228,,,,,st,vol2-7d.1.xlsx
+Kanpur,Uttar Pradesh,2022,0,,,,,st,vol2-7d.1.xlsx
+Kanpur,Uttar Pradesh,2023,0,,,,,st,vol2-7d.1.xlsx
+Kanpur,Uttar Pradesh,2024,0,,,,,st,vol2-7d.1.xlsx
+Kochi,Kerala,2022,5,,,,,st,vol2-7d.1.xlsx
+Kochi,Kerala,2023,3,,,,,st,vol2-7d.1.xlsx
+Kochi,Kerala,2024,8,,,,,st,vol2-7d.1.xlsx
+Kolkata,West Bengal,2022,2,,,,,st,vol2-7d.1.xlsx
+Kolkata,West Bengal,2023,2,,,,,st,vol2-7d.1.xlsx
+Kolkata,West Bengal,2024,0,,,,,st,vol2-7d.1.xlsx
+Kozhikode,Kerala,2022,3,,,,,st,vol2-7d.1.xlsx
+Kozhikode,Kerala,2023,2,,,,,st,vol2-7d.1.xlsx
+Kozhikode,Kerala,2024,2,,,,,st,vol2-7d.1.xlsx
+Lucknow,Uttar Pradesh,2022,0,,,,,st,vol2-7d.1.xlsx
+Lucknow,Uttar Pradesh,2023,0,,,,,st,vol2-7d.1.xlsx
+Lucknow,Uttar Pradesh,2024,0,,,,,st,vol2-7d.1.xlsx
+Mumbai,Maharashtra,2022,2,,,,,st,vol2-7d.1.xlsx
+Mumbai,Maharashtra,2023,5,,,,,st,vol2-7d.1.xlsx
+Mumbai,Maharashtra,2024,7,,,,,st,vol2-7d.1.xlsx
+Nagpur,Maharashtra,2022,12,,,,,st,vol2-7d.1.xlsx
+Nagpur,Maharashtra,2023,6,,,,,st,vol2-7d.1.xlsx
+Nagpur,Maharashtra,2024,15,,,,,st,vol2-7d.1.xlsx
+Patna,Bihar,2022,0,,,,,st,vol2-7d.1.xlsx
+Patna,Bihar,2023,0,,,,,st,vol2-7d.1.xlsx
+Patna,Bihar,2024,0,,,,,st,vol2-7d.1.xlsx
+Pune,Maharashtra,2022,0,,,,,st,vol2-7d.1.xlsx
+Pune,Maharashtra,2023,3,,,,,st,vol2-7d.1.xlsx
+Pune,Maharashtra,2024,7,,,,,st,vol2-7d.1.xlsx
+Surat,Gujarat,2022,16,,,,,st,vol2-7d.1.xlsx
+Surat,Gujarat,2023,18,,,,,st,vol2-7d.1.xlsx
+Surat,Gujarat,2024,17,,,,,st,vol2-7d.1.xlsx
+Ahmedabad,Gujarat,2022,591,,,,,economic,vol2-8b.1.xlsx
+Ahmedabad,Gujarat,2023,646,,,,,economic,vol2-8b.1.xlsx
+Ahmedabad,Gujarat,2024,806,,,12.7,64.3,economic,vol2-8b.1.xlsx
+Bengaluru,Karnataka,2022,3245,,,,,economic,vol2-8b.1.xlsx
+Bengaluru,Karnataka,2023,3858,,,,,economic,vol2-8b.1.xlsx
+Bengaluru,Karnataka,2024,3477,,,40.9,49.1,economic,vol2-8b.1.xlsx
+Chennai,Tamil Nadu,2022,1038,,,,,economic,vol2-8b.1.xlsx
+Chennai,Tamil Nadu,2023,2155,,,,,economic,vol2-8b.1.xlsx
+Chennai,Tamil Nadu,2024,2436,,,28.0,42.5,economic,vol2-8b.1.xlsx
+Coimbatore,Tamil Nadu,2022,261,,,,,economic,vol2-8b.1.xlsx
+Coimbatore,Tamil Nadu,2023,499,,,,,economic,vol2-8b.1.xlsx
+Coimbatore,Tamil Nadu,2024,660,,,30.7,59.8,economic,vol2-8b.1.xlsx
+Delhi City,,2022,5007,,,,,economic,vol2-8b.1.xlsx
+Delhi City,,2023,4580,,,,,economic,vol2-8b.1.xlsx
+Delhi City,,2024,4524,,,27.7,58.1,economic,vol2-8b.1.xlsx
+Ghaziabad,Uttar Pradesh,2022,1024,,,,,economic,vol2-8b.1.xlsx
+Ghaziabad,Uttar Pradesh,2023,1004,,,,,economic,vol2-8b.1.xlsx
+Ghaziabad,Uttar Pradesh,2024,775,,,32.9,59.7,economic,vol2-8b.1.xlsx
+Hyderabad,Telangana,2022,6015,,,,,economic,vol2-8b.1.xlsx
+Hyderabad,Telangana,2023,5728,,,,,economic,vol2-8b.1.xlsx
+Hyderabad,Telangana,2024,5839,,,75.4,30.6,economic,vol2-8b.1.xlsx
+Indore,Madhya Pradesh,2022,562,,,,,economic,vol2-8b.1.xlsx
+Indore,Madhya Pradesh,2023,553,,,,,economic,vol2-8b.1.xlsx
+Indore,Madhya Pradesh,2024,295,,,13.6,74.2,economic,vol2-8b.1.xlsx
+Jaipur,Rajasthan,2022,5332,,,,,economic,vol2-8b.1.xlsx
+Jaipur,Rajasthan,2023,5304,,,,,economic,vol2-8b.1.xlsx
+Jaipur,Rajasthan,2024,5471,,,178.0,17.4,economic,vol2-8b.1.xlsx
+Kanpur,Uttar Pradesh,2022,595,,,,,economic,vol2-8b.1.xlsx
+Kanpur,Uttar Pradesh,2023,629,,,,,economic,vol2-8b.1.xlsx
+Kanpur,Uttar Pradesh,2024,463,,,15.9,75.4,economic,vol2-8b.1.xlsx
+Kochi,Kerala,2022,445,,,,,economic,vol2-8b.1.xlsx
+Kochi,Kerala,2023,869,,,,,economic,vol2-8b.1.xlsx
+Kochi,Kerala,2024,1050,,,49.6,65.0,economic,vol2-8b.1.xlsx
+Kolkata,West Bengal,2022,2013,,,,,economic,vol2-8b.1.xlsx
+Kolkata,West Bengal,2023,1544,,,,,economic,vol2-8b.1.xlsx
+Kolkata,West Bengal,2024,1825,,,12.9,92.4,economic,vol2-8b.1.xlsx
+Kozhikode,Kerala,2022,191,,,,,economic,vol2-8b.1.xlsx
+Kozhikode,Kerala,2023,422,,,,,economic,vol2-8b.1.xlsx
+Kozhikode,Kerala,2024,469,,,23.1,42.3,economic,vol2-8b.1.xlsx
+Lucknow,Uttar Pradesh,2022,3702,,,,,economic,vol2-8b.1.xlsx
+Lucknow,Uttar Pradesh,2023,2446,,,,,economic,vol2-8b.1.xlsx
+Lucknow,Uttar Pradesh,2024,1732,,,59.7,50.8,economic,vol2-8b.1.xlsx
+Mumbai,Maharashtra,2022,6960,,,,,economic,vol2-8b.1.xlsx
+Mumbai,Maharashtra,2023,6476,,,,,economic,vol2-8b.1.xlsx
+Mumbai,Maharashtra,2024,7771,,,42.2,48.2,economic,vol2-8b.1.xlsx
+Nagpur,Maharashtra,2022,550,,,,,economic,vol2-8b.1.xlsx
+Nagpur,Maharashtra,2023,697,,,,,economic,vol2-8b.1.xlsx
+Nagpur,Maharashtra,2024,748,,,29.9,31.5,economic,vol2-8b.1.xlsx
+Patna,Bihar,2022,1532,,,,,economic,vol2-8b.1.xlsx
+Patna,Bihar,2023,1861,,,,,economic,vol2-8b.1.xlsx
+Patna,Bihar,2024,1402,,,68.5,92.2,economic,vol2-8b.1.xlsx
+Pune,Maharashtra,2022,1023,,,,,economic,vol2-8b.1.xlsx
+Pune,Maharashtra,2023,1207,,,,,economic,vol2-8b.1.xlsx
+Pune,Maharashtra,2024,2125,,,42.1,56.1,economic,vol2-8b.1.xlsx
+Surat,Gujarat,2022,674,,,,,economic,vol2-8b.1.xlsx
+Surat,Gujarat,2023,742,,,,,economic,vol2-8b.1.xlsx
+Surat,Gujarat,2024,879,,,19.2,78.4,economic,vol2-8b.1.xlsx
+Ahmedabad,Gujarat,2022,261,,,,,cyber,vol2-9b.1.xlsx
+Ahmedabad,Gujarat,2023,246,,,,,cyber,vol2-9b.1.xlsx
+Ahmedabad,Gujarat,2024,396,,,6.2,48.6,cyber,vol2-9b.1.xlsx
+Bengaluru,Karnataka,2022,9940,,,,,cyber,vol2-9b.1.xlsx
+Bengaluru,Karnataka,2023,17631,,,,,cyber,vol2-9b.1.xlsx
+Bengaluru,Karnataka,2024,17561,,,206.6,24.2,cyber,vol2-9b.1.xlsx
+Chennai,Tamil Nadu,2022,271,,,,,cyber,vol2-9b.1.xlsx
+Chennai,Tamil Nadu,2023,1352,,,,,cyber,vol2-9b.1.xlsx
+Chennai,Tamil Nadu,2024,1882,,,21.6,41.2,cyber,vol2-9b.1.xlsx
+Coimbatore,Tamil Nadu,2022,68,,,,,cyber,vol2-9b.1.xlsx
+Coimbatore,Tamil Nadu,2023,207,,,,,cyber,vol2-9b.1.xlsx
+Coimbatore,Tamil Nadu,2024,300,,,13.9,17.9,cyber,vol2-9b.1.xlsx
+Delhi City,,2022,685,,,,,cyber,vol2-9b.1.xlsx
+Delhi City,,2023,407,,,,,cyber,vol2-9b.1.xlsx
+Delhi City,,2024,404,,,2.5,77.8,cyber,vol2-9b.1.xlsx
+Ghaziabad,Uttar Pradesh,2022,626,,,,,cyber,vol2-9b.1.xlsx
+Ghaziabad,Uttar Pradesh,2023,880,,,,,cyber,vol2-9b.1.xlsx
+Ghaziabad,Uttar Pradesh,2024,479,,,20.3,21.3,cyber,vol2-9b.1.xlsx
+Hyderabad,Telangana,2022,4436,,,,,cyber,vol2-9b.1.xlsx
+Hyderabad,Telangana,2023,4855,,,,,cyber,vol2-9b.1.xlsx
+Hyderabad,Telangana,2024,4009,,,51.7,12.9,cyber,vol2-9b.1.xlsx
+Indore,Madhya Pradesh,2022,47,,,,,cyber,vol2-9b.1.xlsx
+Indore,Madhya Pradesh,2023,86,,,,,cyber,vol2-9b.1.xlsx
+Indore,Madhya Pradesh,2024,57,,,2.6,82.4,cyber,vol2-9b.1.xlsx
+Jaipur,Rajasthan,2022,310,,,,,cyber,vol2-9b.1.xlsx
+Jaipur,Rajasthan,2023,551,,,,,cyber,vol2-9b.1.xlsx
+Jaipur,Rajasthan,2024,197,,,6.4,33.2,cyber,vol2-9b.1.xlsx
+Kanpur,Uttar Pradesh,2022,541,,,,,cyber,vol2-9b.1.xlsx
+Kanpur,Uttar Pradesh,2023,481,,,,,cyber,vol2-9b.1.xlsx
+Kanpur,Uttar Pradesh,2024,449,,,15.4,84.6,cyber,vol2-9b.1.xlsx
+Kochi,Kerala,2022,96,,,,,cyber,vol2-9b.1.xlsx
+Kochi,Kerala,2023,112,,,,,cyber,vol2-9b.1.xlsx
+Kochi,Kerala,2024,201,,,9.5,55.4,cyber,vol2-9b.1.xlsx
+Kolkata,West Bengal,2022,75,,,,,cyber,vol2-9b.1.xlsx
+Kolkata,West Bengal,2023,21,,,,,cyber,vol2-9b.1.xlsx
+Kolkata,West Bengal,2024,21,,,0.1,95.6,cyber,vol2-9b.1.xlsx
+Kozhikode,Kerala,2022,45,,,,,cyber,vol2-9b.1.xlsx
+Kozhikode,Kerala,2023,114,,,,,cyber,vol2-9b.1.xlsx
+Kozhikode,Kerala,2024,106,,,5.2,39.5,cyber,vol2-9b.1.xlsx
+Lucknow,Uttar Pradesh,2022,1134,,,,,cyber,vol2-9b.1.xlsx
+Lucknow,Uttar Pradesh,2023,1453,,,,,cyber,vol2-9b.1.xlsx
+Lucknow,Uttar Pradesh,2024,1292,,,44.5,22.8,cyber,vol2-9b.1.xlsx
+Mumbai,Maharashtra,2022,4724,,,,,cyber,vol2-9b.1.xlsx
+Mumbai,Maharashtra,2023,4131,,,,,cyber,vol2-9b.1.xlsx
+Mumbai,Maharashtra,2024,4939,,,26.8,30.8,cyber,vol2-9b.1.xlsx
+Nagpur,Maharashtra,2022,211,,,,,cyber,vol2-9b.1.xlsx
+Nagpur,Maharashtra,2023,309,,,,,cyber,vol2-9b.1.xlsx
+Nagpur,Maharashtra,2024,253,,,10.1,79.6,cyber,vol2-9b.1.xlsx
+Patna,Bihar,2022,222,,,,,cyber,vol2-9b.1.xlsx
+Patna,Bihar,2023,235,,,,,cyber,vol2-9b.1.xlsx
+Patna,Bihar,2024,642,,,31.4,100.0,cyber,vol2-9b.1.xlsx
+Pune,Maharashtra,2022,357,,,,,cyber,vol2-9b.1.xlsx
+Pune,Maharashtra,2023,487,,,,,cyber,vol2-9b.1.xlsx
+Pune,Maharashtra,2024,1504,,,29.8,26.6,cyber,vol2-9b.1.xlsx
+Surat,Gujarat,2022,371,,,,,cyber,vol2-9b.1.xlsx
+Surat,Gujarat,2023,397,,,,,cyber,vol2-9b.1.xlsx
+Surat,Gujarat,2024,266,,,5.8,66.7,cyber,vol2-9b.1.xlsx

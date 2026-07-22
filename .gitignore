@@ -1,0 +1,49 @@
+# ── Secrets — NEVER commit ─────────────────────────────────────
+.env
+*.env
+!.env.example
+.env.*
+!.env.example
+# Catalyst app config may hold API keys in env_variables — keep out of git
+app-config.json
+dist_appsail/app-config.json
+# Catalyst CLI project link (contains project/org IDs)
+.catalystrc
+.catalyst/
+# Common secret formats
+*.pem
+*.key
+credentials.json
+secrets.json
+*_secret*
+*.local
+
+# ── Deploy bundle (regenerate: python scripts/build_appsail.py) ─
+dist_appsail/
+
+# ── Raw source data, 16+ GB (already processed into databases) ──
+cases/
+FIR_Details_Data.csv/
+data/archive/
+*.xlsx
+
+# ── Heavy / user-generated databases ────────────────────────────
+data/ksp_fir.duckdb
+data/chats.db
+data/audit.db
+data/case_docs.db
+data/scale_test_chats.db
+data/ksp_crime.db
+data/criminal.db
+data/cases.db
+
+# Small demo DBs in data/unified/ and case_knowledge.db stay committed
+# so the repo is runnable after: python scripts/build_appsail.py
+
+# ── Python / tooling ────────────────────────────────────────────
+__pycache__/
+*.pyc
+.venv/
+venv/
+node_modules/
+.pytest_cache/

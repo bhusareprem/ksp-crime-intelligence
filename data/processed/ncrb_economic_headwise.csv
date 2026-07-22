@@ -1,0 +1,61 @@
+city,state,year,crime_head,cases,source_table
+Ahmedabad,Gujarat,2024,Criminal Breach of Trust,135,vol2-8b.2.xlsx
+Ahmedabad,Gujarat,2024,Counterfeiting,10,vol2-8b.2.xlsx
+Ahmedabad,Gujarat,2024,"Forgery, Cheating & Fraud",661,vol2-8b.2.xlsx
+Bengaluru,Karnataka,2024,Criminal Breach of Trust,217,vol2-8b.2.xlsx
+Bengaluru,Karnataka,2024,Counterfeiting,11,vol2-8b.2.xlsx
+Bengaluru,Karnataka,2024,"Forgery, Cheating & Fraud",3249,vol2-8b.2.xlsx
+Chennai,Tamil Nadu,2024,Criminal Breach of Trust,11,vol2-8b.2.xlsx
+Chennai,Tamil Nadu,2024,Counterfeiting,2,vol2-8b.2.xlsx
+Chennai,Tamil Nadu,2024,"Forgery, Cheating & Fraud",2423,vol2-8b.2.xlsx
+Coimbatore,Tamil Nadu,2024,Criminal Breach of Trust,2,vol2-8b.2.xlsx
+Coimbatore,Tamil Nadu,2024,Counterfeiting,2,vol2-8b.2.xlsx
+Coimbatore,Tamil Nadu,2024,"Forgery, Cheating & Fraud",656,vol2-8b.2.xlsx
+Delhi City,,2024,Criminal Breach of Trust,254,vol2-8b.2.xlsx
+Delhi City,,2024,Counterfeiting,33,vol2-8b.2.xlsx
+Delhi City,,2024,"Forgery, Cheating & Fraud",4237,vol2-8b.2.xlsx
+Ghaziabad,Uttar Pradesh,2024,Criminal Breach of Trust,249,vol2-8b.2.xlsx
+Ghaziabad,Uttar Pradesh,2024,Counterfeiting,7,vol2-8b.2.xlsx
+Ghaziabad,Uttar Pradesh,2024,"Forgery, Cheating & Fraud",519,vol2-8b.2.xlsx
+Hyderabad,Telangana,2024,Criminal Breach of Trust,155,vol2-8b.2.xlsx
+Hyderabad,Telangana,2024,Counterfeiting,5,vol2-8b.2.xlsx
+Hyderabad,Telangana,2024,"Forgery, Cheating & Fraud",5679,vol2-8b.2.xlsx
+Indore,Madhya Pradesh,2024,Criminal Breach of Trust,46,vol2-8b.2.xlsx
+Indore,Madhya Pradesh,2024,Counterfeiting,1,vol2-8b.2.xlsx
+Indore,Madhya Pradesh,2024,"Forgery, Cheating & Fraud",248,vol2-8b.2.xlsx
+Jaipur,Rajasthan,2024,Criminal Breach of Trust,199,vol2-8b.2.xlsx
+Jaipur,Rajasthan,2024,Counterfeiting,4,vol2-8b.2.xlsx
+Jaipur,Rajasthan,2024,"Forgery, Cheating & Fraud",5268,vol2-8b.2.xlsx
+Kanpur,Uttar Pradesh,2024,Criminal Breach of Trust,114,vol2-8b.2.xlsx
+Kanpur,Uttar Pradesh,2024,Counterfeiting,4,vol2-8b.2.xlsx
+Kanpur,Uttar Pradesh,2024,"Forgery, Cheating & Fraud",345,vol2-8b.2.xlsx
+Kochi,Kerala,2024,Criminal Breach of Trust,25,vol2-8b.2.xlsx
+Kochi,Kerala,2024,Counterfeiting,0,vol2-8b.2.xlsx
+Kochi,Kerala,2024,"Forgery, Cheating & Fraud",1025,vol2-8b.2.xlsx
+Kolkata,West Bengal,2024,Criminal Breach of Trust,227,vol2-8b.2.xlsx
+Kolkata,West Bengal,2024,Counterfeiting,12,vol2-8b.2.xlsx
+Kolkata,West Bengal,2024,"Forgery, Cheating & Fraud",1586,vol2-8b.2.xlsx
+Kozhikode,Kerala,2024,Criminal Breach of Trust,13,vol2-8b.2.xlsx
+Kozhikode,Kerala,2024,Counterfeiting,6,vol2-8b.2.xlsx
+Kozhikode,Kerala,2024,"Forgery, Cheating & Fraud",450,vol2-8b.2.xlsx
+Lucknow,Uttar Pradesh,2024,Criminal Breach of Trust,482,vol2-8b.2.xlsx
+Lucknow,Uttar Pradesh,2024,Counterfeiting,0,vol2-8b.2.xlsx
+Lucknow,Uttar Pradesh,2024,"Forgery, Cheating & Fraud",1250,vol2-8b.2.xlsx
+Mumbai,Maharashtra,2024,Criminal Breach of Trust,1395,vol2-8b.2.xlsx
+Mumbai,Maharashtra,2024,Counterfeiting,10,vol2-8b.2.xlsx
+Mumbai,Maharashtra,2024,"Forgery, Cheating & Fraud",6366,vol2-8b.2.xlsx
+Nagpur,Maharashtra,2024,Criminal Breach of Trust,48,vol2-8b.2.xlsx
+Nagpur,Maharashtra,2024,Counterfeiting,3,vol2-8b.2.xlsx
+Nagpur,Maharashtra,2024,"Forgery, Cheating & Fraud",697,vol2-8b.2.xlsx
+Patna,Bihar,2024,Criminal Breach of Trust,0,vol2-8b.2.xlsx
+Patna,Bihar,2024,Counterfeiting,0,vol2-8b.2.xlsx
+Patna,Bihar,2024,"Forgery, Cheating & Fraud",1402,vol2-8b.2.xlsx
+Pune,Maharashtra,2024,Criminal Breach of Trust,93,vol2-8b.2.xlsx
+Pune,Maharashtra,2024,Counterfeiting,2,vol2-8b.2.xlsx
+Pune,Maharashtra,2024,"Forgery, Cheating & Fraud",2030,vol2-8b.2.xlsx
+Surat,Gujarat,2024,Criminal Breach of Trust,312,vol2-8b.2.xlsx
+Surat,Gujarat,2024,Counterfeiting,5,vol2-8b.2.xlsx
+Surat,Gujarat,2024,"Forgery, Cheating & Fraud",562,vol2-8b.2.xlsx
+TOTAL CITIES,,2024,Criminal Breach of Trust,3977,vol2-8b.2.xlsx
+TOTAL CITIES,,2024,Counterfeiting,117,vol2-8b.2.xlsx
+TOTAL CITIES,,2024,"Forgery, Cheating & Fraud",38653,vol2-8b.2.xlsx

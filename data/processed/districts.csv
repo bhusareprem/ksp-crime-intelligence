@@ -1,0 +1,32 @@
+district_id,name,name_kn,latitude,longitude,population,zone
+1,Bengaluru Urban,ಬೆಂಗಳೂರು ನಗರ,12.9716,77.5946,9620551,South
+2,Bengaluru Rural,ಬೆಂಗಳೂರು ಗ್ರಾಮ,13.2257,77.575,990922,South
+3,Mysuru,ಮೈಸೂರು,12.2958,76.6394,1281769,South
+4,Belagavi,ಬೆಳಗಾವಿ,15.8497,74.4977,2036482,North
+5,Kalaburagi,ಕಲಬುರಗಿ,17.3297,76.8343,2564892,North
+6,Dakshina Kannada,ದಕ್ಷಿಣ ಕನ್ನಡ,12.9141,74.856,2089649,Coastal
+7,Udupi,ಉಡುಪಿ,13.3409,74.7421,1177361,Coastal
+8,Hassan,ಹಾಸನ,13.0072,76.0962,1776421,South
+9,Shivamogga,ಶಿವಮೊಗ್ಗ,13.9299,75.5681,1752753,Malnad
+10,Tumakuru,ತುಮಕೂರು,13.3409,77.101,2678980,South
+11,Ballari,ಬಳ್ಳಾರಿ,15.1394,76.9214,2452595,North
+12,Vijayapura,ವಿಜಯಪುರ,16.8302,75.71,2177331,North
+13,Raichur,ರಾಯಚೂರು,16.2076,77.3463,1928812,North
+14,Dharwad,ಧಾರವಾಡ,15.4589,75.0078,1847023,North
+15,Gadag,ಗadag,15.4167,75.6167,1067179,North
+16,Haveri,ಹaveri,14.7951,75.399,1598506,North
+17,Chitradurga,ಚitradurga,14.2226,76.398,1659456,South
+18,Chikkamagaluru,ಚikkamagaluru,13.3161,75.772,1137961,Malnad
+19,Kodagu,ಕodagu,12.4244,75.7382,554519,Malnad
+20,Mandya,ಮandya,12.5218,76.8951,1805769,South
+21,Kolar,ಕolar,13.136,78.1292,1536401,South
+22,Chikkaballapur,ಚikkaballapur,13.4355,77.7315,1255104,South
+23,Ramanagara,ರamanagara,12.7235,77.2807,1082739,South
+24,Yadgir,ಯadgir,16.7704,77.1376,1174272,North
+25,Bidar,ಬidar,17.9133,77.53,1703300,North
+26,Koppal,ಕoppal,15.35,76.15,1388727,North
+27,Bagalkot,ಬagalkot,16.1864,75.696,1886334,North
+28,Uttara Kannada,ಉttara Kannada,14.7936,74.6869,1437169,Coastal
+29,Davanagere,ದavanagere,14.4644,75.9218,1945497,Malnad
+30,Vijayanagara,ವijayanagara,15.335,76.46,1356714,North
+31,Chamarajanagar,ಚamarajanagar,11.9261,76.9437,1020962,South

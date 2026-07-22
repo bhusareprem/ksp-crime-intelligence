@@ -1,0 +1,36 @@
+crime_head_id,name,category,ipc_section,severity
+1,Theft,IPC,379,medium
+2,House Breaking & Theft,IPC,457,high
+3,Robbery,IPC,392,high
+4,Dacoity,IPC,395,critical
+5,Murder,IPC,302,critical
+6,Attempt to Murder,IPC,307,critical
+7,Culpable Homicide,IPC,304,critical
+8,Rape,IPC,376,critical
+9,Assault on Women,IPC,354,high
+10,Sexual Harassment,IPC,354A,high
+11,Kidnapping & Abduction,IPC,363,high
+12,Cheating & Fraud,IPC,420,medium
+13,Criminal Breach of Trust,IPC,406,medium
+14,Forgery,IPC,465,medium
+15,Counterfeiting,IPC,489A,high
+16,Cyber Crime - Online Fraud,BNS,318,high
+17,Cyber Crime - Identity Theft,BNS,319,high
+18,Cyber Crime - Hacking,BNS,320,high
+19,Cyber Crime - Phishing,BNS,321,medium
+20,Dowry Death,SLL,304B,critical
+21,Dowry Prohibition Act,SLL,DP Act,high
+22,POCSO Act,SLL,POCSO,critical
+23,Domestic Violence,SLL,DV Act,high
+24,NDPS Act,SLL,NDPS,high
+25,Arms Act,SLL,Arms Act,high
+26,Riots,IPC,147,high
+27,Hurt/Grievous Hurt,IPC,325,medium
+28,Criminal Trespass,IPC,447,low
+29,Mischief,IPC,425,low
+30,Extortion,IPC,384,high
+31,Criminal Intimidation,IPC,506,medium
+32,Missing Person,IPC,N/A,medium
+33,Road Accident Death,IPC,304A,high
+34,Immoral Traffic Act,SLL,ITPA,high
+35,SC/ST Atrocities Act,SLL,SC/ST Act,high
