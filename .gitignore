@@ -41,7 +41,7 @@ data/cases.db
 # so the repo is runnable after: python scripts/build_appsail.py
 
 # ── Editor / tooling config (local only) ────────────────────────
-.claude/
+
 .vscode/
 .idea/
 
