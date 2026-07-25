@@ -406,13 +406,22 @@ def behavioral_profile():
             LEFT JOIN ReligionMaster rm ON a.ReligionID = rm.ReligionID
             GROUP BY rm.ReligionName ORDER BY count DESC
         """)
+        # Day-of-week crime pattern — DAYNAME() returns 'Sunday'..'Saturday',
+        # which the frontend chart matches by name.
+        day_rows = _fir("""
+            SELECT DAYNAME(CrimeRegisteredDate) AS day_of_week, COUNT(*) AS count
+            FROM CaseMaster
+            WHERE CrimeRegisteredDate IS NOT NULL
+            GROUP BY DAYNAME(CrimeRegisteredDate)
+        """)
     except Exception as e:
-        return {"summary": {}, "by_occupation": [], "by_religion": [], "error": str(e)}
+        return {"summary": {}, "by_occupation": [], "by_religion": [], "by_day": [], "error": str(e)}
 
     return {
         "summary": rows[0] if rows else {},
         "by_occupation": occ_rows,
         "by_religion": religion_rows,
+        "by_day": day_rows,
     }
 
 

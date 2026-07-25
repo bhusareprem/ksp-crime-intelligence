@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Microphone Diagnostic — KSP Crime AI</title>
+<style>
+  :root { --bg:#0f172a; --card:#1e293b; --line:#334155; --txt:#e2e8f0; --muted:#94a3b8;
+          --accent:#3b82f6; --green:#22c55e; --red:#ef4444; --amber:#f59e0b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt);
+         font:15px/1.5 system-ui,Segoe UI,Roboto,sans-serif; padding:24px; }
+  .wrap { max-width:680px; margin:0 auto; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px;
+          padding:18px; margin-bottom:16px; }
+  .card h2 { font-size:14px; text-transform:uppercase; letter-spacing:.05em;
+             color:var(--muted); margin:0 0 12px; }
+  .check { display:flex; align-items:center; gap:10px; padding:6px 0; }
+  .check .ico { width:22px; text-align:center; font-size:16px; }
+  .check .k { flex:1; }
+  .check .v { color:var(--muted); font-size:13px; text-align:right; max-width:55%; word-break:break-word; }
+  .ok { color:var(--green); } .bad { color:var(--red); } .warn { color:var(--amber); }
+  button { background:var(--accent); color:#fff; border:none; border-radius:9px;
+           padding:12px 20px; font-size:15px; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  button.sec { background:#334155; }
+  .btns { display:flex; gap:10px; flex-wrap:wrap; }
+  .meter-wrap { margin-top:14px; }
+  .meter-bg { height:26px; background:#0b1220; border:1px solid var(--line);
+              border-radius:8px; overflow:hidden; }
+  .meter-bar { height:100%; width:0%; background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);
+               transition:width .05s linear; }
+  .meter-label { display:flex; justify-content:space-between; color:var(--muted);
+                 font-size:12px; margin-top:6px; }
+  .verdict { font-size:15px; font-weight:600; margin-top:12px; padding:10px 12px;
+             border-radius:8px; display:none; }
+  .verdict.show { display:block; }
+  .verdict.good { background:rgba(34,197,94,.12); color:var(--green); border:1px solid rgba(34,197,94,.3); }
+  .verdict.bad  { background:rgba(239,68,68,.12); color:var(--red);  border:1px solid rgba(239,68,68,.3); }
+  .verdict.warn { background:rgba(245,158,11,.12); color:var(--amber); border:1px solid rgba(245,158,11,.3); }
+  select { background:#0b1220; color:var(--txt); border:1px solid var(--line);
+           border-radius:8px; padding:9px; width:100%; margin-top:10px; }
+  .result { margin-top:12px; padding:12px; background:#0b1220; border-radius:8px;
+            border:1px solid var(--line); min-height:20px; }
+  .result .t { font-size:17px; }
+  ol { margin:8px 0 0; padding-left:20px; color:var(--muted); }
+  ol li { margin:6px 0; }
+  code { background:#0b1220; padding:2px 6px; border-radius:5px; font-size:13px; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎤 Microphone Diagnostic</h1>
+  <p class="sub">Runs in <b>this</b> browser to find why voice isn't being picked up. Use the same browser you use for the app.</p>
+
+  <div class="card">
+    <h2>Environment</h2>
+    <div id="env"></div>
+  </div>
+
+  <div class="card">
+    <h2>Live microphone test</h2>
+    <div class="btns">
+      <button id="startBtn">Start microphone test</button>
+      <button id="stopBtn" class="sec" disabled>Stop</button>
+    </div>
+    <select id="devSel" style="display:none"></select>
+    <div class="meter-wrap" id="meterWrap" style="display:none">
+      <div class="meter-bg"><div class="meter-bar" id="meterBar"></div></div>
+      <div class="meter-label"><span>Silent</span><span id="peakTxt">peak: 0%</span><span>Loud</span></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+  </div>
+
+  <div class="card">
+    <h2>Full test — record 3s &amp; transcribe</h2>
+    <p class="sub" style="margin:0 0 12px">Speak a full sentence after pressing. This tests the exact voice pipeline the chat uses.</p>
+    <div class="btns">
+      <button id="recBtn" disabled>● Record 3 seconds &amp; transcribe</button>
+      <select id="langSel" style="width:auto;margin:0"><option value="en">English</option><option value="kn">ಕನ್ನಡ</option></select>
+    </div>
+    <div class="result" id="recResult"><span class="muted" style="color:var(--muted)">Start the microphone test first.</span></div>
+  </div>
+
+  <div class="card">
+    <h2>If the meter stays flat (no sound)</h2>
+    <ol>
+      <li><b>Windows mic privacy:</b> Settings → Privacy &amp; security → <b>Microphone</b> → turn ON “Let apps access your microphone” <i>and</i> “Let desktop apps access your microphone”.</li>
+      <li><b>Right device:</b> pick your actual mic from the dropdown above (headset vs. built-in). A muted/absent device shows a flat meter.</li>
+      <li><b>Windows sound settings:</b> Settings → System → Sound → Input → check the input device level moves when you talk.</li>
+      <li><b>Browser permission:</b> click the 🔒/🎤 icon in the address bar → Microphone → <b>Allow</b> → reload.</li>
+      <li><b>Browser:</b> use <b>Chrome</b> or <b>Edge</b> (latest).</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let stream=null, ac=null, analyser=null, srcNode=null, rafId=null, heard=false, curDeviceId=null;
+
+function row(ico, cls, k, v){ return `<div class="check"><span class="ico ${cls}">${ico}</span><span class="k">${k}</span><span class="v">${v||''}</span></div>`; }
+
+async function envCheck(){
+  const secure = window.isSecureContext;
+  const gum = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  const acOK = !!(window.AudioContext || window.webkitAudioContext);
+  const ua = navigator.userAgent;
+  let browser = 'Other browser';
+  if (/Edg\//.test(ua)) browser='Microsoft Edge ✓';
+  else if (/Chrome\//.test(ua) && !/OPR|Edg/.test(ua)) browser='Google Chrome ✓';
+  else if (/Firefox\//.test(ua)) browser='Firefox (works, Chrome/Edge preferred)';
+  else if (/Safari\//.test(ua)) browser='Safari';
+  let perm='unknown';
+  try { const p=await navigator.permissions.query({name:'microphone'}); perm=p.state; p.onchange=()=>envCheck(); } catch(_){ perm='not reported'; }
+  let html='';
+  html+=row(secure?'✓':'✗', secure?'ok':'bad', 'Secure context (https/localhost)', secure?'yes':'NO — mic needs https');
+  html+=row(gum?'✓':'✗', gum?'ok':'bad', 'getUserMedia supported', gum?'yes':'NO');
+  html+=row(acOK?'✓':'✗', acOK?'ok':'bad', 'Web Audio supported', acOK?'yes':'NO');
+  html+=row(/✓/.test(browser)?'✓':'!', /✓/.test(browser)?'ok':'warn', 'Browser', browser);
+  const pico = perm==='granted'?'✓':perm==='denied'?'✗':'!';
+  const pcls = perm==='granted'?'ok':perm==='denied'?'bad':'warn';
+  html+=row(pico, pcls, 'Microphone permission', perm + (perm==='denied'?' — allow it in the address bar':''));
+  $('env').innerHTML=html;
+}
+
+async function listDevices(){
+  try{
+    const devs = await navigator.mediaDevices.enumerateDevices();
+    const mics = devs.filter(d=>d.kind==='audioinput');
+    const sel=$('devSel');
+    sel.innerHTML = mics.map(m=>`<option value="${m.deviceId}">${m.label||('Microphone '+m.deviceId.slice(0,6))}</option>`).join('');
+    if(mics.length>1){ sel.style.display='block'; }
+    if(curDeviceId){ sel.value=curDeviceId; }
+  }catch(_){}
+}
+
+// Open a mic robustly: try the requested device exactly, then loosely, then any
+// default. A Realtek "Headset Microphone" with nothing plugged in throws
+// OverconstrainedError, so we must fall back to a device that actually opens.
+async function getMicStream(deviceId){
+  const base = { channelCount:1, echoCancellation:true, noiseSuppression:true, autoGainControl:true };
+  const tries = [];
+  if(deviceId){ tries.push({audio:{...base, deviceId:{exact:deviceId}}}); tries.push({audio:{...base, deviceId}}); }
+  tries.push({audio:base});
+  tries.push({audio:true});
+  let err;
+  for(const c of tries){ try{ return await navigator.mediaDevices.getUserMedia(c); }catch(e){ err=e; } }
+  throw err;
+}
+
+async function startMeter(deviceId){
+  stopMeter();
+  const requested = deviceId;
+  try{
+    stream = await getMicStream(deviceId);
+  }catch(err){
+    verdict('bad', '✗ Could not open ANY microphone ('+err.name+'). '+(err.name==='NotAllowedError'?'Permission is blocked — allow it in the address bar and reload.':err.name==='NotFoundError'?'No working microphone found — plug one in and reload.':'Try a different device or check Windows sound settings.'));
+    return;
+  }
+  const track = stream.getAudioTracks()[0];
+  curDeviceId = track.getSettings().deviceId || null;
+  const openedLabel = track.label || 'default microphone';
+  if(requested && curDeviceId && requested!==curDeviceId){
+    verdict('warn', '⚠ The selected mic couldn\'t be opened (likely a headset jack with nothing plugged in). Using “'+openedLabel+'” instead — speak and watch the meter.');
+  }
+  await envCheck(); await listDevices();
+  const AC = window.AudioContext||window.webkitAudioContext;
+  ac = new AC(); try{ if(ac.state==='suspended') await ac.resume(); }catch(_){}
+  srcNode = ac.createMediaStreamSource(stream);
+  analyser = ac.createAnalyser(); analyser.fftSize=2048;
+  srcNode.connect(analyser);
+  const buf = new Float32Array(analyser.fftSize);
+  heard=false;
+  $('meterWrap').style.display='block';
+  $('startBtn').disabled=true; $('stopBtn').disabled=false; $('recBtn').disabled=false;
+  $('recResult').innerHTML='<span style="color:var(--muted)">Ready — press “Record 3 seconds”.</span>';
+  function loop(){
+    analyser.getFloatTimeDomainData(buf);
+    let peak=0, sum=0;
+    for(let i=0;i<buf.length;i++){ const a=Math.abs(buf[i]); if(a>peak)peak=a; sum+=buf[i]*buf[i]; }
+    const rms=Math.sqrt(sum/buf.length);
+    const pct=Math.min(100, Math.round(rms*300));
+    $('meterBar').style.width=pct+'%';
+    $('peakTxt').textContent='peak: '+Math.round(peak*100)+'%';
+    if(peak>0.05 && !heard){ heard=true; verdict('good','✓ Your microphone is working — sound detected! If the chat still fails, the issue is elsewhere (tell Claude).'); }
+    rafId=requestAnimationFrame(loop);
+  }
+  loop();
+  setTimeout(()=>{ if(!heard) verdict('bad','✗ No sound detected yet. Speak louder, or check the troubleshooting steps below (Windows mic privacy / device selection).'); }, 6000);
+}
+
+function stopMeter(){
+  if(rafId) cancelAnimationFrame(rafId), rafId=null;
+  try{ srcNode&&srcNode.disconnect(); }catch(_){}
+  try{ ac&&ac.close(); }catch(_){}
+  if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
+  ac=null; analyser=null; srcNode=null;
+  $('startBtn').disabled=false; $('stopBtn').disabled=true; $('recBtn').disabled=true;
+}
+
+function verdict(cls,msg){ const v=$('verdict'); v.className='verdict show '+cls; v.textContent=msg; }
+
+// ── Record 3s and transcribe (same PCM pipeline as the app) ──
+function encodeWav(samples, rate){
+  const b=new ArrayBuffer(44+samples.length*2), v=new DataView(b);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+  w(0,'RIFF'); v.setUint32(4,36+samples.length*2,true); w(8,'WAVE'); w(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,rate,true); v.setUint32(28,rate*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
+  w(36,'data'); v.setUint32(40,samples.length*2,true);
+  let o=44; for(let i=0;i<samples.length;i++){ const s=Math.max(-1,Math.min(1,samples[i])); v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true); o+=2; }
+  return new Blob([v],{type:'audio/wav'});
+}
+function resample(sm,inR,outR){ if(inR===outR)return sm; const r=inR/outR,n=Math.max(1,Math.floor(sm.length/r)),o=new Float32Array(n);
+  for(let i=0;i<n;i++){const x=i*r,i0=Math.floor(x),i1=Math.min(i0+1,sm.length-1),f=x-i0;o[i]=sm[i0]*(1-f)+sm[i1]*f;} return o; }
+
+async function record3s(){
+  if(!ac||!stream){ return; }
+  $('recBtn').disabled=true;
+  $('recResult').innerHTML='<span style="color:var(--amber)">● Recording… speak now (3s)</span>';
+  const proc = ac.createScriptProcessor(4096,1,1);
+  const chunks=[]; const rate=ac.sampleRate;
+  proc.onaudioprocess=e=>chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+  const zero=ac.createGain(); zero.gain.value=0;
+  srcNode.connect(proc); proc.connect(zero); zero.connect(ac.destination);
+  await new Promise(r=>setTimeout(r,3000));
+  proc.onaudioprocess=null;
+  try{ proc.disconnect(); }catch(_){}
+  try{ srcNode.disconnect(proc); }catch(_){}   // keep srcNode→analyser so the meter stays live
+  const total=chunks.reduce((a,c)=>a+c.length,0);
+  const merged=new Float32Array(total); let off=0; for(const c of chunks){merged.set(c,off);off+=c.length;}
+  let peak=0; for(let i=0;i<merged.length;i++){const a=Math.abs(merged[i]);if(a>peak)peak=a;}
+  if(peak<0.01){ $('recResult').innerHTML='<span class="bad">✗ Captured silence (peak '+Math.round(peak*100)+'%). Your mic isn\'t producing sound — see troubleshooting below.</span>'; $('recBtn').disabled=false; return; }
+  $('recResult').innerHTML='<span style="color:var(--muted)">Transcribing… (peak '+Math.round(peak*100)+'%)</span>';
+  const wav=encodeWav(resample(merged,rate,16000),16000);
+  const fd=new FormData(); fd.append('file',wav,'voice.wav');
+  try{
+    const res=await fetch('/api/voice/transcribe?language='+$('langSel').value,{method:'POST',body:fd});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){ $('recResult').innerHTML='<span class="bad">✗ Endpoint error: '+(data.detail||res.status)+'</span>'; }
+    else if(!(data.text||'').trim()){ $('recResult').innerHTML='<span class="warn">Transcribed empty — audio had sound (peak '+Math.round(peak*100)+'%) but no clear speech. Speak closer/clearer.</span>'; }
+    else { $('recResult').innerHTML='<div class="t">✅ “'+data.text+'”</div><div style="color:var(--muted);font-size:12px;margin-top:6px">peak '+Math.round(peak*100)+'% · '+(merged.length/rate).toFixed(1)+'s · '+data.model+'</div>'; }
+  }catch(e){ $('recResult').innerHTML='<span class="bad">✗ Could not reach the transcription endpoint. Is the app running?</span>'; }
+  $('recBtn').disabled=false;
+}
+
+$('startBtn').onclick=()=>startMeter($('devSel').value||null);
+$('stopBtn').onclick=stopMeter;
+$('recBtn').onclick=record3s;
+$('devSel').onchange=()=>{ if(stream) startMeter($('devSel').value); };
+envCheck(); listDevices();
+</script>
+</body>
+</html>

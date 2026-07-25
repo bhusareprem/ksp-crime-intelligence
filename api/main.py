@@ -522,6 +522,77 @@ def web_search_endpoint(q: str):
     return {"query": q, "results": results or "No results found for this query."}
 
 
+# ── Voice input (server-side speech-to-text via Groq Whisper) ──────────────
+# The browser's Web Speech API streams audio to a cloud service that many
+# networks/regions block, so mic capture succeeds but no transcript returns.
+# Groq Whisper runs on the same endpoint the app already uses for the LLM, so
+# it works wherever the app works — and transcribes Kannada natively.
+
+_GROQ_STT_URL = "https://api.groq.com/openai/v1/audio/transcriptions"
+_GROQ_STT_MODEL = os.getenv("STT_MODEL", "whisper-large-v3")
+_MAX_AUDIO = 25 * 1024 * 1024  # Groq's audio upload ceiling
+
+
+def _groq_key() -> str:
+    key = (os.getenv("GROQ_API_KEY") or "").strip()
+    if key:
+        return key
+    # app-config also sets OPENAI_API_KEY to the Groq key when provider=groq
+    alt = (os.getenv("OPENAI_API_KEY") or "").strip()
+    return alt if alt.startswith("gsk_") else ""
+
+
+@app.post("/api/voice/transcribe")
+async def voice_transcribe(file: UploadFile = File(...), language: str = "en"):
+    key = _groq_key()
+    if not key:
+        raise HTTPException(status_code=503,
+                            detail="Voice input needs a Groq API key (set GROQ_API_KEY).")
+
+    audio = b""
+    while True:
+        chunk = await file.read(1024 * 1024)
+        if not chunk:
+            break
+        audio += chunk
+        if len(audio) > _MAX_AUDIO:
+            raise HTTPException(status_code=413, detail="Audio too long (max ~25 MB).")
+    if not audio:
+        raise HTTPException(status_code=400, detail="No audio received.")
+
+    lang = "kn" if language == "kn" else "en"
+    import requests
+    try:
+        r = requests.post(
+            _GROQ_STT_URL,
+            headers={"Authorization": f"Bearer {key}"},
+            files={"file": (file.filename or "voice.webm", audio,
+                            file.content_type or "audio/webm")},
+            data={"model": _GROQ_STT_MODEL, "language": lang,
+                  "response_format": "json", "temperature": "0"},
+            timeout=45,
+        )
+    except Exception as e:
+        print(f"[voice transcribe] request failed: {e}", file=sys.stderr)
+        raise HTTPException(status_code=502,
+                            detail="Could not reach the transcription service.") from e
+
+    if r.status_code != 200:
+        print(f"[voice transcribe] groq {r.status_code}: {r.text[:300]}", file=sys.stderr)
+        detail = "Transcription failed."
+        if r.status_code in (401, 403):
+            detail = "Transcription rejected — check the Groq API key."
+        elif r.status_code == 429:
+            detail = "Transcription rate-limited — try again in a moment."
+        raise HTTPException(status_code=502, detail=detail)
+
+    try:
+        text = (r.json().get("text") or "").strip()
+    except Exception:
+        text = ""
+    return {"text": text, "language": lang, "model": _GROQ_STT_MODEL}
+
+
 # ── Database Browser ────────────────────────────────────────────────────────
 
 _BROWSE_VIEWS: dict[str, dict[str, str]] = {

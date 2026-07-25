@@ -76,9 +76,22 @@ def compact_fir(src: Path, dst: Path):
 
 
 def main():
+    # Preserve the Catalyst project link + app config across rebuilds so the
+    # deploy target isn't lost every time the bundle is regenerated.
+    preserved = {}
+    for keep in (".catalystrc", "app-config.json", "catalyst.json"):
+        p = DIST / keep
+        if p.exists():
+            preserved[keep] = p.read_bytes()
+
     if DIST.exists():
         shutil.rmtree(DIST)
     DIST.mkdir()
+
+    for name, blob in preserved.items():
+        (DIST / name).write_bytes(blob)
+    if preserved:
+        print(f"Preserved Catalyst files: {', '.join(preserved)}")
 
     print("Copying code...")
     for item in CODE:

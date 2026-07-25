@@ -10,6 +10,9 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Catalyst Authentication Web SDK (real login; init.js is served by the Catalyst platform) -->
+  <script src="https://static.zohocdn.com/catalyst/sdk/js/4.4.0/catalystWebSDK.js"></script>
+  <script src="/__catalyst/sdk/init.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -578,7 +581,20 @@
 
     .voice-btn:hover { color: var(--accent); background: var(--accent-light); }
     .voice-btn.listening { color: var(--red); animation: pulse 1s infinite; }
+    .voice-btn.transcribing { color: var(--accent); animation: spin .8s linear infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Voice status toast */
+    .voice-hint {
+      position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%);
+      z-index: 9999; max-width: 440px; padding: 10px 16px; border-radius: 10px;
+      font-size: 13px; line-height: 1.45; color: #fff; background: #1e293b;
+      box-shadow: 0 8px 28px rgba(0,0,0,.28); opacity: 0; pointer-events: none;
+      transition: opacity .25s; text-align: center;
+    }
+    .voice-hint.show { opacity: 1; }
+    .voice-hint.err { background: #7f1d1d; }
 
     textarea#chatInput {
       flex: 1;
@@ -1865,11 +1881,19 @@
     #loginModal {
       position: fixed; inset: 0; background: rgba(0,0,0,.9);
       z-index: 9999; display: flex; align-items: center; justify-content: center;
+      overflow-y: auto; padding: 24px;
     }
     .login-box {
       background: #0f1626; border: 1px solid #1c2740; border-radius: 14px;
-      padding: 40px 36px; width: 380px; box-shadow: 0 30px 80px rgba(0,0,0,.8), 0 0 60px rgba(37,99,235,.12);
+      padding: 32px 30px; width: 430px; max-width: 100%;
+      box-shadow: 0 30px 80px rgba(0,0,0,.8), 0 0 60px rgba(37,99,235,.12);
     }
+    /* Hide the whole app until authenticated — only the login modal shows pre-auth */
+    body.pre-auth .sidebar, body.pre-auth .main { display: none !important; }
+    /* Catalyst embedded auth renders a white form/iframe here — give it room + a clean frame */
+    #catalystLogin { width: 100%; min-height: 440px; background: #fff; border-radius: 10px; overflow: hidden; margin-top: 4px; }
+    #catalystLogin:empty { min-height: 0; }
+    #catalystLogin iframe { width: 100% !important; min-height: 440px; border: 0; }
     .login-box h2 { color: #f8fafc; font-size: 20px; margin: 0 0 4px; }
     .login-box .sub { color: #64748b; font-size: 12px; margin: 0 0 28px; }
     .login-field { margin-bottom: 14px; }
@@ -1942,7 +1966,7 @@
     .tts-btn:hover, .tts-btn.on { color: var(--accent); background: var(--accent-light); }
   </style>
 </head>
-<body>
+<body class="pre-auth">
 
 <!-- LOGIN MODAL -->
 <div id="loginModal">
@@ -1952,24 +1976,18 @@
       <h2>Crime Intelligence</h2>
       <p class="sub">Karnataka State Police — Restricted Access</p>
     </div>
-    <div class="login-field">
-      <label>OFFICER ID</label>
-      <input id="officerId" placeholder="e.g. SP001" autocomplete="username" />
-    </div>
-    <div class="login-field">
-      <label>PASSWORD</label>
-      <input id="officerPw" type="password" placeholder="Enter password" autocomplete="current-password"
-             onkeydown="if(event.key==='Enter')doLogin()" />
-    </div>
+    <!-- Catalyst Authentication renders its secure login form here -->
+    <div id="catalystLogin"></div>
     <div id="loginError"></div>
-    <button class="login-submit" onclick="doLogin()">Sign In to KSP System</button>
-    <div class="login-demo">
-      <div class="dm-label">DEMO CREDENTIALS</div>
-      <div class="dm-creds">
-        SP001 / sp@ksp2024 &nbsp;—&nbsp; Superintendent of Police<br>
-        INS001 / ins@ksp2024 &nbsp;—&nbsp; Inspector<br>
-        VIEW01 / view@ksp2024 &nbsp;—&nbsp; Viewer (read-only)
+    <!-- Always-visible evaluation access (full SP) + Catalyst sign-in above for real officers -->
+    <div id="loginFallback">
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;color:#94a3b8;font-size:10.5px;letter-spacing:.08em">
+        <span style="flex:1;height:1px;background:#e2e8f0"></span>FOR EVALUATION<span style="flex:1;height:1px;background:#e2e8f0"></span>
       </div>
+      <button class="login-submit" onclick="demoAccess()">🛡️ Enter as Demo Officer — Full Access</button>
+      <p style="font-size:11px;color:#64748b;text-align:center;margin-top:12px">
+        Judges &amp; reviewers: one-click access with full <b>Superintendent (SP)</b> privileges — no account needed.<br>Officers sign in securely above via Zoho Catalyst Authentication.
+      </p>
     </div>
   </div>
 </div>
@@ -2485,6 +2503,8 @@ let loading = false;
 let abortCtrl = null;
 let voiceRecognition = null;
 let listening = false;
+let recStream = null, recTimer = null;
+let audioCtx = null, srcNode = null, procNode = null, pcmChunks = [], captureRate = 48000;
 let mapMarkers = [];
 let chartInstances = {};
 let activeProvider = null;
@@ -2521,40 +2541,180 @@ function setLang(lang) {
   document.getElementById('chatInput').placeholder = ph;
 }
 
-// ─── VOICE INPUT ──────────────────────────────────────────────────────────
-function toggleVoice() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    alert('Voice input not supported in this browser. Use Chrome or Edge.');
+// ─── VOICE INPUT (record → Groq Whisper transcription) ─────────────────────
+// Browser Web Speech STT streams audio to a cloud service many networks block,
+// so the mic opens but no transcript returns. Instead we record locally and
+// transcribe server-side via Groq Whisper — works wherever the app works and
+// handles Kannada natively.
+function voiceHint(msg, isError) {
+  let el = document.getElementById('voiceHint');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'voiceHint';
+    el.className = 'voice-hint';
+    document.body.appendChild(el);
+  }
+  clearTimeout(el._t);
+  if (!msg) { el.classList.remove('show'); return; }
+  el.textContent = msg;
+  el.classList.toggle('err', !!isError);
+  el.classList.add('show');
+  el._t = setTimeout(() => el.classList.remove('show'), isError ? 6000 : 4000);
+}
+
+function _setVoiceBtn(state) {
+  const b = document.getElementById('voiceBtn');
+  if (!b) return;
+  b.classList.remove('listening', 'transcribing');
+  if (state === 'rec') { b.classList.add('listening'); b.title = 'Recording… click to stop'; }
+  else if (state === 'busy') { b.classList.add('transcribing'); b.title = 'Transcribing…'; }
+  else { b.title = 'Voice input'; }
+}
+
+// We capture RAW PCM straight from the mic via the Web Audio API rather than
+// using MediaRecorder. MediaRecorder's WebM/Opus output has unreliable duration
+// metadata, so server-side decoders often recover only a fraction of the audio —
+// frequently the silent lead-in, which Whisper transcribes as "you"/".". Raw PCM
+// is exactly what the mic produced, so the FULL utterance always reaches Whisper.
+async function toggleVoice() {
+  if (listening) { stopRecording(); return; }
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !AC) {
+    voiceHint('Voice input isn’t supported in this browser — please use Chrome or Edge.', true);
     return;
   }
-  if (listening) { voiceRecognition && voiceRecognition.stop(); return; }
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  voiceRecognition = new SpeechRecognition();
-  voiceRecognition.lang = currentLang === 'kn' ? 'kn-IN' : 'en-IN';
-  voiceRecognition.interimResults = false;
-  voiceRecognition.onstart = () => {
-    listening = true;
-    document.getElementById('voiceBtn').classList.add('listening');
-    document.getElementById('voiceBtn').title = 'Listening... (click to stop)';
+  try {
+    recStream = await navigator.mediaDevices.getUserMedia({
+      audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+    });
+  } catch (err1) {
+    // A device may reject these constraints (e.g. an unplugged headset jack that
+    // Windows lists as default). Retry with the loosest request so any working mic is used.
+    try {
+      recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err2) {
+      const denied = err2 && (err2.name === 'NotAllowedError' || err2.name === 'SecurityError');
+      voiceHint(denied
+        ? 'Microphone access is blocked. Click the 🎤/🔒 icon in the address bar → Allow → reload.'
+        : 'No working microphone could be opened. Set the correct mic as default in Windows sound settings, then try again.', true);
+      return;
+    }
+  }
+  audioCtx = new AC();
+  try { if (audioCtx.state === 'suspended') await audioCtx.resume(); } catch (_) {}
+  captureRate = audioCtx.sampleRate || 48000;
+  pcmChunks = [];
+  srcNode = audioCtx.createMediaStreamSource(recStream);
+  procNode = audioCtx.createScriptProcessor(4096, 1, 1);
+  procNode.onaudioprocess = (e) => {
+    pcmChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));  // copy each frame
   };
-  voiceRecognition.onresult = (e) => {
-    const transcript = e.results[0][0].transcript;
+  const sink = audioCtx.createGain();
+  sink.gain.value = 0;  // pump the processor without audible playback
+  srcNode.connect(procNode);
+  procNode.connect(sink);
+  sink.connect(audioCtx.destination);
+  listening = true;
+  _setVoiceBtn('rec');
+  voiceHint(currentLang === 'kn'
+    ? '🎤 ರೆಕಾರ್ಡ್ ಆಗುತ್ತಿದೆ… ಮಾತನಾಡಿ, ಮುಗಿದ ಮೇಲೆ 🎤 ಒತ್ತಿ'
+    : '🎤 Recording… speak, then click 🎤 to stop', false);
+  clearTimeout(recTimer);
+  recTimer = setTimeout(() => { if (listening) stopRecording(); }, 15000);  // safety auto-stop
+}
+
+function stopRecording() {
+  clearTimeout(recTimer);
+  listening = false;
+  _setVoiceBtn('idle');
+  try { if (procNode) { procNode.onaudioprocess = null; procNode.disconnect(); } } catch (_) {}
+  try { if (srcNode) srcNode.disconnect(); } catch (_) {}
+  if (recStream) { recStream.getTracks().forEach(t => t.stop()); recStream = null; }
+  const ctx = audioCtx;
+  audioCtx = null; srcNode = null; procNode = null;
+  transcribePcm(ctx);
+}
+
+async function transcribePcm(ctx) {
+  const total = pcmChunks.reduce((a, c) => a + c.length, 0);
+  const closeCtx = () => { try { ctx && ctx.close(); } catch (_) {} };
+  if (!total) { voiceHint('No audio was captured — please try again.', true); closeCtx(); return; }
+
+  // Merge captured frames into one PCM buffer.
+  const merged = new Float32Array(total);
+  let off = 0;
+  for (const c of pcmChunks) { merged.set(c, off); off += c.length; }
+  pcmChunks = [];
+  closeCtx();
+
+  // If the mic delivered essentially silence, say so plainly instead of sending
+  // empty audio (which Whisper renders as "you").
+  let peak = 0;
+  for (let i = 0; i < merged.length; i++) { const a = Math.abs(merged[i]); if (a > peak) peak = a; }
+  if (peak < 0.008) {
+    voiceHint('Your microphone picked up almost no sound. Check the correct mic is selected and unmuted (and speak a little louder), then try again.', true);
+    return;
+  }
+
+  const wav = pcmToWav(merged, captureRate, 16000);
+  _setVoiceBtn('busy');
+  voiceHint(currentLang === 'kn' ? 'ಪಠ್ಯಕ್ಕೆ ಪರಿವರ್ತಿಸಲಾಗುತ್ತಿದೆ…' : 'Transcribing…', false);
+  const fd = new FormData();
+  fd.append('file', wav, 'voice.wav');
+  try {
+    const res = await fetch('/api/voice/transcribe?language=' + currentLang, { method: 'POST', body: fd });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({ detail: res.statusText }));
+      voiceHint('Transcription failed: ' + (e.detail || res.statusText), true);
+      return;
+    }
+    const data = await res.json();
+    const text = (data.text || '').trim();
+    if (!text) { voiceHint('Didn’t catch any speech — please try again.', true); return; }
     const inp = document.getElementById('chatInput');
-    inp.value = transcript;
+    inp.value = text;
     autoResize(inp);
-    // Auto-send after voice recognition
-    setTimeout(() => sendMessage(), 300);
-  };
-  voiceRecognition.onend = () => {
-    listening = false;
-    document.getElementById('voiceBtn').classList.remove('listening');
-    document.getElementById('voiceBtn').title = 'Voice input';
-  };
-  voiceRecognition.onerror = () => {
-    listening = false;
-    document.getElementById('voiceBtn').classList.remove('listening');
-  };
-  voiceRecognition.start();
+    voiceHint('', false);
+    sendMessage();
+  } catch (err) {
+    voiceHint('Couldn’t reach the transcription service — check your connection and try again.', true);
+  } finally {
+    _setVoiceBtn('idle');
+  }
+}
+
+// Resample mono Float32 PCM to the target rate and encode as 16-bit PCM WAV.
+function pcmToWav(samples, inRate, outRate) {
+  let data = samples;
+  if (inRate !== outRate) {
+    const ratio = inRate / outRate;
+    const outLen = Math.max(1, Math.floor(samples.length / ratio));
+    data = new Float32Array(outLen);
+    for (let i = 0; i < outLen; i++) {
+      const idx = i * ratio, i0 = Math.floor(idx), i1 = Math.min(i0 + 1, samples.length - 1);
+      const frac = idx - i0;
+      data[i] = samples[i0] * (1 - frac) + samples[i1] * frac;
+    }
+  }
+  return encodeWav(data, outRate);
+}
+
+function encodeWav(samples, rate) {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); w(8, 'WAVE');
+  w(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true); view.setUint32(24, rate, true);
+  view.setUint32(28, rate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true);
+  w(36, 'data'); view.setUint32(40, samples.length * 2, true);
+  let off = 44;
+  for (let i = 0; i < samples.length; i++) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    off += 2;
+  }
+  return new Blob([view], { type: 'audio/wav' });
 }
 
 // ─── PDF EXPORT ───────────────────────────────────────────────────────────
@@ -2660,25 +2820,55 @@ function speakText(text) {
   window.speechSynthesis.speak(u);
 }
 
-// ─── ROLE-BASED LOGIN ─────────────────────────────────────────────────────
-const _KSP_ROLES = {
-  'SP001/sp@ksp2024':    { id: 'SP001',   role: 'Superintendent of Police', tag: 'SP',  level: 3 },
-  'INS001/ins@ksp2024':  { id: 'INS001',  role: 'Inspector',                 tag: 'INS', level: 2 },
-  'VIEW01/view@ksp2024': { id: 'VIEW01',  role: 'Viewer',                    tag: 'VIEW',level: 1 },
+// ─── ACCESS CONTROL (Zoho Catalyst Authentication) ────────────────────────
+// Role-based access. A signed-in officer's access LEVEL comes from either:
+//   (1) their Catalyst-assigned role (set in the Catalyst console), or
+//   (2) an email→role map (below) as a reliable fallback.
+// Levels: 3 = Superintendent (full) · 2 = Inspector/Officer · 1 = Viewer (read-only).
+// Gmail ignores dots, so all of these deliver to bhusareprem286@gmail.com,
+// but Catalyst treats them as distinct accounts — one per role.
+const _ROLE_BY_EMAIL = {
+  'officer@ksp.demo':          { role: 'Superintendent of Police', tag: 'SP',   level: 3 },  // judge / demo — full access, no personal email
+  'bhusareprem286@gmail.com':  { role: 'Superintendent of Police', tag: 'SP',   level: 3 },
+  'bhusare.prem286@gmail.com': { role: 'Inspector',                tag: 'INS',  level: 2 },
+  'bhusa.reprem286@gmail.com': { role: 'Viewer',                   tag: 'VIEW', level: 1 },
 };
+// Catalyst console role name → access level
+const _LEVEL_BY_ROLE = {
+  'App Administrator': 3, 'Superintendent of Police': 3, 'Superintendent': 3,
+  'Inspector': 2, 'Investigating Officer': 2,
+  'App User': 1, 'Viewer': 1,
+};
+function _catalystRoleName(user) {
+  const rd = (user && (user.role_details || user.role)) || {};
+  return rd.role_name || rd.name || (user && (user.role_name || '')) || '';
+}
+function _resolveRole(user, email) {
+  // 1) explicit email map wins (reliable for the demo)
+  const byEmail = _ROLE_BY_EMAIL[(email || '').toLowerCase()];
+  if (byEmail) return byEmail;
+  // 2) otherwise use the Catalyst-assigned role
+  const rn = _catalystRoleName(user);
+  if (_LEVEL_BY_ROLE[rn] != null) {
+    const level = _LEVEL_BY_ROLE[rn];
+    return { role: rn, tag: level >= 3 ? 'SP' : level === 1 ? 'VIEW' : 'INS', level };
+  }
+  // 3) default: Investigating Officer
+  return { role: 'Investigating Officer', tag: 'OFR', level: 2 };
+}
+
 let currentOfficer = null;
 
-function doLogin() {
-  const id = document.getElementById('officerId').value.trim();
-  const pw = document.getElementById('officerPw').value;
-  const officer = _KSP_ROLES[`${id}/${pw}`];
-  if (!officer) {
-    document.getElementById('loginError').textContent = 'Invalid credentials. Use the demo accounts below.';
-    document.getElementById('officerPw').value = '';
-    return;
-  }
-  currentOfficer = { ...officer };
-  sessionStorage.setItem('ksp_officer', JSON.stringify(currentOfficer));
+function _catalystAuth() {
+  return (window.catalyst && catalyst.auth) ? catalyst.auth : null;
+}
+
+function _showApp(user) {
+  try { console.log('[KSP auth] user:', user); } catch (e) {}
+  const email = (user && (user.email_id || user.email)) || 'officer@ksp.local';
+  const name = (user && (user.first_name || user.name)) || email.split('@')[0];
+  currentOfficer = { id: name, email, ..._resolveRole(user, email) };
+  document.body.classList.remove('pre-auth');
   document.getElementById('loginModal').style.display = 'none';
   _applyOfficer(currentOfficer);
   loadAlerts();
@@ -2695,33 +2885,58 @@ function _applyOfficer(officer) {
     const el = document.getElementById(id);
     if (el) el.style.display = officer.level < 2 ? 'none' : '';
   });
-  // If a viewer is currently on a restricted tab, bounce to chat
   if (officer.level < 2 && (currentTab === 'solver' || currentTab === 'audit')) switchTab('chat');
 }
 
+// One-click evaluation access: full Superintendent (SP) privileges, neutral
+// identity (no personal email). Also used as the fallback if Catalyst Auth
+// isn't reachable. See _ROLE_BY_EMAIL['officer@ksp.demo'].
+function demoAccess() {
+  _showApp({ email_id: 'officer@ksp.demo', first_name: 'Demo Officer' });
+}
+
 function logout() {
+  const auth = _catalystAuth();
+  if (auth && currentOfficer && currentOfficer.email !== 'officer@ksp.demo') {
+    try { auth.signOut(window.location.origin); return; } catch (e) {}
+  }
   if (!confirm('Log out of KSP Crime Intelligence?')) return;
-  sessionStorage.removeItem('ksp_officer');
   currentOfficer = null;
+  location.reload();
+}
+
+function _showFallback() {
   document.getElementById('loginModal').style.display = 'flex';
-  document.getElementById('officerBadge').style.display = 'none';
-  document.getElementById('officerId').value = '';
-  document.getElementById('officerPw').value = '';
-  document.getElementById('loginError').textContent = '';
+  document.getElementById('loginFallback').style.display = 'block';
+}
+function _widgetRendered() {
+  const el = document.getElementById('catalystLogin');
+  return el && el.children.length > 0;
 }
 
 function checkLogin() {
-  const stored = sessionStorage.getItem('ksp_officer');
-  if (stored) {
+  const modal = document.getElementById('loginModal');
+  const auth = _catalystAuth();
+  if (auth && typeof auth.isUserAuthenticated === 'function') {
+    let settled = false;
+    // If Catalyst never responds (e.g. init.js not served) show the fallback.
+    const timer = setTimeout(() => { if (!settled) _showFallback(); }, 3500);
     try {
-      currentOfficer = JSON.parse(stored);
-      document.getElementById('loginModal').style.display = 'none';
-      _applyOfficer(currentOfficer);
+      auth.isUserAuthenticated()
+        .then(res => { settled = true; clearTimeout(timer); _showApp((res && res.content) ? res.content : res); })
+        .catch(() => {
+          settled = true; clearTimeout(timer);
+          modal.style.display = 'flex';
+          try {
+            auth.signIn('catalystLogin');
+            // If the secure login widget doesn't render, reveal the fallback.
+            setTimeout(() => { if (!_widgetRendered()) _showFallback(); }, 2500);
+          } catch (e) { _showFallback(); }
+        });
       return;
-    } catch {}
+    } catch (e) { clearTimeout(timer); }
   }
-  // Show login
-  document.getElementById('loginModal').style.display = 'flex';
+  _showFallback();
 }
 
 // ─── EARLY WARNING ALERTS ─────────────────────────────────────────────────

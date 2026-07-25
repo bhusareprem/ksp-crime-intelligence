@@ -20,6 +20,9 @@ secrets.json
 
 # ── Deploy bundle (regenerate: python scripts/build_appsail.py) ─
 dist_appsail/
+# Vendored dependency artifacts (regenerated at build time)
+deps/
+deps.zip
 
 # ── Raw source data, 16+ GB (already processed into databases) ──
 cases/
