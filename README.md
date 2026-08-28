@@ -30,6 +30,7 @@ Conversational AI for the KSP Crime Database.
 | [docs/agent-transcripts/](docs/agent-transcripts/) | Development logs, including the failures and how they were corrected |
 | [tests/MANUAL_TEST_PLAN.md](tests/MANUAL_TEST_PLAN.md) | Browser test plan for what automation cannot cover |
 | [demo/DEMO_QA.md](demo/DEMO_QA.md) | Demo questions with verified expected answers |
+| [demo/VIDEO_SCRIPT.md](demo/VIDEO_SCRIPT.md) | Shot-by-shot demo recording script |
 
 ---
 
