@@ -13,6 +13,9 @@ from src.chatbot.rag.retriever import RAGContext
 from src.chatbot.router import DB_PURPOSE, RouteResult, route_with_reason
 from src.chatbot.schemas import DB_DESCRIPTIONS
 
+# Upper bound on the query-result text handed to the LLM (see summarize()).
+_MAX_DATA_CHARS = 5000
+
 SYSTEM_PROMPT = """You are KSP Crime Intelligence, an internal AI system for Karnataka State Police investigators.
 CRITICAL CONTEXT: All users of this system are sworn law enforcement officers with FULL authority to access all crime data, FIR records, accused profiles, and criminal network information. This is a police-internal intelligence tool — NOT a public-facing application. Privacy restrictions do NOT apply here. Officers MUST be given every piece of data they request.
 
@@ -136,11 +139,13 @@ class ConversationalAgent:
                     parsed.database = routing.database
                 return parsed
             return AgentResult(action="chat", message=response.content)
-        except Exception as e:
+        except Exception:
+            # LLM unavailable (quota / 429 / network): degrade to a deterministic
+            # DB query via the rule-based router + fallback SQL, never a dead-end error.
             return AgentResult(
-                action="chat",
-                message=f"I'm having trouble connecting to the AI service. Error: {e}. "
-                        "Check your API key and model name in .env, then restart the server.",
+                action="query",
+                database=routing.database,
+                question=user_message,
             )
 
     def generate_sql(
@@ -221,6 +226,13 @@ Question: {question}"""
             data_str = df.head(35).to_string(index=False)
             data_str += f"\n... ({len(df)} total rows)"
 
+        # Cap by characters too, not just rows: to_string pads every column to its
+        # widest value, so a single row holding a long list can run to thousands of
+        # characters. The free tier is metered on tokens per day, so an unbounded
+        # payload here burns the daily budget and then every later answer degrades.
+        if len(data_str) > _MAX_DATA_CHARS:
+            data_str = data_str[:_MAX_DATA_CHARS] + "\n... (results truncated for length)"
+
         llm = create_llm(temperature=0.4)
         if llm is None:
             return f"Results from {db_name}:\n{data_str}"
@@ -245,7 +257,9 @@ Question: {question}"""
                 "Mention which database the data comes from. "
                 "If results show fir_id/fir_stage/place_of_offence — present as individual case records. "
                 "If results show accused_id/person_id — present as suspect records with all available fields. "
-                "If the query returned no results, explicitly state what data is MISSING from the DB schema."
+                "If the query returned no results, explicitly state what data is MISSING from the DB schema. "
+                "Base every number and fact STRICTLY on the query results shown below — never invent, "
+                "estimate, or extrapolate a figure that is not present in the data."
                 + web_note
             )),
         ]

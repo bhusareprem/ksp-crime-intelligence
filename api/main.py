@@ -11,7 +11,7 @@ from urllib.parse import unquote
 import duckdb as _duckdb
 import pandas as _pd
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -61,6 +61,13 @@ doc_store = DocStore(PROJECT / "data" / "case_docs.db")
 case_intel = CaseIntelligence(PROJECT / "data" / "case_knowledge.db")
 FRONTEND = PROJECT / "frontend"
 _AUDIT_DB = PROJECT / "data" / "audit.db"
+
+# Live-news ingestion + ML pattern detection (DBSCAN clusters, robust z-score
+# anomalies, OLS forecast, Pearson correlation) — power the AI Intelligence Brief.
+from src.news import live_news
+import src.ml.patterns as ml
+ml.DATA_DIR = PROJECT / "data"
+from src.chatbot import evidence as _evidence
 
 
 def _init_audit():
@@ -283,18 +290,42 @@ def chat(req: ChatRequest):
     except Exception as e:
         err = str(e)
         print(f"[chat error] {err}", file=sys.stderr)
-        # Auto-fallback: if active provider hits quota/not-found, switch to Groq
+        # Auto-fallback on quota/not-found. Must move to a DIFFERENT provider:
+        # Groq's free tier is metered per day, so re-pointing Groq at itself after
+        # its own 429 just fails again.
         if any(x in err for x in ("429", "RESOURCE_EXHAUSTED", "quota", "NOT_FOUND", "404")):
-            if _provider_available("groq"):
-                set_active("groq", "llama-3.3-70b-versatile")
+            current, _model = get_active()
+            current = current or "groq"
+            # Same provider, cheaper model first; then a different provider entirely.
+            candidates = []
+            alt_model = os.getenv("LLM_MODEL_FALLBACK", "")
+            if current == "groq" and alt_model and "rate_limit" not in err:
+                candidates.append(("groq", alt_model))
+            candidates += [(p, None) for p in ("gemini", "groq", "openrouter", "mistral")
+                           if p != current and _provider_available(p)]
+            from src.chatbot.llm_config import PROVIDERS
+            for prov, mdl in candidates:
+                # Must name the new provider's own model — falling back to the
+                # LLM_MODEL env var would hand Gemini a Groq model id.
+                if not mdl:
+                    _models = PROVIDERS.get(prov, {}).get("models") or []
+                    mdl = _models[0]["id"] if _models else ""
+                if not mdl:
+                    continue
+                set_active(prov, mdl)
                 bot._llm_checked = False  # force re-check
                 try:
                     resp = bot.ask(ask_message, history=history)
+                    print(f"[chat fallback] switched {current} -> {prov}", file=sys.stderr)
+                    break
                 except Exception as e2:
-                    print(f"[chat fallback error] {e2}", file=sys.stderr)
-                    raise HTTPException(status_code=500, detail="The AI service is temporarily unavailable. Please try again.") from e2
+                    print(f"[chat fallback error on {prov}] {e2}", file=sys.stderr)
             else:
-                raise HTTPException(status_code=429, detail="AI provider quota exceeded and no fallback is configured.") from e
+                set_active(current, _model or "")
+                raise HTTPException(
+                    status_code=429,
+                    detail="The AI provider's daily quota is exhausted and no fallback succeeded.",
+                ) from e
         else:
             raise HTTPException(status_code=500, detail="The AI service could not process that request. Please try again.") from e
 
@@ -739,7 +770,9 @@ def browse_view(db: str, view: str, page: int = 1, limit: int = 100, q: str = ""
                 path = bot.db.criminal_path
             else:
                 path = bot.db.cases_path
-            conn = _duckdb.connect(str(path), read_only=True)
+            # Same config as every other reader — see analytics._DUCKDB_SAFE_CONFIG.
+            conn = _duckdb.connect(str(path), read_only=True,
+                                   config={"enable_external_access": False})
             try:
                 desc = conn.execute(f"SELECT * FROM ({base}) LIMIT 0").description
                 cols = [c[0] for c in desc]
@@ -770,6 +803,234 @@ def browse_view(db: str, view: str, page: int = 1, limit: int = 100, q: str = ""
         "columns": list(df.columns),
         "rows": df.fillna("").astype(str).values.tolist(),
     }
+
+
+# ── Live News Intelligence ────────────────────────────────────────────────
+@app.get("/api/news/live")
+def news_live(force: bool = False):
+    """Live Karnataka crime headlines → geolocated incidents + hotspot correlation.
+
+    force=1 bypasses the 60s cache, so the dashboard's Refresh actually refetches.
+    """
+    data = live_news.fetch_crime_news(PROJECT / "data", force=force)
+    try:
+        from api.analytics import district_breakdown
+        top = [r["district"] for r in district_breakdown().get("data", [])]
+        data["correlations"] = live_news.correlate_with_hotspots(data.get("incidents", []), top)
+    except Exception:
+        data["correlations"] = []
+    return data
+
+
+# ── AI / ML pattern detection ─────────────────────────────────────────────
+@app.get("/api/ml/clusters")
+def ml_clusters():
+    try:
+        return ml.crime_clusters()
+    except Exception as e:
+        print(f"[clusters error] {e}", file=sys.stderr)
+        return {"clusters": [], "points": [], "error": "unavailable"}
+
+
+@app.get("/api/ml/anomalies")
+def ml_anomalies():
+    try:
+        return ml.anomalies()
+    except Exception as e:
+        print(f"[anomalies error] {e}", file=sys.stderr)
+        return {"anomalies": [], "error": "unavailable"}
+
+
+@app.get("/api/ml/forecast")
+def ml_forecast():
+    try:
+        return ml.forecast()
+    except Exception as e:
+        print(f"[forecast error] {e}", file=sys.stderr)
+        return {"history": [], "forecast": [], "error": "unavailable"}
+
+
+@app.get("/api/ml/socioeconomic")
+def ml_socio():
+    try:
+        return ml.socioeconomic_correlation()
+    except Exception as e:
+        print(f"[socio error] {e}", file=sys.stderr)
+        return {"points": [], "correlations": {}, "error": "unavailable"}
+
+
+# ── AI Intelligence Brief + Patrol Deployment ─────────────────────────────
+def _gather_signals():
+    """Aggregate every live signal into a compact digest for the LLM / recommender."""
+    from api.analytics import (crime_trends, hotspots, district_breakdown,
+                               criminal_network, predictions, crime_alerts)
+    sig = {}
+    try:
+        t = crime_trends().get("data", [])
+        sig["trend"] = t[-3:] if t else []
+    except Exception: sig["trend"] = []
+    try:
+        sig["top_districts"] = [{"district": r["district"], "firs": r["firs"]}
+                                for r in district_breakdown().get("data", [])[:5]]
+    except Exception: sig["top_districts"] = []
+    try:
+        sig["hotspots"] = [{"district": r["district"], "firs": r["total_firs"],
+                            "solved_pct": round((r.get("solved", 0) / r["total_firs"] * 100) if r.get("total_firs") else 0, 0)}
+                           for r in hotspots().get("data", [])[:5]]
+    except Exception: sig["hotspots"] = []
+    try: sig["clusters"] = ml.crime_clusters().get("clusters", [])[:3]
+    except Exception: sig["clusters"] = []
+    try: sig["anomalies"] = ml.anomalies().get("anomalies", [])[:5]
+    except Exception: sig["anomalies"] = []
+    try: sig["forecast"] = ml.forecast().get("forecast", [])[:3]
+    except Exception: sig["forecast"] = []
+    try:
+        alerts = crime_alerts().get("alerts", [])
+        sig["alerts"] = alerts[:6]
+    except Exception: sig["alerts"] = []
+    try:
+        net = criminal_network().get("nodes", [])
+        sig["top_offenders"] = sorted(net, key=lambda n: -(n.get("score") or 0))[:5]
+        sig["top_offenders"] = [{"name": n["label"], "district": n["district"],
+                                 "risk": n["risk"], "connections": n["score"]} for n in sig["top_offenders"]]
+    except Exception: sig["top_offenders"] = []
+    try:
+        news = live_news.fetch_crime_news(PROJECT / "data")
+        sig["live_news"] = [{"headline": f["headline"], "district": f.get("district"),
+                             "crime": f.get("crime_type")} for f in news.get("feed", [])[:6]]
+    except Exception: sig["live_news"] = []
+    return sig
+
+
+@app.get("/api/intelligence/brief")
+def intelligence_brief():
+    """AI-synthesised executive crime-intelligence briefing from all live signals."""
+    import json as _json
+    from datetime import datetime
+    sig = _gather_signals()
+    llm = create_llm(temperature=0.35)
+    if llm is None:
+        return {"brief": "AI briefing requires an LLM provider (set GROQ_API_KEY / LLM_PROVIDER).",
+                "generated_at": datetime.utcnow().isoformat(), "signals": sig}
+    try:
+        from langchain_core.messages import HumanMessage, SystemMessage
+        resp = llm.invoke([
+            SystemMessage(content=(
+                "You are the Chief Crime Intelligence Analyst for the Karnataka State Police. "
+                "From the structured signals provided (trends, hotspots, ML-detected emerging clusters, "
+                "statistical anomalies, forecasts, live spike-alerts, top-risk offenders, and live crime news), "
+                "write a concise executive intelligence briefing for a senior officer. Use these sections with "
+                "markdown headers: '## Situation Overview', '## Emerging Threats', '## Statistical Anomalies', "
+                "'## Watchlist' (top offenders), and '## Recommended Actions' (specific, prioritised deployment "
+                "advice). Be specific with district names and numbers. Be crisp — this is read by a busy officer. "
+                "Do not invent data beyond the signals given."
+            )),
+            HumanMessage(content="Live signals (JSON):\n" + _json.dumps(sig, default=str)[:6000]),
+        ])
+        brief = getattr(resp, "content", "") or ""
+    except Exception as e:
+        print(f"[brief error] {e}", file=sys.stderr)
+        brief = "Unable to generate the intelligence brief right now."
+    return {"brief": brief, "generated_at": datetime.utcnow().isoformat(),
+            "signal_summary": {"hotspots": len(sig.get("hotspots", [])),
+                               "clusters": len(sig.get("clusters", [])),
+                               "anomalies": len(sig.get("anomalies", [])),
+                               "alerts": len(sig.get("alerts", [])),
+                               "news": len(sig.get("live_news", []))}}
+
+
+@app.get("/api/intelligence/patrol")
+def patrol_recommendations():
+    """Rank districts for patrol deployment from forecast + hotspots + anomalies + alerts."""
+    sig = _gather_signals()
+    score = {}
+    reasons = {}
+    def bump(d, pts, why):
+        if not d: return
+        score[d] = score.get(d, 0) + pts
+        reasons.setdefault(d, []).append(why)
+    for h in sig.get("hotspots", []):
+        bump(h["district"], 2 + (2 if (h.get("solved_pct") or 100) < 40 else 0),
+             f"high FIR volume ({h['firs']:,})" + (", low solve rate" if (h.get('solved_pct') or 100) < 40 else ""))
+    for a in sig.get("alerts", []):
+        bump(a["district"], 4 if a.get("severity") == "critical" else 2,
+             f"{a['crime_type']} spike +{a['change_pct']}%")
+    for an in sig.get("anomalies", []):
+        bump(an["district"], 3 if an.get("severity") == "critical" else 1,
+             f"anomaly {an['month']} (z={an['z_score']})")
+    for c in sig.get("clusters", []):
+        for d in c.get("districts", [])[:4]:
+            bump(d, 1, "part of an emerging crime cluster")
+    for n in sig.get("live_news", []):
+        bump(n.get("district"), 1, f"fresh report: {n.get('crime')}")
+    ranked = sorted(score.items(), key=lambda x: -x[1])[:8]
+    recs = []
+    for i, (d, s) in enumerate(ranked, 1):
+        recs.append({"priority": i, "district": d, "score": s,
+                     "reasons": list(dict.fromkeys(reasons[d]))[:3]})
+    return {"recommendations": recs, "generated": True}
+
+
+# ── Evidence Intelligence ─────────────────────────────────────────────────
+@app.get("/api/evidence/sample")
+def evidence_sample():
+    """A realistic witness statement seeded with a real repeat-offender name."""
+    return {"statement": _evidence.sample_statement()}
+
+
+@app.post("/api/evidence/analyze")
+async def evidence_analyze(text: str = Form(""), language: str = Form("en"),
+                           file: UploadFile | None = File(None)):
+    """Extract entities from a statement/document/audio and cross-reference the FIR DB."""
+    statement = (text or "").strip()
+    note = ""
+    if file is not None:
+        raw = b""
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            raw += chunk
+            if len(raw) > 25 * 1024 * 1024:
+                raise HTTPException(status_code=413, detail="File too large (max 25 MB).")
+        if raw:
+            extracted, note = _evidence.extract_text(file.filename or "upload", raw)
+            if extracted.strip():
+                statement = extracted.strip()
+    if not statement:
+        raise HTTPException(status_code=400, detail=note or "Provide statement text or an evidence file.")
+    try:
+        result = _evidence.analyze(statement)
+    except Exception as e:
+        print(f"[evidence error] {e}", file=sys.stderr)
+        raise HTTPException(status_code=500, detail="Could not analyze the evidence.") from e
+    if note:
+        result["note"] = note
+    return result
+
+
+# ── Autonomous Investigation Agent ────────────────────────────────────────
+class InvestigateRequest(BaseModel):
+    goal: str = Field(..., min_length=3, max_length=500)
+    max_steps: int = 5
+
+
+@app.get("/api/investigate/examples")
+def investigate_examples():
+    from src.chatbot import investigator
+    return {"examples": investigator.EXAMPLE_GOALS}
+
+
+@app.post("/api/investigate")
+def investigate(req: InvestigateRequest):
+    """Autonomous multi-step investigation: plan → chain tools → write the case."""
+    from src.chatbot import investigator
+    steps = min(max(req.max_steps, 3), 6)
+    try:
+        return investigator.run_investigation(req.goal.strip(), max_steps=steps)
+    except Exception as e:
+        print(f"[investigate error] {e}", file=sys.stderr)
+        raise HTTPException(status_code=500, detail="Investigation failed.") from e
 
 
 @app.get("/")

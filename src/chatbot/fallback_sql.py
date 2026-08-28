@@ -2,8 +2,18 @@
 
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
 from src.karnataka_data import KARNATAKA_DISTRICTS
+
+
+def _fir_db_path() -> str | None:
+    """Locate the CCTNS ksp_fir.duckdb for grounding lookups."""
+    base = Path(__file__).resolve().parents[2] / "data"
+    for p in (base / "ksp_fir.duckdb", base / "unified" / "ksp_fir.duckdb"):
+        if p.exists():
+            return str(p)
+    return None
 
 DISTRICT_ALIASES = {
     "bangalore": "Bengaluru Urban",
@@ -40,6 +50,12 @@ def _extract_year(text: str) -> int | None:
 
 
 def _find_district(text: str) -> str | None:
+    # "[Respond in Kannada language.]" would otherwise match Dakshina/Uttara Kannada.
+    try:
+        from src.chatbot.rag.schema_live import strip_directive
+        text = strip_directive(text)
+    except Exception:
+        pass
     q = text.lower()
     for alias, canonical in DISTRICT_ALIASES.items():
         if re.search(rf"\b{re.escape(alias)}\b", q):
@@ -58,6 +74,19 @@ def _find_district(text: str) -> str | None:
         first = d["name"].split()[0]
         if re.search(rf"\b{re.escape(first.lower())}\b", q):
             return d["name"]
+
+    # Kannada script (ಮೈಸೂರಿನಲ್ಲಿ → Mysuru) — the matcher is case-ending aware.
+    # Without this a Kannada question silently loses its district filter and the
+    # answer comes back as a statewide total.
+    try:
+        path = _fir_db_path()
+        if path and any("ಀ" <= ch <= "೿" for ch in text):
+            from src.chatbot.rag.schema_live import match_districts
+            hits = match_districts(text, path)
+            if hits:
+                return hits[0]
+    except Exception:
+        pass
 
     return None
 
@@ -91,15 +120,17 @@ def _combined_context(question: str, history: list[dict]) -> str:
 
 def _detect_crime_topic(question: str, history: list[dict]) -> str | None:
     ctx = _combined_context(question, history)
-    if re.search(r"\bpocso\b", ctx):
+    # Kannada terms are listed alongside the English ones so a Kannada question
+    # keeps its crime filter instead of collapsing to an all-crime total.
+    if re.search(r"\bpocso\b|ಪೋಕ್ಸೊ", ctx):
         return "pocso"
-    if re.search(r"\bmurder\b", ctx):
+    if re.search(r"\bmurder\b|ಕೊಲೆ|ಹತ್ಯೆ", ctx):
         return "murder"
-    if re.search(r"\btheft|\brobbery\b", ctx):
+    if re.search(r"\btheft|\brobbery\b|ಕಳ್ಳತನ|ಚೋರಿ|ದರೋಡೆ|ಸುಲಿಗೆ", ctx):
         return "theft"
-    if re.search(r"\bcyber\b", ctx):
+    if re.search(r"\bcyber\b|ಸೈಬರ್", ctx):
         return "cyber"
-    if re.search(r"\bndps|\bdrug|\bnarcot", ctx):
+    if re.search(r"\bndps|\bdrug|\bnarcot|ಮಾದಕ|ಗಾಂಜಾ|ಡ್ರಗ್ಸ್", ctx):
         return "ndps"
     return None
 
@@ -123,6 +154,19 @@ def _crime_filter_by_keyword(keyword: str) -> str:
 
 # ── Pattern helpers ────────────────────────────────────────────────────────────
 
+# Role words that ride along in front of a name. History expansion rewrites
+# "more details on thimmaiah" to "...for accused thimmaiah", and searching
+# AccusedName for "accused thimmaiah" matches nobody.
+_NAME_NOISE = re.compile(
+    r"^(?:the|a|an|accused|offender|offenders|criminal|criminals|suspect|suspects|"
+    r"person|individual|named|repeat|mr|mrs|ms|dr|sri|shri|smt)\b[.\s]+", re.I)
+_NAME_REJECT = {
+    "the top criminal", "top criminal", "karnataka", "the accused", "accused",
+    "suspect", "criminal", "offender", "offenders", "criminals", "person",
+    "them", "him", "her", "this", "that", "it", "case", "the case", "cases",
+}
+
+
 def _extract_person_name(question: str) -> str | None:
     q = question.strip()
     for pat in (
@@ -131,11 +175,15 @@ def _extract_person_name(question: str) -> str | None:
         r"^who is\s+([A-Za-z][A-Za-z\s'.-]{2,50})\??$",
     ):
         m = re.search(pat, q, re.I)
-        if m:
-            name = m.group(1).strip().rstrip("?.!")
-            if name.lower() not in ("the top criminal", "top criminal", "karnataka",
-                                    "the accused", "accused", "suspect"):
-                return name
+        if not m:
+            continue
+        name = m.group(1).strip().rstrip("?.!")
+        prev = None
+        while name != prev:                       # "the accused Thimmaiah" → "Thimmaiah"
+            prev = name
+            name = _NAME_NOISE.sub("", name).strip()
+        if len(name) >= 3 and name.lower() not in _NAME_REJECT:
+            return name
     return None
 
 
@@ -195,28 +243,48 @@ def _wants_per_district_criminals(q: str) -> bool:
 # ── SQL builders ───────────────────────────────────────────────────────────────
 
 def _person_details(name: str) -> FallbackQuery:
+    # An aggregate profile, not a row dump: a LIMITed dump made the model report
+    # the row count as the person's FIR total (50 instead of their real 260).
     safe = name.replace("'", "''")
     return FallbackQuery(
         db=DB,
         sql=f"""
-            SELECT a.AccusedName AS name, a.AgeYear AS age,
-                   CASE a.GenderID WHEN 1 THEN 'Male' WHEN 2 THEN 'Female' ELSE 'Other' END AS gender,
-                   a.District AS district, om.OccupationName AS occupation,
-                   rm.ReligionName AS religion, cm.CrimeNo AS fir_no,
-                   csh.CrimeHeadName AS crime_type,
-                   EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT AS year,
-                   csm.CaseStatusName AS status
-            FROM Accused a
-            JOIN CaseMaster cm ON cm.CaseMasterID = a.CaseMasterID
-            JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
-            JOIN CaseStatusMaster csm ON cm.CaseStatusID = csm.CaseStatusID
-            LEFT JOIN OccupationMaster om ON a.OccupationID = om.OccupationID
-            LEFT JOIN ReligionMaster rm ON a.ReligionID = rm.ReligionID
-            WHERE a.AccusedName ILIKE '%{safe}%'
-            ORDER BY cm.CrimeRegisteredDate DESC
-            LIMIT 50
+            WITH hits AS (
+                SELECT a.AccusedName AS nm, a.AgeYear AS age, om.OccupationName AS occ,
+                       a.CaseMasterID AS cid, d.DistrictName AS dist,
+                       csh.CrimeHeadName AS ch,
+                       EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT AS yr
+                FROM Accused a
+                JOIN CaseMaster cm ON cm.CaseMasterID = a.CaseMasterID
+                JOIN Unit u ON cm.PoliceStationID = u.UnitID
+                JOIN District d ON u.DistrictID = d.DistrictID
+                JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
+                LEFT JOIN OccupationMaster om ON a.OccupationID = om.OccupationID
+                WHERE a.AccusedName ILIKE '%{safe}%'
+            ),
+            ranked AS (
+                SELECT nm, ch, COUNT(*) AS c,
+                       ROW_NUMBER() OVER (PARTITION BY nm ORDER BY COUNT(*) DESC) AS rn
+                FROM hits GROUP BY nm, ch
+            ),
+            tops AS (
+                SELECT nm, string_agg(ch || ' (' || c || ')', ', ' ORDER BY c DESC) AS top_crimes
+                FROM ranked WHERE rn <= 6 GROUP BY nm
+            )
+            SELECT h.nm AS name, MAX(h.age) AS age, mode(h.occ) AS occupation,
+                   COUNT(DISTINCT h.cid) AS total_firs,
+                   COUNT(DISTINCT h.dist) AS districts_active,
+                   mode(h.dist) AS main_district,
+                   MIN(h.yr) AS first_year, MAX(h.yr) AS last_year,
+                   COUNT(DISTINCT h.ch) AS distinct_crime_types,
+                   MAX(t.top_crimes) AS top_crimes
+            FROM hits h JOIN tops t ON t.nm = h.nm
+            GROUP BY h.nm
+            ORDER BY total_firs DESC
+            LIMIT 10
         """,
-        explanation=f"FIR records for accused: {name}",
+        explanation=f"Offender profile for accused: {name}",
+        note="Figures are lifetime totals across all FIRs on record (2020-2024).",
     )
 
 
@@ -237,16 +305,20 @@ def _district_crime_overview(district: str, year: int | None) -> FallbackQuery:
 
 
 def _top_accused_statewide(limit: int = 15) -> FallbackQuery:
+    # mode() gives their primary district/occupation; MAX would just pick the
+    # alphabetically last one, which misreads a statewide offender.
     return FallbackQuery(
         db=DB,
         sql=f"""
-            SELECT a.AccusedName AS name, a.AgeYear AS age, a.District AS district,
-                   om.OccupationName AS occupation,
+            SELECT a.AccusedName AS name, MAX(a.AgeYear) AS age,
+                   mode(a.District) AS main_district,
+                   COUNT(DISTINCT a.District) AS districts_active,
+                   mode(om.OccupationName) AS occupation,
                    COUNT(DISTINCT a.CaseMasterID) AS fir_count
             FROM Accused a
             LEFT JOIN OccupationMaster om ON a.OccupationID = om.OccupationID
             WHERE a.AccusedName IS NOT NULL
-            GROUP BY a.AccusedMasterID, a.AccusedName, a.AgeYear, a.District, om.OccupationName
+            GROUP BY a.AccusedName
             HAVING COUNT(DISTINCT a.CaseMasterID) > 1
             ORDER BY fir_count DESC
             LIMIT {limit}
@@ -260,8 +332,8 @@ def _top_accused_in_district(district: str, limit: int = 10) -> FallbackQuery:
     return FallbackQuery(
         db=DB,
         sql=f"""
-            SELECT a.AccusedName AS name, a.AgeYear AS age,
-                   om.OccupationName AS occupation,
+            SELECT a.AccusedName AS name, MAX(a.AgeYear) AS age,
+                   mode(om.OccupationName) AS occupation,
                    COUNT(DISTINCT a.CaseMasterID) AS fir_count
             FROM Accused a
             JOIN CaseMaster cm ON a.CaseMasterID = cm.CaseMasterID
@@ -270,7 +342,7 @@ def _top_accused_in_district(district: str, limit: int = 10) -> FallbackQuery:
             LEFT JOIN OccupationMaster om ON a.OccupationID = om.OccupationID
             WHERE {_dist_filter(district)}
               AND a.AccusedName IS NOT NULL
-            GROUP BY a.AccusedMasterID, a.AccusedName, a.AgeYear, om.OccupationName
+            GROUP BY a.AccusedName
             ORDER BY fir_count DESC
             LIMIT {limit}
         """,
@@ -284,7 +356,7 @@ def _top_accused_per_district() -> FallbackQuery:
         sql="""
             WITH ranked AS (
                 SELECT d.DistrictName AS district, a.AccusedName AS name,
-                       a.AgeYear AS age, COUNT(DISTINCT a.CaseMasterID) AS fir_count,
+                       MAX(a.AgeYear) AS age, COUNT(DISTINCT a.CaseMasterID) AS fir_count,
                        ROW_NUMBER() OVER (
                            PARTITION BY d.DistrictID ORDER BY COUNT(DISTINCT a.CaseMasterID) DESC
                        ) AS rn
@@ -293,13 +365,48 @@ def _top_accused_per_district() -> FallbackQuery:
                 JOIN Unit u ON cm.PoliceStationID = u.UnitID
                 JOIN District d ON u.DistrictID = d.DistrictID
                 WHERE a.AccusedName IS NOT NULL
-                GROUP BY d.DistrictID, d.DistrictName, a.AccusedMasterID, a.AccusedName, a.AgeYear
+                GROUP BY d.DistrictID, d.DistrictName, a.AccusedName
             )
             SELECT district, name, age, fir_count
             FROM ranked WHERE rn = 1
             ORDER BY district, fir_count DESC
         """,
         explanation="Top accused per district",
+    )
+
+
+def _case_progress_by_district(year: int | None = None) -> FallbackQuery:
+    """Chargesheet / disposal rate by district.
+
+    The closest thing this schema supports to a 'conviction rate': CaseStatusMaster
+    records how far a case has progressed, never the court's verdict.
+    """
+    yr = f"WHERE EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT = {year}" if year else ""
+    return FallbackQuery(
+        db=DB,
+        sql=f"""
+            SELECT d.DistrictName AS district,
+                   COUNT(*) AS total_firs,
+                   COUNT(*) FILTER (WHERE csm.CaseStatusName = 'Charge Sheeted') AS charge_sheeted,
+                   ROUND(100.0 * COUNT(*) FILTER (WHERE csm.CaseStatusName = 'Charge Sheeted')
+                         / NULLIF(COUNT(*), 0), 1) AS chargesheet_pct,
+                   ROUND(100.0 * COUNT(*) FILTER (
+                             WHERE csm.CaseStatusName IN ('Closed/Disposed', 'Final Report Filed'))
+                         / NULLIF(COUNT(*), 0), 1) AS disposed_pct,
+                   ROUND(100.0 * COUNT(*) FILTER (
+                             WHERE csm.CaseStatusName IN ('Under Investigation', 'Pending'))
+                         / NULLIF(COUNT(*), 0), 1) AS still_open_pct
+            FROM CaseMaster cm
+            JOIN Unit u ON cm.PoliceStationID = u.UnitID
+            JOIN District d ON u.DistrictID = d.DistrictID
+            JOIN CaseStatusMaster csm ON cm.CaseStatusID = csm.CaseStatusID
+            {yr}
+            GROUP BY d.DistrictName
+            ORDER BY chargesheet_pct DESC
+        """,
+        explanation=f"Case progression by district{' in ' + str(year) if year else ''}",
+        note=("Case progression, not court outcomes — this database records how far a case "
+              "has advanced (chargesheet / disposal), not conviction or acquittal."),
     )
 
 
@@ -459,6 +566,12 @@ def try_fallback_sql(question: str, history: list[dict] | None = None) -> Fallba
     if person_name:
         return _person_details(person_name)
 
+    # --- Case progression (chargesheet / disposal / pendency) by district ---
+    if re.search(r"charge\s*sheet(ing)?\s*rate|chargesheet\s*rate|disposal\s*rate|pendency|"
+                 r"case\s*progress|case\s*status\s*(by|per)\s*district|"
+                 r"clearance\s*rate|solve\s*rate|detection\s*rate", q):
+        return _case_progress_by_district(year)
+
     # --- Communal / hate crime / caste violence trends ---
     if re.search(r"communal|hate\s*crime|religious.*crime|sectarian|caste\s*attack|mob\s*lynch|minority.*crime", q):
         return _communal_trends(district, year)
@@ -506,6 +619,69 @@ def try_fallback_sql(question: str, history: list[dict] | None = None) -> Fallba
         return _top_accused_statewide()
 
     crime_topic = _detect_crime_topic(question, history)
+
+    # --- Simple aggregate counts (deterministic — answered with NO LLM call) ---
+    is_count = bool(re.search(r"how many|number of|\btotal\b|count of|\bcount\b|ಎಷ್ಟು", q))
+    mentions_unit = bool(re.search(r"\bfir(s)?\b|\bcase(s)?\b|\bcrime(s)?\b|registered|ದಾಖಲ", q))
+    per_district = bool(re.search(r"each district|per district|by district|every district", q))
+    ywhere = f"WHERE EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT = {year}" if year else ""
+
+    # "How many districts?" (English, or Kannada ಎಷ್ಟು ಜಿಲ್ಲೆಗಳಿವೆ)
+    # Kannada is case-marked: ಜಿಲ್ಲೆಗಳ- is the plural ("districts"), while ಜಿಲ್ಲೆಯಲ್ಲಿ
+    # is the locative ("in <X> district"). Matching bare ಜಿಲ್ಲೆ caught every Kannada
+    # question that merely named a district and answered it with the district count.
+    kn_district_count = ("ಜಿಲ್ಲೆಗಳ" in q and "ಎಷ್ಟು" in q
+                         and not crime_topic and not district)
+    if re.search(r"how many districts|number of districts|count of districts", q) or kn_district_count:
+        return FallbackQuery(db=DB,
+            sql="SELECT COUNT(DISTINCT DistrictName) AS districts FROM District",
+            explanation="Number of districts in the crime database")
+
+    # "Which/top district by FIR volume?" (no specific crime type)
+    if not crime_topic and re.search(r"which|what|highest|most|top|rank", q) and re.search(r"district", q) and mentions_unit and not per_district:
+        return FallbackQuery(db=DB,
+            sql=f"""SELECT d.DistrictName AS district, COUNT(*) AS fir_count
+                {_fir_base()}
+                {ywhere}
+                GROUP BY d.DistrictName ORDER BY fir_count DESC LIMIT 5""",
+            explanation="Districts ranked by FIR volume")
+
+    # "How many FIRs?" — statewide or a single district, optional year, no crime type
+    if is_count and mentions_unit and not crime_topic and not per_district and not re.search(r"top|rate|which|highest|most|rank", q):
+        if district:
+            return FallbackQuery(db=DB,
+                sql=f"""SELECT COUNT(*) AS fir_count
+                    {_fir_base()}
+                    WHERE {_dist_filter(district)} {_year_filter(year)}""",
+                explanation=f"Total FIRs in {district}" + (f" ({year})" if year else ""))
+        return FallbackQuery(db=DB,
+            sql=f"SELECT COUNT(*) AS fir_count FROM CaseMaster cm {ywhere}",
+            explanation="Total FIRs" + (f" in {year}" if year else " in the database"))
+
+    # "How many <crime> ...?" — precise filtered count using the DB's EXACT CrimeHeadName
+    # values (grounding), so "drug cases" -> NDPS heads, "rapes", "fraud" all count right.
+    if is_count and not per_district and not re.search(r"top|rate|which|highest|most|rank|breakdown|each|list|details", q):
+        _dbp = _fir_db_path()
+        _heads = []
+        if _dbp:
+            try:
+                from src.chatbot.rag.schema_live import match_crime_heads
+                _heads = match_crime_heads(question, _dbp)
+            except Exception:
+                _heads = []
+        if _heads:
+            _in = ", ".join("'" + h.replace("'", "''") + "'" for h in _heads)
+            _dist = f"AND {_dist_filter(district)}" if district else ""
+            return FallbackQuery(
+                db=DB,
+                sql=f"""SELECT COUNT(*) AS fir_count
+                    {_fir_base()}
+                    WHERE csh.CrimeHeadName IN ({_in}) {_dist} {_year_filter(year)}""",
+                explanation="FIR count for " + ", ".join(_heads[:3])
+                            + (f" in {district}" if district else "")
+                            + (f" ({year})" if year else ""),
+                note="Matched crime types: " + ", ".join(_heads),
+            )
 
     # --- Follow-up: "give me details" ---
     if _is_details_followup(question):

@@ -1458,6 +1458,11 @@
 
     /* Leaflet dark theme */
     .leaflet-container { background: #0a0f1c; }
+    /* The OSM fallback ships light tiles; invert them so the fallback still
+       matches the dark operations UI instead of flashing a white map. */
+    .osm-dark { filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(.9); }
+    /* Lift the place names so they stay readable over the hotspot circles. */
+    .map-labels { filter: brightness(1.45) contrast(1.1); }
     .leaflet-popup-content-wrapper, .leaflet-popup-tip {
       background: #0f1626; color: #e8eef8;
       box-shadow: 0 10px 30px rgba(0,0,0,.6);
@@ -2020,6 +2025,15 @@
     </button>
 
     <div class="nav-group-label" style="margin-top:4px">Intelligence</div>
+    <button class="nav-item" onclick="switchTab('investigate')" id="nav-investigate">
+      <span class="nav-icon">🕵️</span> Investigate
+    </button>
+    <button class="nav-item" onclick="switchTab('brief')" id="nav-brief">
+      <span class="nav-icon">🧠</span> AI Brief
+    </button>
+    <button class="nav-item" onclick="switchTab('evidence')" id="nav-evidence">
+      <span class="nav-icon">🔬</span> Evidence Intel
+    </button>
     <button class="nav-item" onclick="switchTab('intelmap')" id="nav-intelmap">
       <span class="nav-icon">🗺️</span> Intel Map
     </button>
@@ -2065,6 +2079,9 @@
   <!-- TOP BAR -->
   <div class="topbar">
     <button class="tab-btn active" onclick="switchTab('chat')" id="tab-chat">Chat</button>
+    <button class="tab-btn" onclick="switchTab('investigate')" id="tab-investigate">🕵️ Investigate</button>
+    <button class="tab-btn" onclick="switchTab('brief')" id="tab-brief">🧠 AI Brief</button>
+    <button class="tab-btn" onclick="switchTab('evidence')" id="tab-evidence">🔬 Evidence</button>
     <button class="tab-btn" onclick="switchTab('intelmap')" id="tab-intelmap">Intel Map</button>
     <button class="tab-btn" onclick="switchTab('analytics')" id="tab-analytics">Analytics</button>
     <button class="tab-btn" onclick="switchTab('solver')" id="tab-solver">Case Solver</button>
@@ -2220,6 +2237,82 @@
       <div class="card">
         <h3>Day of Week · Crime Pattern</h3>
         <div class="chart-wrap"><canvas id="dayChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <h3 style="margin:0">Live Crime News · Karnataka</h3>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span id="newsMeta" style="font-size:11px;color:var(--muted)"></span>
+          <button class="im-ctrl-btn" id="newsRefreshBtn" onclick="loadNewsFeed(true)">↻ Refresh</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0 10px">
+        Open-source reporting matched against our districts and crime heads, so a spike shows up
+        here before the FIR reaches CCTNS.
+      </div>
+      <div id="newsFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
+      <div id="newsFeed" style="display:grid;gap:8px;max-height:430px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <!-- AUTONOMOUS INVESTIGATION AGENT PANEL -->
+  <div class="panel" id="panel-investigate">
+    <div class="card">
+      <h3>🕵️ Autonomous Investigation Agent</h3>
+      <div style="font-size:12px;color:var(--muted);margin:4px 0 10px">Give the AI a goal. It plans, runs multiple analyses across the data, follows the leads, and writes the case — on its own.</div>
+      <div id="investExamples" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <input id="investGoal" type="text" placeholder="e.g. Find the biggest emerging threat and who's behind it" style="flex:1;min-width:280px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px">
+        <button onclick="runInvestigation()" id="investBtn" style="padding:8px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer">Investigate</button>
+      </div>
+      <div id="investSteps" style="margin-top:16px"></div>
+      <div id="investBrief" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <!-- AI INTELLIGENCE BRIEF PANEL -->
+  <div class="panel" id="panel-brief">
+    <div class="stat-row">
+      <div class="stat-box"><div class="stat-num" id="briefHotspots">—</div><div class="stat-label">Hotspots</div></div>
+      <div class="stat-box"><div class="stat-num" id="briefClusters">—</div><div class="stat-label">ML Clusters</div></div>
+      <div class="stat-box"><div class="stat-num" id="briefAnomalies">—</div><div class="stat-label">Anomalies</div></div>
+      <div class="stat-box"><div class="stat-num" id="briefAlerts">—</div><div class="stat-label">Live Alerts</div></div>
+      <div class="stat-box"><div class="stat-num" id="briefNews">—</div><div class="stat-label">News Items</div></div>
+    </div>
+    <div class="analytics-grid" style="grid-template-columns: 2fr 1fr;">
+      <div class="card">
+        <h3>🧠 AI Intelligence Brief
+          <button onclick="loadBrief(true)" id="briefRefreshBtn" style="float:right;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--accent);color:#fff;cursor:pointer">↻ Regenerate</button>
+          <button onclick="window.print()" style="float:right;margin-right:8px;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer">🖨 Print</button>
+        </h3>
+        <div id="briefBody" style="padding-top:8px;line-height:1.65">Open this tab to generate the briefing.</div>
+        <div id="briefMeta" style="font-size:11px;color:var(--muted);margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h3>🚔 Patrol Deployment</h3>
+        <div id="patrolList" style="padding-top:8px">Ranking districts…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVIDENCE INTELLIGENCE PANEL -->
+  <div class="panel" id="panel-evidence">
+    <div class="analytics-grid" style="grid-template-columns: 1fr 1fr;">
+      <div class="card">
+        <h3>🔬 Evidence Intelligence
+          <button onclick="loadEvidenceSample()" style="float:right;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer">Load sample</button>
+        </h3>
+        <div style="font-size:12px;color:var(--muted);margin:4px 0 8px">Paste a witness / complaint statement, or upload one (PDF, DOCX, TXT, or audio). The AI extracts suspects, districts &amp; crime types and cross-references 500k FIRs for priors and gang links.</div>
+        <textarea id="evidenceText" rows="8" style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical" placeholder="Paste the statement text here..."></textarea>
+        <div style="display:flex;gap:10px;margin-top:8px;align-items:center;flex-wrap:wrap">
+          <input type="file" id="evidenceFile" accept=".txt,.md,.pdf,.docx,.doc,.wav,.mp3,.m4a,.webm,.ogg" style="font-size:12px;color:var(--muted)">
+          <button onclick="analyzeEvidence()" style="padding:8px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer">Analyze Evidence</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Intelligence Findings</h3>
+        <div id="evidenceResult" style="padding-top:6px;color:var(--muted)">Run an analysis to see extracted entities and FIR cross-references.</div>
       </div>
     </div>
   </div>
@@ -2525,11 +2618,177 @@ function switchTab(tab) {
   document.querySelector('.sidebar').classList.toggle('sidebar-map-hidden', tab === 'intelmap');
   currentTab = tab;
   if (tab === 'analytics') loadAnalytics();
+  if (tab === 'investigate') loadInvestigateExamples();
+  if (tab === 'brief') loadBrief();
+  if (tab === 'evidence') { const t = document.getElementById('evidenceText'); if (t && !t.value) loadEvidenceSample(); }
   if (tab === 'intelmap') loadIntelMap();
   if (tab === 'audit') loadAudit();
   if (tab === 'browse') initBrowse();
   if (tab === 'solver') loadCaseSolverStats();
   closeModelDropdown();
+}
+
+// ─── AI INTELLIGENCE BRIEF + PATROL DEPLOYMENT ────────────────────────────
+let _briefLoaded = false;
+async function loadBrief(force) {
+  if (_briefLoaded && !force) return;
+  _briefLoaded = true;
+  const body = document.getElementById('briefBody');
+  const btn = document.getElementById('briefRefreshBtn');
+  body.innerHTML = '<div style="color:var(--muted)">🧠 Synthesising every live signal (trends, hotspots, ML clusters, anomalies, live news)… this takes a few seconds.</div>';
+  if (btn) { btn.disabled = true; btn.textContent = '↻ Working…'; }
+  loadPatrol();
+  try {
+    const res = await fetch('/api/intelligence/brief');
+    const d = await res.json();
+    const md = d.brief || 'No brief available.';
+    body.innerHTML = (window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>'));
+    const s = d.signal_summary || {};
+    const setv = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = (v ?? '—'); };
+    setv('briefHotspots', s.hotspots); setv('briefClusters', s.clusters);
+    setv('briefAnomalies', s.anomalies); setv('briefAlerts', s.alerts); setv('briefNews', s.news);
+    document.getElementById('briefMeta').textContent =
+      'Synthesised by the LLM from live ML + news signals · ' + (d.generated_at || '');
+  } catch (e) {
+    body.innerHTML = '<div style="color:var(--red)">Could not generate the brief. Check the LLM provider is configured.</div>';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '↻ Regenerate'; }
+  }
+}
+
+async function loadPatrol() {
+  const el = document.getElementById('patrolList');
+  el.innerHTML = '<div style="color:var(--muted)">Ranking districts…</div>';
+  try {
+    const res = await fetch('/api/intelligence/patrol');
+    const d = await res.json();
+    const recs = d.recommendations || [];
+    if (!recs.length) { el.innerHTML = '<div style="color:var(--muted)">No deployment signals right now.</div>'; return; }
+    el.innerHTML = recs.map(r =>
+      '<div style="padding:8px 0;border-bottom:1px solid var(--border)">' +
+        '<div style="font-weight:600"><span style="color:var(--accent)">#' + r.priority + '</span> ' +
+        escHtml(r.district) + '<span style="float:right;font-size:11px;color:var(--muted)">score ' + r.score + '</span></div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (r.reasons || []).map(escHtml).join(' · ') + '</div>' +
+      '</div>').join('');
+  } catch (e) {
+    el.innerHTML = '<div style="color:var(--red)">Patrol ranking unavailable.</div>';
+  }
+}
+
+// ─── EVIDENCE INTELLIGENCE ────────────────────────────────────────────────
+async function loadEvidenceSample() {
+  try {
+    const r = await fetch('/api/evidence/sample');
+    const d = await r.json();
+    const t = document.getElementById('evidenceText');
+    if (t) t.value = d.statement || '';
+  } catch (e) {}
+}
+
+async function analyzeEvidence() {
+  const el = document.getElementById('evidenceResult');
+  const text = (document.getElementById('evidenceText').value || '').trim();
+  const file = document.getElementById('evidenceFile').files[0];
+  if (!text && !file) { el.innerHTML = '<div style="color:var(--muted)">Paste a statement or choose a file first.</div>'; return; }
+  el.innerHTML = '<div style="color:var(--muted)">🔬 Extracting entities and cross-referencing 500k FIRs…</div>';
+  const fd = new FormData();
+  fd.append('text', text);
+  fd.append('language', window.currentLang || 'en');
+  if (file) fd.append('file', file);
+  try {
+    const res = await fetch('/api/evidence/analyze', { method: 'POST', body: fd });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({ detail: res.statusText }));
+      el.innerHTML = '<div style="color:var(--red)">' + escHtml(e.detail || 'Analysis failed') + '</div>';
+      return;
+    }
+    const d = await res.json();
+    const chip = a => (a || []).map(x => '<span style="display:inline-block;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:2px 9px;margin:2px;font-size:11px">' + escHtml(x) + '</span>').join('') || '<span style="color:var(--muted)">none</span>';
+    const ent = d.entities || {};
+    let h = '';
+    if (d.note) h += '<div style="color:var(--muted);font-size:12px;margin-bottom:8px">ℹ️ ' + escHtml(d.note) + '</div>';
+    h += '<div style="font-size:12px;color:var(--muted);margin-bottom:3px">Districts mentioned</div>' + chip(ent.districts);
+    h += '<div style="font-size:12px;color:var(--muted);margin:8px 0 3px">Crime types inferred</div>' + chip(ent.crimes);
+    h += '<div style="font-size:12px;color:var(--muted);margin:10px 0 4px">Named individuals cross-referenced against 500k FIRs</div>';
+    const m = d.matches || [];
+    if (!m.length) {
+      h += '<div style="color:var(--muted);font-size:13px">No named individual in the statement matched a prior FIR.</div>';
+    } else {
+      m.forEach(x => {
+        const hot = x.priors >= 3;
+        h += '<div style="border:1px solid ' + (hot ? 'var(--red)' : 'var(--border)') + ';border-radius:8px;padding:9px;margin:6px 0">'
+          + '<div style="font-weight:600">' + (hot ? '⚠️ ' : '') + escHtml(x.matched_name)
+          + '<span style="float:right;color:var(--accent)">' + x.priors + ' prior FIRs</span></div>'
+          + '<div style="font-size:11px;color:var(--muted);margin-top:3px">Crimes: ' + (x.crimes || []).map(escHtml).join(', ') + '</div>'
+          + '<div style="font-size:11px;color:var(--muted)">Districts: ' + (x.districts || []).map(escHtml).join(', ') + '</div>'
+          + ((x.gangs && x.gangs.length) ? '<div style="font-size:11px;color:var(--red)">Gang link: ' + x.gangs.map(escHtml).join(', ') + '</div>' : '')
+          + '</div>';
+      });
+    }
+    if (d.summary) {
+      h += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
+        + '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">AI investigative note</div>'
+        + (window.marked ? marked.parse(d.summary) : escHtml(d.summary)) + '</div>';
+    }
+    el.innerHTML = h;
+  } catch (e) {
+    el.innerHTML = '<div style="color:var(--red)">Could not analyze the evidence.</div>';
+  }
+}
+
+// ─── AUTONOMOUS INVESTIGATION AGENT ───────────────────────────────────────
+async function loadInvestigateExamples() {
+  const el = document.getElementById('investExamples');
+  if (!el || el.dataset.loaded) return;
+  try {
+    const r = await fetch('/api/investigate/examples');
+    const d = await r.json();
+    el.innerHTML = (d.examples || []).map(x =>
+      '<button onclick="document.getElementById(\'investGoal\').value=this.textContent" style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:3px 10px;color:var(--muted);cursor:pointer">' + escHtml(x) + '</button>'
+    ).join('');
+    el.dataset.loaded = '1';
+  } catch (e) {}
+}
+
+let _investBusy = false;
+async function runInvestigation() {
+  if (_investBusy) return;
+  const goal = (document.getElementById('investGoal').value || '').trim();
+  const stepsEl = document.getElementById('investSteps');
+  const briefEl = document.getElementById('investBrief');
+  const btn = document.getElementById('investBtn');
+  if (!goal) { stepsEl.innerHTML = '<div style="color:var(--muted)">Enter a goal or pick an example above.</div>'; return; }
+  _investBusy = true; btn.disabled = true; btn.textContent = 'Investigating…';
+  briefEl.innerHTML = '';
+  stepsEl.innerHTML = '<div style="color:var(--muted)">🕵️ The agent is investigating — planning steps, running analyses, following the leads…</div>';
+  try {
+    const res = await fetch('/api/investigate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ goal })
+    });
+    const d = await res.json();
+    if (!res.ok) { stepsEl.innerHTML = '<div style="color:var(--red)">' + escHtml(d.detail || 'Investigation failed') + '</div>'; return; }
+    stepsEl.innerHTML = '';
+    const steps = d.steps || [];
+    for (let i = 0; i < steps.length; i++) {
+      const s = steps[i];
+      const div = document.createElement('div');
+      div.style.cssText = 'border-left:2px solid var(--accent);padding:6px 0 6px 12px;margin:8px 0;opacity:0;transition:opacity .3s';
+      div.innerHTML = '<div style="font-weight:600;font-size:13px"><span style="color:var(--accent)">Step ' + s.step + '</span> · ' + escHtml(s.tool) + '</div>'
+        + (s.thought ? '<div style="font-size:12px;color:var(--muted);font-style:italic">' + escHtml(s.thought) + '</div>' : '')
+        + '<div style="font-size:12px;margin-top:2px">→ ' + escHtml(s.observation) + '</div>';
+      stepsEl.appendChild(div);
+      await new Promise(r => setTimeout(r, 650));
+      div.style.opacity = '1';
+    }
+    const tag = d.method === 'autonomous' ? '🧠 autonomously planned' : '📋 investigation playbook';
+    briefEl.innerHTML = '<div style="font-size:11px;color:var(--muted);margin:10px 0 6px">Case written after ' + (d.tool_count || steps.length) + ' investigative steps · ' + tag + '</div>'
+      + '<div class="card" style="background:var(--bg)">' + (window.marked ? marked.parse(d.brief || '') : escHtml(d.brief || '')) + '</div>';
+  } catch (e) {
+    stepsEl.innerHTML = '<div style="color:var(--red)">Could not run the investigation.</div>';
+  } finally {
+    _investBusy = false; btn.disabled = false; btn.textContent = 'Investigate';
+  }
 }
 
 // ─── LANGUAGE ─────────────────────────────────────────────────────────────
@@ -3089,7 +3348,19 @@ async function sendMessage() {
     hideTyping();
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: res.statusText }));
-      addMessage('bot', 'Error: ' + (err.detail || res.statusText));
+      let msg = err.detail;
+      // FastAPI validation errors arrive as an array of objects, which would
+      // otherwise render as "[object Object]".
+      if (Array.isArray(msg)) {
+        const first = msg[0] || {};
+        const t = first.type || '';
+        if (t.includes('too_long')) msg = 'That message is too long — please keep it under 2000 characters. For a full statement or document, use the Evidence Intel tab.';
+        else if (t.includes('too_short')) msg = 'Please type a question first.';
+        else msg = first.msg || 'That request could not be processed.';
+      } else if (res.status === 429) {
+        msg = msg || 'The AI provider is rate-limited right now. Please try again in a moment.';
+      }
+      addMessage('bot', msg || res.statusText);
     } else {
       const data = await res.json();
       if (data.session_id) currentSession = data.session_id;
@@ -3208,7 +3479,120 @@ const CHART_DEFAULTS = {
   },
 };
 
+// ─── LIVE CRIME NEWS (Analytics) ──────────────────────────────────────────
+// Headlines and source names come from an external RSS feed, so every field is
+// escaped before it reaches innerHTML.
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+let _newsItems = [], _newsFilter = 'all', _newsLoaded = false;
+
+const NEWS_SEVERITY = { high: '#ef4444', medium: '#f97316', low: '#64748b' };
+
+function _newsAge(published) {
+  const t = Date.parse(published || '');
+  if (!t) return '';
+  const mins = Math.round((Date.now() - t) / 60000);
+  if (mins < 60) return mins + 'm ago';
+  if (mins < 1440) return Math.round(mins / 60) + 'h ago';
+  return Math.round(mins / 1440) + 'd ago';
+}
+
+function renderNewsFeed() {
+  const wrap = document.getElementById('newsFeed');
+  if (!wrap) return;
+  const items = _newsFilter === 'all'
+    ? _newsItems
+    : _newsItems.filter(n => (n.district || '') === _newsFilter);
+
+  if (!items.length) {
+    wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:14px 0">' +
+      'No matching stories right now.</div>';
+    return;
+  }
+  wrap.innerHTML = items.map(n => {
+    const col = NEWS_SEVERITY[n.severity] || NEWS_SEVERITY.low;
+    const chips = [];
+    if (n.district) chips.push(
+      '<span style="color:var(--accent)">📍 ' + escapeHtml(n.district) + '</span>');
+    if (n.crime_type && n.crime_type !== 'General') chips.push(
+      '<span>' + escapeHtml(n.crime_type) + '</span>');
+    chips.push('<span>' + escapeHtml(n.source || '') + '</span>');
+    const age = _newsAge(n.published);
+    if (age) chips.push('<span>' + age + '</span>');
+    return '' +
+      '<a href="' + encodeURI(n.url || '#') + '" target="_blank" rel="noopener noreferrer" ' +
+        'style="display:block;text-decoration:none;background:var(--bg);border:1px solid var(--border);' +
+        'border-left:3px solid ' + col + ';border-radius:6px;padding:10px 12px">' +
+        '<div style="color:var(--text);font-size:13px;line-height:1.45">' +
+          escapeHtml(n.headline || '') + '</div>' +
+        '<div style="margin-top:6px;font-size:11px;color:var(--muted);display:flex;' +
+          'gap:10px;flex-wrap:wrap">' + chips.join('') + '</div>' +
+      '</a>';
+  }).join('');
+}
+
+function renderNewsFilters() {
+  const bar = document.getElementById('newsFilters');
+  if (!bar) return;
+  const counts = {};
+  _newsItems.forEach(n => { if (n.district) counts[n.district] = (counts[n.district] || 0) + 1; });
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const mk = (key, label, n) =>
+    '<button class="im-ctrl-btn' + (_newsFilter === key ? ' im-ctrl-accent' : '') + '" ' +
+    'onclick="setNewsFilter(' + JSON.stringify(key).replace(/"/g, '&quot;') + ')">' +
+    escapeHtml(label) + (n != null ? ' (' + n + ')' : '') + '</button>';
+  bar.innerHTML = mk('all', 'All', _newsItems.length) +
+    top.map(([d, n]) => mk(d, d, n)).join('');
+}
+
+function setNewsFilter(k) { _newsFilter = k; renderNewsFilters(); renderNewsFeed(); }
+
+let _newsBusy = false;
+
+async function loadNewsFeed(force) {
+  if (_newsBusy) return;
+  if (_newsLoaded && !force) return;
+  _newsBusy = true;
+  const wrap = document.getElementById('newsFeed');
+  const meta = document.getElementById('newsMeta');
+  const btn = document.getElementById('newsRefreshBtn');
+  const label = btn ? btn.textContent : null;
+  if (btn) { btn.disabled = true; btn.textContent = 'Refreshing…'; }
+  if (wrap && !_newsItems.length) {
+    wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:14px 0">' +
+      'Fetching live reports…</div>';
+  }
+  try {
+    // force=1 skips the 60s server cache, otherwise Refresh returns the same
+    // payload and looks broken.
+    const url = '/api/news/live' + (force ? '?force=1' : '');
+    const d = await (await fetch(url, { cache: 'no-store' })).json();
+    _newsItems = d.feed || [];
+    _newsLoaded = true;
+    if (meta) {
+      const withDistrict = _newsItems.filter(n => n.district).length;
+      const newest = _newsItems.length ? _newsAge(_newsItems[0].published) : '';
+      meta.textContent = _newsItems.length + ' stories · ' + withDistrict +
+        ' district-matched' + (newest ? ' · newest ' + newest : '');
+    }
+    renderNewsFilters();
+    renderNewsFeed();
+  } catch (e) {
+    if (wrap && !_newsItems.length) {
+      wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:14px 0">' +
+        'Live news is unavailable right now. The rest of Analytics is unaffected.</div>';
+    }
+  } finally {
+    _newsBusy = false;
+    if (btn) { btn.disabled = false; btn.textContent = label || '↻ Refresh'; }
+  }
+}
+
 async function loadAnalytics() {
+  loadNewsFeed();          // independent of the charts; never blocks them
   try {
     const [trends, district, crimeTypes, preds, cases, behav] = await Promise.all([
       fetch('/api/analytics/trends').then(r => r.json()),
@@ -3320,13 +3704,80 @@ let _imRiskMarkers = {};
 let _activeImRisks = new Set(['critical','high','medium','low']);
 const IM_RISK_COLOR = { critical:'#ef4444', high:'#f97316', medium:'#eab308', low:'#22c55e' };
 
+// Keyless dark basemaps, tried in order. CARTO's free tiles began demanding an
+// API key and now render "API KEY REQUIRED" across every tile, so we no longer
+// use them. If a provider fails we fall through to the next rather than leaving
+// the officer looking at an empty grey map.
+// Esri splits its dark canvas in two: a Base layer with landforms only, and a
+// Reference layer carrying every place name. Both are needed, or the officer
+// gets an unlabelled silhouette they cannot navigate.
+const ESRI = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/';
+const BASEMAPS = [
+  { url: ESRI + 'World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    labels: ESRI + 'World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+    opts: { attribution: 'Esri, HERE, Garmin, © OpenStreetMap contributors', maxZoom: 16 } },
+  { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',   // already labelled
+    opts: { attribution: '© OpenStreetMap contributors', maxZoom: 19, className: 'osm-dark' } },
+];
+
+let imLabelLayer = null;
+
+function addBasemap(map, idx) {
+  idx = idx || 0;
+  const spec = BASEMAPS[idx];
+  if (!spec) return null;
+  const layer = L.tileLayer(spec.url, Object.assign({ crossOrigin: true }, spec.opts));
+  let errors = 0;
+  layer.on('tileerror', () => {
+    // A handful of missing tiles at the edge of a zoom level is normal; a wall
+    // of them means the provider is down or now wants a key.
+    if (++errors === 6 && BASEMAPS[idx + 1]) {
+      map.removeLayer(layer);
+      if (imLabelLayer) { map.removeLayer(imLabelLayer); imLabelLayer = null; }
+      addBasemap(map, idx + 1);
+    }
+  });
+  layer.addTo(map);
+  if (spec.labels) {
+    // Added after the base so it draws on top of it, and it lives in the tile
+    // pane so suspect markers still sit above the type.
+    imLabelLayer = L.tileLayer(spec.labels, Object.assign(
+      { crossOrigin: true, className: 'map-labels' }, spec.opts)).addTo(map);
+  }
+  return layer;
+}
+
+const IM_SUSPECT_MIN_ZOOM = 8;
+
+function imSyncZoomLayers() {
+  if (!intelMapInstance || !imSuspectLayer) return;
+  const show = intelMapInstance.getZoom() >= IM_SUSPECT_MIN_ZOOM;
+  const on = intelMapInstance.hasLayer(imSuspectLayer);
+  if (show && !on) intelMapInstance.addLayer(imSuspectLayer);
+  else if (!show && on) intelMapInstance.removeLayer(imSuspectLayer);
+  const hint = document.getElementById('imZoomHint');
+  if (hint) hint.style.opacity = show ? '0' : '1';
+}
+
+function imAddZoomHint(map) {
+  const el = document.createElement('div');
+  el.id = 'imZoomHint';
+  el.textContent = 'Zoom in to plot individual suspects';
+  el.style.cssText =
+    'position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:500;' +
+    'padding:7px 14px;border-radius:999px;pointer-events:none;white-space:nowrap;' +
+    'background:rgba(11,17,32,.86);border:1px solid #24304d;color:#93a4c4;' +
+    'font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;' +
+    'transition:opacity .25s ease';
+  map.getContainer().appendChild(el);
+}
+
 async function loadIntelMap() {
   if (intelMapInstance) return;
   try {
     intelMapInstance = L.map('intel-map', { center: [14.5, 75.7], zoom: 7 });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '© OSM © CartoDB', subdomains: 'abcd', maxZoom: 19,
-    }).addTo(intelMapInstance);
+    addBasemap(intelMapInstance);
+    imAddZoomHint(intelMapInstance);
 
     const [hotRes, netRes] = await Promise.all([
       fetch('/api/analytics/hotspots'),
@@ -3346,7 +3797,8 @@ async function loadIntelMap() {
       const ratio = r.total_firs / maxFIR;
       const color = ratio > 0.6 ? '#ef4444' : ratio > 0.3 ? '#f97316' : '#eab308';
       L.circle([r.latitude, r.longitude], {
-        radius: 8000 + ratio * 35000, color, fillColor: color, fillOpacity: 0.12, weight: 1.5, opacity: 0.45,
+        radius: 8000 + ratio * 35000, color, fillColor: color,
+        fillOpacity: 0.09, weight: 1, opacity: 0.32,
       }).addTo(imHotspotLayer).bindPopup(`
         <div style="font-family:Inter,sans-serif;min-width:170px">
           <b style="color:#f1f5f9">${r.district}</b>
@@ -3365,8 +3817,8 @@ async function loadIntelMap() {
       const base = distCoords[n.district];
       if (!base) return;
       const idx = distOffset[n.district] = (distOffset[n.district] || 0) + 1;
-      const angle = idx * 2.399;
-      const r = 0.022 * Math.sqrt(idx);
+      const angle = idx * 2.399;                 // golden angle, spreads evenly
+      const r = 0.038 * Math.sqrt(idx);          // wider spiral so dots separate
       nodeCoords[n.id] = { lat: base.lat + r * Math.sin(angle), lng: base.lng + r * Math.cos(angle) };
     });
 
@@ -3378,7 +3830,8 @@ async function loadIntelMap() {
       if (!coords) return;
       const color = IM_RISK_COLOR[n.risk] || IM_RISK_COLOR.high;
       const marker = L.circleMarker([coords.lat, coords.lng], {
-        radius: Math.min(5 + n.score * 0.1, 13), color: '#fff', weight: 1.5, fillColor: color, fillOpacity: 0.9,
+        radius: Math.min(4 + n.score * 0.07, 8.5), color: '#0b1120',
+        weight: 1, fillColor: color, fillOpacity: 0.92,
       }).bindPopup(`
         <div style="font-family:Inter,sans-serif;min-width:185px">
           <b style="color:#f1f5f9">${n.label}</b>
@@ -3400,6 +3853,12 @@ async function loadIntelMap() {
     });
     imSuspectLayer.addTo(intelMapInstance);
 
+    // At state zoom, 131 suspects scattered inside 31 district circles read as
+    // noise. Show district hotspots first and reveal individuals on zoom-in,
+    // which is also how an officer actually works: state view, then a district.
+    imSyncZoomLayers();
+    intelMapInstance.on('zoomend', imSyncZoomLayers);
+
     document.getElementById('imNodes').textContent = netData.nodes.length;
     document.getElementById('imEdges').textContent = netData.nodes.filter(n => n.in_gang).length;
     document.getElementById('imCritical').textContent = netData.nodes.filter(n => n.risk === 'high' || n.risk === 'critical').length;
@@ -3408,7 +3867,16 @@ async function loadIntelMap() {
     const allCoords = Object.values(nodeCoords).map(c => [c.lat, c.lng]);
     if (allCoords.length) {
       imAllBounds = L.latLngBounds(allCoords);
-      intelMapInstance.fitBounds(imAllBounds, { padding: [30, 30] });
+      // The panel may still be laying out when the map is built. A zero-size
+      // container makes fitBounds resolve to a whole-world zoom, so measure
+      // again on the next frames before fitting, and clamp the result.
+      const fit = () => {
+        intelMapInstance.invalidateSize(false);
+        intelMapInstance.fitBounds(imAllBounds, { padding: [30, 30] });
+        if (intelMapInstance.getZoom() < 6) intelMapInstance.setView([14.7, 76.0], 7);
+        imSyncZoomLayers();
+      };
+      requestAnimationFrame(() => { fit(); setTimeout(fit, 350); });
     }
   } catch(e) { console.error('Intel Map error:', e); }
 }

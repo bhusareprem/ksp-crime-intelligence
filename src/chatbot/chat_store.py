@@ -42,6 +42,10 @@ class ChatStore:
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
+        # SQLite ignores foreign keys unless this is set per connection, so the
+        # ON DELETE CASCADE on chat_messages was declared but never enforced:
+        # deleting a session left its messages behind.
+        conn.execute("PRAGMA foreign_keys = ON")
         return conn
 
     def _init_db(self) -> None:
@@ -141,6 +145,9 @@ class ChatStore:
 
     def delete_session(self, session_id: str) -> bool:
         with self._connect() as conn:
+            # Explicit as well as the cascade: an officer deleting a conversation
+            # must not leave its content recoverable in the messages table.
+            conn.execute("DELETE FROM chat_messages WHERE session_id = ?", (session_id,))
             cur = conn.execute("DELETE FROM chat_sessions WHERE id = ?", (session_id,))
             return cur.rowcount > 0
 

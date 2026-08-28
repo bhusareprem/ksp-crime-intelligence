@@ -145,171 +145,122 @@ GROUP BY ch.severity ORDER BY count DESC""",
 CRIMINAL_EXAMPLES: list[QueryExample] = [
     QueryExample(
         "How many thefts in Bengaluru in 2024?",
-        """SELECT d.name AS district, ch.name AS crime_type, COUNT(*) AS count
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE d.name ILIKE '%Bengaluru%' AND ch.name ILIKE '%theft%' AND f.fir_year = 2024
-GROUP BY d.name, ch.name ORDER BY count DESC""",
-        ("theft", "bengaluru", "fir", "count", "2024", "real"),
+        """SELECT COUNT(*) AS theft_firs
+FROM CaseMaster cm
+JOIN Unit u ON cm.PoliceStationID = u.UnitID
+JOIN District d ON u.DistrictID = d.DistrictID
+JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
+WHERE d.DistrictName ILIKE '%Bengaluru Urban%' AND csh.CrimeHeadName ILIKE '%theft%'
+  AND EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT = 2024""",
+        ("theft", "bengaluru", "count", "2024", "fir"),
     ),
     QueryExample(
         "Murder FIRs by district in 2023",
-        """SELECT d.name AS district, COUNT(*) AS murder_firs
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE ch.name ILIKE '%murder%' AND f.fir_year = 2023
-GROUP BY d.name ORDER BY murder_firs DESC LIMIT 10""",
+        """SELECT d.DistrictName AS district, COUNT(*) AS murder_firs
+FROM CaseMaster cm
+JOIN Unit u ON cm.PoliceStationID = u.UnitID
+JOIN District d ON u.DistrictID = d.DistrictID
+JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
+WHERE csh.CrimeHeadName ILIKE '%murder%' AND EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT = 2023
+GROUP BY d.DistrictName ORDER BY murder_firs DESC LIMIT 10""",
         ("murder", "district", "2023", "fir"),
     ),
     QueryExample(
         "Crime breakdown in Gadag district",
-        """SELECT ch.name AS crime_type, COUNT(*) AS fir_count,
-       SUM(f.accused_count) AS total_accused, SUM(f.arrested_count) AS total_arrested
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE d.name ILIKE '%Gadag%'
-GROUP BY ch.name ORDER BY fir_count DESC LIMIT 10""",
-        ("gadag", "district", "crime", "overview", "breakdown"),
+        """SELECT csh.CrimeHeadName AS crime_type, COUNT(*) AS fir_count
+FROM CaseMaster cm
+JOIN Unit u ON cm.PoliceStationID = u.UnitID
+JOIN District d ON u.DistrictID = d.DistrictID
+JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
+WHERE d.DistrictName ILIKE '%Gadag%'
+GROUP BY csh.CrimeHeadName ORDER BY fir_count DESC LIMIT 10""",
+        ("gadag", "district", "crime", "breakdown", "overview"),
     ),
     QueryExample(
-        "Top repeat offender profiles in Bagalkot",
-        """SELECT village_area_name, primary_crime_head, total_firs,
-       repeat_offender_score, risk_level
-FROM criminal_profiles
-WHERE district_name ILIKE '%Bagalkot%'
-ORDER BY repeat_offender_score DESC, total_firs DESC LIMIT 10""",
-        ("repeat", "offender", "profile", "bagalkot", "risk"),
+        "Top repeat accused statewide",
+        """-- Group by AccusedName: AccusedMasterID is one row per case, so grouping
+-- on it gives every person exactly 1 FIR and finds no repeat offenders.
+SELECT a.AccusedName AS name, MAX(a.District) AS district,
+       COUNT(DISTINCT a.CaseMasterID) AS fir_count
+FROM Accused a
+WHERE a.AccusedName IS NOT NULL
+GROUP BY a.AccusedName
+HAVING COUNT(DISTINCT a.CaseMasterID) > 1
+ORDER BY fir_count DESC LIMIT 15""",
+        ("repeat", "offender", "accused", "top", "name"),
     ),
     QueryExample(
-        "How many POCSO cases in each district?",
-        """SELECT d.name AS district, COUNT(*) AS pocso_cases
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE ch.name ILIKE '%POCSO%'
-GROUP BY d.name ORDER BY pocso_cases DESC""",
-        ("pocso", "district", "count", "each district", "child"),
+        "Cyber crime gangs and their members",
+        """SELECT g.GangName, g.Specialization,
+       COUNT(DISTINCT agl.AccusedMasterID) AS members,
+       COUNT(DISTINCT a.CaseMasterID) AS linked_firs
+FROM CrimeGang g
+JOIN AccusedGangLink agl ON agl.GangID = g.GangID
+JOIN Accused a ON agl.AccusedMasterID = a.AccusedMasterID
+WHERE g.Specialization ILIKE '%cyber%'
+GROUP BY g.GangID, g.GangName, g.Specialization
+ORDER BY linked_firs DESC LIMIT 10""",
+        ("gang", "cyber", "organized", "network", "members"),
     ),
     QueryExample(
-        "POCSO case details for each FIR",
-        """SELECT f.fir_id, d.name AS district, f.fir_year, f.fir_month, f.fir_stage,
-       f.village_area_name, f.place_of_offence, f.accused_count, f.arrested_count
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE ch.name ILIKE '%POCSO%'
-ORDER BY d.name, f.fir_year DESC""",
-        ("pocso", "details", "fir", "each case", "individual"),
+        "Cyber crime FIRs by district 2023",
+        """SELECT d.DistrictName AS district, COUNT(*) AS cyber_firs
+FROM CaseMaster cm
+JOIN Unit u ON cm.PoliceStationID = u.UnitID
+JOIN District d ON u.DistrictID = d.DistrictID
+JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
+WHERE csh.CrimeHeadName ILIKE '%cyber%' AND EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT = 2023
+GROUP BY d.DistrictName ORDER BY cyber_firs DESC LIMIT 10""",
+        ("cyber", "district", "2023", "fir"),
     ),
     QueryExample(
-        "Arrest rate for robberies 2024",
-        """SELECT d.name, COUNT(*) AS fir_count,
-       SUM(f.arrested_count) AS arrests,
-       ROUND(SUM(f.arrested_count)*100.0/COUNT(*), 1) AS arrest_pct
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE ch.name ILIKE '%robbery%' AND f.fir_year = 2024
-GROUP BY d.name ORDER BY fir_count DESC LIMIT 10""",
-        ("robbery", "arrest", "2024", "rate"),
-    ),
-    QueryExample(
-        "Accused count by district 2022",
-        """SELECT d.name, SUM(f.accused_count) AS total_accused, COUNT(*) AS fir_count
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-WHERE f.fir_year = 2022
-GROUP BY d.name ORDER BY total_accused DESC LIMIT 10""",
-        ("accused", "district", "2022", "count"),
-    ),
-    QueryExample(
-        "Cyber crime FIRs in Dakshina Kannada 2023",
-        """SELECT ch.name, COUNT(*) AS count
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE d.name ILIKE '%Dakshina Kannada%' AND ch.name ILIKE '%cyber%' AND f.fir_year = 2023
-GROUP BY ch.name ORDER BY count DESC""",
-        ("cyber", "fir", "2023", "district"),
-    ),
-    QueryExample(
-        "Top crime types statewide 2024",
-        """SELECT ch.name AS crime_type, COUNT(*) AS count
-FROM fir_details f
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE f.fir_year = 2024
-GROUP BY ch.name ORDER BY count DESC LIMIT 10""",
-        ("top", "crime", "2024", "statewide"),
-    ),
-    QueryExample(
-        "FIR stage distribution in Hassan",
-        """SELECT f.fir_stage, COUNT(*) AS count
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-WHERE d.name ILIKE '%Hassan%'
-GROUP BY f.fir_stage ORDER BY count DESC""",
-        ("fir", "stage", "hassan", "investigation"),
-    ),
-    QueryExample(
-        "Co-accused network size by district",
-        """SELECT d.name, COUNT(DISTINCT c.link_id) AS co_links
-FROM co_accused_links c
-JOIN fir_details f ON c.fir_id = f.fir_id
-JOIN districts d ON f.district_id = d.district_id
-GROUP BY d.name ORDER BY co_links DESC LIMIT 10""",
-        ("network", "co-accused", "district"),
-    ),
-    QueryExample(
-        "Recent theft cases Mandya 2024",
-        """SELECT f.fir_id, ch.name, f.fir_year, f.village_area_name, f.accused_count
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE d.name ILIKE '%Mandya%' AND ch.name ILIKE '%theft%' AND f.fir_year = 2024
-ORDER BY f.fir_id DESC LIMIT 20""",
-        ("theft", "recent", "mandya", "2024", "cases"),
-    ),
-    QueryExample(
-        "Victim counts by crime head Belagavi",
-        """SELECT ch.name, SUM(f.victim_count) AS victims, COUNT(*) AS firs
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-JOIN crime_heads ch ON f.crime_head_id = ch.head_id
-WHERE d.name ILIKE '%Belagavi%'
-GROUP BY ch.name ORDER BY victims DESC LIMIT 10""",
-        ("victim", "belagavi", "crime"),
-    ),
-    QueryExample(
-        "Chargesheeted vs pending in Shivamogga",
-        """SELECT f.fir_stage,
-       SUM(f.chargesheeted_count) AS chargesheeted,
-       COUNT(*) AS total_firs
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-WHERE d.name ILIKE '%Shivamogga%'
-GROUP BY f.fir_stage""",
-        ("chargesheet", "pending", "shivamogga"),
-    ),
-    QueryExample(
-        "Highest risk behavioral profiles statewide",
-        """SELECT district_name, village_area_name, primary_crime_head,
-       repeat_offender_score, risk_level, total_firs
-FROM criminal_profiles
-WHERE risk_level = 'critical'
-ORDER BY repeat_offender_score DESC LIMIT 15""",
-        ("risk", "profile", "critical", "repeat"),
-    ),
-    QueryExample(
-        "Monthly FIR trend Mysuru 2023",
-        """SELECT f.fir_month, COUNT(*) AS fir_count
-FROM fir_details f
-JOIN districts d ON f.district_id = d.district_id
-WHERE d.name ILIKE '%Mysuru%' AND f.fir_year = 2023
-GROUP BY f.fir_month ORDER BY f.fir_month""",
+        "Monthly FIR trend in Mysuru 2023",
+        """SELECT EXTRACT(MONTH FROM cm.CrimeRegisteredDate)::INT AS month, COUNT(*) AS fir_count
+FROM CaseMaster cm
+JOIN Unit u ON cm.PoliceStationID = u.UnitID
+JOIN District d ON u.DistrictID = d.DistrictID
+WHERE d.DistrictName ILIKE '%Mysuru%' AND EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT = 2023
+GROUP BY month ORDER BY month""",
         ("trend", "monthly", "mysuru", "2023"),
+    ),
+    QueryExample(
+        "Total FIRs registered in 2024",
+        """SELECT COUNT(*) AS fir_count
+FROM CaseMaster cm
+WHERE EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT = 2024""",
+        ("total", "count", "fir", "2024", "statewide"),
+    ),
+    QueryExample(
+        "POCSO cases by district",
+        """SELECT d.DistrictName AS district, COUNT(*) AS pocso_cases
+FROM CaseMaster cm
+JOIN Unit u ON cm.PoliceStationID = u.UnitID
+JOIN District d ON u.DistrictID = d.DistrictID
+JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
+WHERE csh.CrimeHeadName ILIKE '%POCSO%'
+GROUP BY d.DistrictName ORDER BY pocso_cases DESC""",
+        ("pocso", "district", "child", "count"),
+    ),
+    QueryExample(
+        "kannada thefts in Mysuru 2023 (kallathana Mysuru)",
+        """SELECT COUNT(*) AS theft_firs
+FROM CaseMaster cm
+JOIN Unit u ON cm.PoliceStationID = u.UnitID
+JOIN District d ON u.DistrictID = d.DistrictID
+JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
+WHERE d.DistrictName ILIKE '%Mysuru%' AND csh.CrimeHeadName ILIKE '%theft%'
+  AND EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT = 2023""",
+        ("kannada", "theft", "mysuru", "2023", "kalasu"),
+    ),
+    QueryExample(
+        "kannada murders in Bengaluru (kole Bengaluru)",
+        """SELECT COUNT(*) AS murder_firs
+FROM CaseMaster cm
+JOIN Unit u ON cm.PoliceStationID = u.UnitID
+JOIN District d ON u.DistrictID = d.DistrictID
+JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
+WHERE d.DistrictName ILIKE '%Bengaluru Urban%' AND csh.CrimeHeadName ILIKE '%murder%'""",
+        ("kannada", "murder", "bengaluru", "kole"),
     ),
 ]
 

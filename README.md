@@ -1,207 +1,386 @@
-# 🔵 KSP Crime Intelligence
+# KSP Crime Intelligence
 
-**Conversational AI & Crime Analytics Platform for the Karnataka State Police**
+**Conversational crime analytics for the Karnataka State Police.** An officer asks a
+question in English or Kannada, by keyboard or voice, and gets an answer from 500,000
+FIRs with the SQL attached. When the data cannot support an answer, the system says so
+instead of producing a number that looks right.
 
-Query 500,000 crime records in plain English or Kannada, uncover criminal networks, detect hotspots, and get predictive early-warning intelligence — all from one AI-powered platform.
+Built for **Datathon 2026** (Hack2skill x Zoho Catalyst), Challenge 01: Intelligent
+Conversational AI for the KSP Crime Database.
 
-> Built for **Datathon 2026** (Hack2skill × Zoho Catalyst) — addressing both *Challenge 01: Intelligent Conversational AI for KSP Crime Database* and *Challenge 02: AI-Driven Crime Analytics & Visualization Platform*.
+**Live:** https://ksp-50044157211.development.catalystappsail.in
+(click *Enter as Demo Officer* for full access, no account needed)
 
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)
 ![DuckDB](https://img.shields.io/badge/DuckDB-500k_FIRs-yellow)
-![LLM](https://img.shields.io/badge/LLM-Groq_·_Gemini_·_Ollama-orange)
-![Deploy](https://img.shields.io/badge/Deploy-Zoho_Catalyst_AppSail-e42527)
+![Tests](https://img.shields.io/badge/tests-135_passing-brightgreen)
+![Deploy](https://img.shields.io/badge/deploy-Zoho_Catalyst-e42527)
 
 ---
 
-## The Problem
+## Contents
 
-The State Crime Records Bureau manages crime data from **1,100+ police stations** across Karnataka. Current systems rely on static dashboards and manual SQL queries — limiting deep analysis and real-time insight. Investigators can't simply *ask* the data a question.
+| Document | What is in it |
+|---|---|
+| This file | Architecture overview, install, configuration, running, tests, troubleshooting |
+| [docs/PRD.md](docs/PRD.md) | Problem, users, success metrics, scope, flows, acceptance criteria, risks |
+| [docs/architecture.md](docs/architecture.md) | Schema, endpoints, component boundaries, retrieval flow, routing, security, deployment |
+| [docs/design.md](docs/design.md) | UI principles, information architecture, interaction states, responsive and accessibility decisions |
+| [docs/agent-transcripts/](docs/agent-transcripts/) | Development logs, including the failures and how they were corrected |
+| [tests/MANUAL_TEST_PLAN.md](tests/MANUAL_TEST_PLAN.md) | Browser test plan for what automation cannot cover |
+| [demo/DEMO_QA.md](demo/DEMO_QA.md) | Demo questions with verified expected answers |
 
-## The Solution
+---
 
-An intelligent platform where an investigator types (or speaks) a natural-language question and gets an evidence-backed answer, a network graph, or a predictive alert — with the underlying query shown for full transparency.
+## The problem
+
+The State Crime Records Bureau holds crime data from more than 1,000 police stations.
+Getting an answer out of it means writing SQL or requesting a report and waiting. An
+investigating officer with a question at 9pm has no way to ask it.
+
+The obvious fix, a chatbot over the database, has a failure mode that matters more here
+than in most domains: a language model asked about a district that does not exist will
+happily drop the filter and return the statewide total. The officer reads a real number
+against the name they asked about. In policing, a confident wrong number is more
+dangerous than no answer.
+
+This system is built around that constraint.
+
+---
+
+## Architecture overview
 
 ```
-Officer question (English / Kannada / voice)
-        │
-        ▼
-   Intent router  ──►  picks the right database
-        │
-        ▼
-   LLM writes SQL  ──►  runs on DuckDB / SQLite  ──►  LLM explains the result
-        │                                                    │
-        │ (if the DB has no answer)                          ▼
-        └──────────►  Web search fallback              Answer + SQL + audit log
+                    Officer question (English / Kannada / voice)
+                                     |
+                    +----------------+----------------+
+                    |                                 |
+             Smalltalk?                        Honesty guards
+             Procedure?                   (run before any SQL, no model call)
+                    |                    - names a district we do not have
+                    |                    - asks for a year outside coverage
+                    |                    - asks for a field or metric not in the schema
+                    |                                 |
+                    |                          refuse and explain
+                    v
+              Intent router  -->  picks the database and explains why
+                    |
+                    v
+            RAG value grounding
+            question -> exact literals in the data
+            ("drug" -> NDPS heads, ಮೈಸೂರಿನಲ್ಲಿ -> Mysuru)
+                    |
+        +-----------+-----------+
+        |                       |
+   LLM writes SQL      Deterministic SQL builder
+   (grounded prompt)   (no model call, covers common questions)
+        |                       |
+        +-----------+-----------+
+                    v
+            SQL safety guard  (single read-only SELECT, no file access)
+                    |
+                    v
+              DuckDB / SQLite
+                    |
+                    v
+       LLM explains the result  -->  answer + SQL + audit row
+       (falls back to a plain table when the model is unavailable)
 ```
 
----
+Two properties fall out of this shape:
 
-## Key Features
+**It degrades instead of failing.** The deterministic builder answers common questions
+with no model call at all. With the model's daily token budget fully exhausted, the
+evaluation suite still scores 21 out of 21: the figures stay correct and only the prose
+gets plainer.
 
-### 🗣️ Conversational Crime Intelligence
-- **Natural-language chatbot** — ask about FIRs, accused, victims, locations, investigation status
-- **Bilingual** — full **English + ಕನ್ನಡ (Kannada)** support
-- **Voice interaction** — speech-to-text input and text-to-speech output
-- **Context-aware** — follow-up questions without repeating context
-- **PDF export** — download the full conversation as a branded report
-- **Web fallback** — searches the internet when a question falls outside the records
+**It refuses before it guesses.** The guards sit ahead of SQL generation, so they hold
+whether or not a model is available.
 
-### 🕸️ Criminal Network & Relationship Analysis
-- Co-accused and gang-membership network graphs
-- Organized-crime group and repeat-offender detection
-- Interactive map visualization across all 31 districts
+### Feature map
 
-### 📊 Crime Pattern & Trend Analytics
-- Year-wise trends, top districts, crime-type breakdowns
-- **Hotspot detection** — station-level crime concentration
-- Interactive dashboards and geospatial maps
-
-### 🧠 Sociological & Criminological Insights
-- Demographic profiling (age, gender, occupation, socio-economic attributes)
-- **Offender risk scoring** to prioritize investigation
-- Behavioral analysis based on crime history
-
-### 🚨 Forecasting & Early Warning
-- Predictive next-year crime forecasts
-- **Live early-warning alerts** — auto-detects district crime spikes (e.g. *"Gadag: Abetment to Suicide +800%"*)
-
-### 🔍 Investigator Decision Support
-- **Case Solver** — paste case facts, get an AI investigation brief + similar solved cases
-- Automated case summaries and investigation timelines
-
-### 🔒 Explainable AI & Secure Governance
-- **Every answer shows its SQL** — full evidence trail
-- **Audit log** of all queries with timestamps
-- **Role-based access** — Superintendent / Inspector / Viewer
-
----
-
-## Tech Stack
-
-| Layer | Technology |
+| Area | What it does |
 |---|---|
-| **Backend** | Python 3.12, FastAPI, Uvicorn |
-| **Databases** | DuckDB (500k-FIR analytics store), SQLite (NCRB stats, chats, audit) |
-| **AI / LLM** | Groq (LLaMA 3.3 70B), Google Gemini 2.5 Flash, Ollama (offline) — swappable via LangChain |
-| **NL→SQL** | LangChain + custom RAG (schema retrieval, few-shot examples, safety guard) |
-| **Web search** | `ddgs` (DuckDuckGo) |
-| **Frontend** | Vanilla JavaScript, HTML5, CSS3 (single-file SPA, no framework) |
-| **Visualization** | Leaflet.js (maps), Chart.js (analytics), jsPDF (report export) |
-| **Voice** | Browser Web Speech API |
-| **Deployment** | Zoho Catalyst AppSail (managed Python runtime) |
+| Conversational query | Bilingual natural language to SQL over 500,000 FIRs, SQL shown with every answer |
+| Voice input | Speech to text through Whisper, raw PCM capture in the browser |
+| Autonomous Investigation Agent | Given a goal, plans its own next step, runs an intelligence tool, follows the lead, writes a case brief |
+| Evidence Intelligence | Statement, document or audio in, named entities cross-referenced against every FIR for priors and gang links |
+| AI Intelligence Brief | Executive briefing synthesised from live hotspot, cluster, anomaly, forecast and news signals |
+| Analytics | Six charts plus a live Karnataka crime news feed matched to districts |
+| Intel Map | District hotspots and a criminal network, suspects revealed on zoom |
+| Machine learning | DBSCAN clustering, robust z-score anomalies, OLS forecast, Pearson correlation, implemented in numpy |
+| Responsible AI | Queries touching caste, religion or community carry a fairness notice |
+| Audit trail | Every question, generated SQL, database and language recorded |
 
 ---
 
-## Dataset
+## Prerequisites
 
-| Source | Coverage |
-|---|---|
-| **KSP FIR Database** | 500,000 FIRs · 895,927 accused · 662,284 victims · 906 stations · 31 districts (2020–2024) |
-| **NCRB Statistics** | National & metro crime rates, benchmarks |
-| **Court Cases** | Convictions, acquittals, dispositions (2010–2018) |
-| **Case Knowledge Base** | 50+ solved Indian cases for investigator reference |
-
-> **Note:** The full FIR database (`ksp_fir.duckdb`, ~460 MB) is **not** in this repo due to GitHub's file-size limits. Smaller demo databases are included so the app runs out of the box. The full dataset is generated from raw records via the scripts in `scripts/` and `src/`.
+- **Python 3.12** (3.11 works; 3.12 is what is deployed)
+- **~1 GB disk** for the FIR database
+- **An LLM API key.** Groq is free and needs no card. Gemini or a local Ollama model
+  also work. The app runs without any key, answering from the deterministic path only.
 
 ---
 
-## Getting Started
+## Installation
 
-### Prerequisites
-- Python 3.10–3.13
-- A free LLM API key ([Groq](https://console.groq.com/keys) recommended, or [Gemini](https://aistudio.google.com/apikey)) — the app also runs in offline/fallback mode without one
-
-### Install & Run
 ```bash
-# 1. Clone
-git clone https://github.com/<your-username>/ksp-crime-intelligence.git
+git clone https://github.com/bhusareprem/ksp-crime-intelligence.git
 cd ksp-crime-intelligence
-
-# 2. Install dependencies
+python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-
-# 3. Configure your LLM key
-cp .env.example .env      # then edit .env and add your key
-
-# 4. Launch
-python run_web.py
+cp .env.example .env                                    # then edit, see below
 ```
 
-Open **http://localhost:8000** and sign in with a demo account:
-
-| Officer ID | Password | Role |
-|---|---|---|
-| `SP001` | `sp@ksp2024` | Superintendent (full access) |
-| `INS001` | `ins@ksp2024` | Inspector |
-| `VIEW01` | `view@ksp2024` | Viewer (read-only) |
-
-### Try asking
-- *"How many theft FIRs in Mysuru in 2023?"*
-- *"Show me cyber crime trends in Karnataka"*
-- *"Top repeat offenders by district"*
-- *"ಬೆಂಗಳೂರಿನಲ್ಲಿ 2024 ರಲ್ಲಿ ಎಷ್ಟು ಕಳ್ಳತನ ಪ್ರಕರಣಗಳು?"* (Kannada)
-
----
-
-## Project Structure
-
-```
-KSP/
-├── api/                    # FastAPI backend
-│   ├── main.py             # routes: chat, browse, upload, models, audit
-│   └── analytics.py        # trends, hotspots, network, predictions, alerts
-├── src/chatbot/            # conversational engine
-│   ├── engine.py           # orchestration: route → SQL → execute → explain
-│   ├── router.py           # picks the right database per question
-│   ├── llm_config.py       # multi-provider LLM (Groq/Gemini/Ollama/…)
-│   ├── db_manager.py       # safe read-only SQL execution
-│   ├── sql_fix.py          # SQL safety guard (SELECT-only, no file reads)
-│   ├── case_intelligence.py# Case Solver
-│   └── rag/                # schema retrieval, examples, web search
-├── frontend/index.html     # single-file SPA (chat, map, analytics, browse)
-├── data/                   # databases (large FIR DB excluded — see note above)
-├── scripts/                # data build + deployment tooling
-├── run_web.py              # entry point
-└── requirements.txt
-```
-
----
-
-## Deployment (Zoho Catalyst)
-
-The platform deploys to **Catalyst AppSail** (managed Python runtime). A build script stages a lean bundle (code + compacted databases, ~76 MB):
+The `data/` directory ships with the databases. To rebuild the synthetic FIR corpus:
 
 ```bash
-python scripts/build_appsail.py     # stages dist_appsail/
-cd dist_appsail
-catalyst init appsail               # Python 3.12, use existing code
-catalyst deploy
+python db/generate.py            # regenerates data/ksp_fir.duckdb (500k FIRs)
 ```
 
-API keys are set as **environment variables in the Catalyst console** — never in files. See [`DEPLOY_CATALYST.md`](DEPLOY_CATALYST.md) for the full runbook.
+---
+
+## Environment variables
+
+All configuration lives in `.env` (gitignored). Copy `.env.example` and fill in.
+
+| Variable | Required | Purpose |
+|---|---|---|
+| `LLM_PROVIDER` | yes | `groq`, `gemini`, `openrouter`, `mistral`, `ollama`, or `none` |
+| `LLM_MODEL` | yes | Model id for that provider |
+| `GROQ_API_KEY` | for Groq | Key from console.groq.com |
+| `GROQ_API_KEY_2ND` | optional | Key from a second Groq account, see below |
+| `GEMINI_API_KEY` | optional | Cross-provider fallback |
+| `OPENAI_BASE_URL` | for Groq | `https://api.groq.com/openai/v1` |
+| `LLM_MODEL_FALLBACK` | optional | Cheaper model to try before switching provider |
+| `QUERY_TIMEOUT_SECONDS` | no | SQL timeout, default 20 |
+| `LLM_TIMEOUT_SECONDS` | no | Model timeout, default 45 |
+| `ENABLE_WEB_SEARCH` | no | `0` disables the web fallback entirely |
+
+Never commit a key. `.env`, `app-config.json` and `dist_appsail/app-config.json` are all
+gitignored. Before pushing:
+
+```bash
+git grep -nE "gsk_|AIza|AQ\."      # must return nothing
+```
+
+### Groq key rotation
+
+Groq meters its free tier **per organisation at 200,000 tokens per day**, which is roughly
+40 to 80 rich questions. A key from a second Groq account is a second budget. Set both
+`GROQ_API_KEY` and `GROQ_API_KEY_2ND` and the app discovers every `gsk_` key in the
+environment and rotates to the next one mid-request on a quota **or** authentication
+error, so a spent or revoked key never reaches the user. Add more as `GROQ_API_KEY_3`
+and so on, no code change needed.
 
 ---
 
-## Security
+## Model setup
 
-This platform handles sensitive law-enforcement data and has been hardened:
-- **SQL injection** — parameterized queries; a strict SELECT-only guard blocks writes, DDL, and file-read functions
-- **DuckDB filesystem lockdown** — `enable_external_access=False` prevents reading local files via SQL
-- **CORS** — restricted to trusted origins (no wildcard-with-credentials)
-- **Prompt-injection resistant** — the SQL guard holds even if the LLM is steered
-- **Audit trail** — every query is logged
-- **No secrets in code** — API keys live only in `.env` (gitignored) or the Catalyst console
+### Cloud: Groq (recommended)
+
+```env
+LLM_PROVIDER=groq
+LLM_MODEL=openai/gpt-oss-120b
+GROQ_API_KEY=gsk_...
+OPENAI_BASE_URL=https://api.groq.com/openai/v1
+```
+
+`openai/gpt-oss-120b` was chosen by measurement, not reputation. A head-to-head on the
+three things this app actually does gave:
+
+| Model | Kannada | JSON tool planning | DuckDB SQL |
+|---|---|---|---|
+| `openai/gpt-oss-120b` | pass | pass | pass |
+| `qwen/qwen3.6-27b` | fail | fail | fail |
+| `openai/gpt-oss-20b` | fail | fail | pass |
+
+Qwen 3.6 is a reasoning model: it spends hundreds of tokens inside `<think>` and never
+reaches an answer, which breaks the agent planner and burns the token budget. If you swap
+models, re-run that comparison rather than assuming.
+
+**Groq's model list changes.** `llama-3.3-70b-versatile`, `llama-3.1-8b-instant`,
+`mixtral-8x7b-32768` and `gemma2-9b-it` are all retired. Probe before trusting an id:
+
+```bash
+curl -H "Authorization: Bearer $GROQ_API_KEY" \
+     -H "User-Agent: Mozilla/5.0" \
+     https://api.groq.com/openai/v1/models
+```
+
+The `User-Agent` header is not optional. Groq returns **403 to Python's default urllib
+agent**, which is easily misread as a revoked key.
+
+### Cloud: Gemini
+
+```env
+LLM_PROVIDER=gemini
+LLM_MODEL=gemini-2.5-flash
+GEMINI_API_KEY=...
+```
+
+Strong Kannada, but the free tier allows 10 requests per minute and 250 per day, which
+the investigation agent alone can exhaust. Best kept as the fallback.
+
+### Local: Ollama
+
+```bash
+ollama serve
+ollama pull llama3.2
+```
+
+```env
+LLM_PROVIDER=ollama
+LLM_MODEL=llama3.2
+```
+
+No key, no quota, fully offline. Quality on Kannada and on SQL generation is lower, so
+expect the deterministic path to carry more of the load.
+
+### No model at all
+
+```env
+LLM_PROVIDER=none
+```
+
+The app still runs. Common questions are answered by the deterministic SQL builder, the
+honesty guards work, and analytics, ML and the map are unaffected.
 
 ---
 
-## License & Attribution
+## Running
 
-Built for Datathon 2026. Crime data is synthetic/derived for demonstration; no real personal records are exposed.
+```bash
+python run_web.py                  # http://localhost:8000
+PORT=8080 python run_web.py        # or choose a port
+```
+
+First start takes about 30 seconds while langchain and duckdb import. The port is read
+from `PORT`, or `X_ZOHO_CATALYST_LISTEN_PORT` when deployed.
+
+Interactive API docs at `/docs`.
 
 ---
 
-<div align="center">
-🔵 <b>Karnataka State Police — Crime Intelligence Platform</b><br>
-<sub>Turning fragmented records into actionable intelligence</sub>
-</div>
+## Tests
+
+```bash
+python -m pytest                                        # 135 tests, ~18s, no model calls
+python scripts/qa_smoke.py http://localhost:8080 --no-llm   # 32 endpoint checks, no tokens
+python scripts/eval_nlsql.py                            # 21 gold questions, spends tokens
+```
+
+| Suite | Covers | Spends tokens |
+|---|---|---|
+| `pytest` | Routing, retrieval and grounding, SQL safety, persistence, honesty guards, API contract | no |
+| `qa_smoke.py --no-llm` | All 42 HTTP endpoints, analytics, ML, network graph, news, security, concurrency | no |
+| `qa_smoke.py` | The above plus the agent, evidence analysis and briefing | yes |
+| `eval_nlsql.py` | End-to-end accuracy against ground truth computed live from the database | yes |
+| [Manual plan](tests/MANUAL_TEST_PLAN.md) | Rendering, map, voice, responsive, accessibility | no |
+
+The default `--no-llm` mode exists because routine QA should not consume the daily token
+budget. Save the token-spending runs for a release gate.
+
+---
+
+## Deployment
+
+Zoho Catalyst AppSail. See [DEPLOY_CATALYST.md](DEPLOY_CATALYST.md) for the full recipe.
+
+```bash
+cd dist_appsail && catalyst deploy
+```
+
+Five things that are easy to get wrong:
+
+1. The start command must be `python3 run_web.py`. There is no bare `python`.
+2. Catalyst does not install `requirements.txt`. Dependencies are vendored into the bundle.
+3. Vendored wheels must be **x86_64 Linux**, not aarch64. Wrong architecture surfaces as
+   `ModuleNotFoundError: pydantic_core._pydantic_core`.
+4. Twenty thousand dependency files fail to upload. They are zipped into `deps.zip` and
+   extracted on first boot. **Never commit or upload the extracted `deps/` directory**, it
+   inflates the bundle from 171 MB to 478 MB.
+5. Keys go in `app-config.json` under `env_variables`. A CLI deploy overwrites console
+   environment variables with the file's contents.
+
+First request after a deploy returns 503 for about 40 seconds while `deps.zip` unpacks.
+That is expected. Verify with:
+
+```bash
+python scripts/qa_smoke.py https://your-app.catalystappsail.in --no-llm
+```
+
+---
+
+## Data
+
+500,000 synthetic FIRs on the **real CCTNS schema**, calibrated to NCRB district
+proportions. 31 districts, 1,020 police stations, 2020 to 2024.
+
+The records are synthetic. The schema is real, which is what makes the generated SQL
+transferable to a production CCTNS instance. State this plainly in any demo.
+
+| Database | Contents |
+|---|---|
+| `ksp_fir.duckdb` | The CCTNS corpus: CaseMaster, Accused, Unit, District, CrimeSubHead, gangs, arrests |
+| `ksp_crime.db` | NCRB national and city statistics, plus a smaller FIR set from 2018 |
+| `cases.db` | Court and case-status reference data |
+| `case_knowledge.db` | 52 solved Indian cases used by the Case Solver |
+| `chats.db`, `audit.db` | Conversation history and the audit trail |
+
+---
+
+## Troubleshooting
+
+**Server appears not to start.** Imports take about 30 seconds. Check for a bound port
+before assuming failure.
+
+**`Address already in use`.** On Windows, Docker Desktop commonly holds port 8000. Use
+`PORT=8080`.
+
+**All Groq models return 403.** Almost certainly the missing `User-Agent` header, not a
+revoked key. Retry with a browser agent before regenerating anything.
+
+**`ModuleNotFoundError: pydantic_core._pydantic_core`.** Wrong wheel architecture in the
+deployment bundle. Re-vendor with `--platform manylinux2014_x86_64`.
+
+**`Can't open a connection to same database file with a different configuration`.**
+Every DuckDB reader must use the identical config. All runtime readers use
+`{"enable_external_access": False}`. A mismatch is swallowed by an exception handler and
+surfaces as silently empty ML results, not as an error.
+
+**Rate limited, or answers arrive as plain tables.** The daily token budget is spent. The
+figures are still correct. Add a second Groq key, or wait for the reset.
+
+**Map tiles show a watermark.** A tile provider started requiring an API key. The app uses
+keyless Esri dark canvas with an OpenStreetMap fallback; see `addBasemap` in the frontend.
+
+**Kannada questions return the wrong district.** Check the SQL in the answer. The district
+filter should name the district you asked about. Regression coverage is in
+`tests/test_retrieval.py::TestDistrictMatching`.
+
+---
+
+## Project layout
+
+```
+api/            FastAPI app and analytics endpoints
+src/chatbot/    Engine, agent, router, RAG, guards, persistence
+src/ml/         Clustering, anomalies, forecasting (numpy only)
+src/news/       Live crime news ingestion
+frontend/       Single-page UI
+tests/          Automated suite and the manual test plan
+scripts/        Evaluation harness, QA smoke suite, build tooling
+docs/           PRD, architecture, design, agent transcripts
+demo/           Demo Q&A sheet and evidence upload files
+```
+
+---
+
+## Licence and status
+
+Prototype built for Datathon 2026. Not a production police system: the data is synthetic,
+authentication is a demo shim, and the deployment is a free tier. See
+[docs/PRD.md](docs/PRD.md) for what production would require.

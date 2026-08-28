@@ -12,9 +12,51 @@ from src.chatbot.normalize import normalize_question
 from src.chatbot.router import route_question, route_with_reason, is_investigative_question
 from src.chatbot.rag.retriever import retrieve_context
 from src.chatbot.rag.web_search import needs_web_search, search_web
+from src.chatbot.responsible_ai import guard as _responsible_guard
 from src.chatbot.schemas import DB_DESCRIPTIONS
 from src.chatbot.smalltalk import detect_smalltalk
 from src.chatbot.sql_fix import fix_sql_for_dialect, is_safe_select
+
+
+# Personal identifiers a question may ask for that the CCTNS schema does not carry.
+_MISSING_FIELDS = [
+    (r"phone|mobile|contact number|whatsapp", "phone or mobile numbers"),
+    (r"home address|residential address|\baddress\b", "home addresses"),
+    (r"aadhaar|aadhar|\buid\b", "Aadhaar numbers"),
+    (r"email|e-mail", "email addresses"),
+    (r"\bimei\b", "IMEI numbers"),
+    (r"bank account|account number|ifsc", "bank account details"),
+    (r"photo|photograph|mugshot|fingerprint|biometric", "photographs or biometrics"),
+]
+
+
+# Outcomes the CCTNS schema simply does not carry. CaseStatusMaster records how far
+# a case has progressed (Registered → Charge Sheeted → Referred to Court →
+# Closed/Disposed), never what the court decided.
+_MISSING_METRICS = [
+    (r"convict|acquit|verdict|sentenc|guilty|jail\s*term|imprisonment", "conviction and acquittal outcomes"),
+    (r"\bbail\s*(rate|outcome|granted)\b", "bail outcomes"),
+    (r"trial\s*(outcome|result)|court\s*(judgment|judgement|verdict|ruling)", "court judgments"),
+]
+
+
+def _missing_metrics(question: str) -> str:
+    q = (question or "").lower()
+    hits = [label for pat, label in _MISSING_METRICS if re.search(pat, q)]
+    if not hits:
+        return ""
+    return hits[0] if len(hits) == 1 else ", ".join(hits[:-1]) + " or " + hits[-1]
+
+
+def _missing_fields(question: str) -> str:
+    """Personal-identifier fields the question asks for that the schema lacks."""
+    q = (question or "").lower()
+    hits = [label for pat, label in _MISSING_FIELDS if re.search(pat, q)]
+    if not hits:
+        return ""
+    if len(hits) == 1:
+        return hits[0]
+    return ", ".join(hits[:-1]) + " or " + hits[-1]
 
 
 def _db_gap_suggestion(question: str, df) -> str:
@@ -153,12 +195,37 @@ class CrimeChatbot:
         if st:
             return ChatResponse(answer=st, sql="", database="", data="", source="chat")
 
+        # --- Officer explicitly asked us to go online → honour it ---
+        # Checked before the honesty guards: those are the right default, but the
+        # officer overriding them is a direct instruction, not a question to answer.
+        if self._wants_web(user_q):
+            return self._ask_web_explicit(user_q, history)
+
+        # --- Unknown place named → refuse before any SQL runs ---
+        # Deterministic on purpose: if the district does not exist we must never
+        # drop the filter and hand back a statewide figure the reader will take
+        # as that place's. Runs with or without an LLM.
+        unknown = self._unknown_places(user_q)
+        if unknown:
+            return self._ask_unknown_place(original, unknown)
+
+        # --- Year outside coverage, or a metric the schema never records ---
+        # Also deterministic: searching the open web for "2017 conviction rate"
+        # returns foreign statistics that have nothing to do with Karnataka.
+        _years = self._out_of_range_years(user_q)
+        _metric = _missing_metrics(user_q)
+        if _years or _metric:
+            return self._ask_coverage_gap(original, _years, _metric)
+
         # --- Investigative procedure questions → Case Intelligence brief ---
         if is_investigative_question(user_q):
             return self._ask_investigation_guide(original)
 
         # --- Specific named-case lookup → case_knowledge + web search ---
-        if self._is_specific_case_lookup(user_q):
+        # But a name we actually hold FIRs on belongs to the database, not the web:
+        # answering "who is <accused>" from a news search when we have 260 of their
+        # FIRs on file is the wrong source.
+        if self._is_specific_case_lookup(user_q) and not self._is_known_accused(user_q):
             return self._ask_specific_case(original)
 
         # --- LLM conversational mode (ChatGPT-like) ---
@@ -167,6 +234,201 @@ class CrimeChatbot:
 
         # --- Fallback mode (no API key) ---
         return self._ask_fallback(original)
+
+    # The officer explicitly asking us to go online. The coverage guard is the
+    # right default, but it must never override a direct instruction.
+    _WEB_REQUEST = re.compile(
+        r"\b(check|search|look|try|use|browse|google)\b[^.?!]{0,20}\b(web|online|internet|google|net)\b"
+        r"|\bweb\s*search\b|\bsearch\s+(the\s+)?(web|internet|online)\b"
+        r"|\bfrom\s+the\s+(web|internet)\b|\bgoogle\s+it\b|\blook\s+it\s+up\b",
+        re.I)
+
+    def _wants_web(self, question: str) -> bool:
+        return bool(self._WEB_REQUEST.search(question or ""))
+
+    def _ask_web_explicit(self, question: str, history: list[dict]) -> ChatResponse:
+        """Officer asked us to go online. Search, and label the source plainly."""
+        from src.chatbot.rag.web_search import search_web, _web_enabled
+
+        # "check web" on its own refers to the previous question — carry it over.
+        topic = self._WEB_REQUEST.sub("", question).strip(" ?.!,:")
+        if len(topic) < 12:
+            for turn in reversed(history[-8:]):
+                if turn.get("role") != "user":
+                    continue
+                prev = self._LANG_PREFIX.sub("", turn.get("content", "")).strip()
+                if prev and not self._wants_web(prev):
+                    topic = prev
+                    break
+        topic = topic or question
+
+        if not _web_enabled():
+            return ChatResponse(
+                answer="Web search is disabled on this deployment (`ENABLE_WEB_SEARCH=0`).",
+                sql="", database="", data="", source="chat", original_question=question)
+        # Keep the Karnataka/India framing unless the officer already supplied a
+        # place — a bare "conviction rate by district 2017" returns Pakistani and
+        # Canadian court statistics, which are worse than useless here.
+        _has_place = re.search(r"karnataka|india|bengaluru|bangalore|mysuru|ncrb", topic, re.I)
+        try:
+            hits = search_web(topic, max_results=5, bare=bool(_has_place))
+        except Exception:
+            hits = None
+        if not hits or len(hits.strip()) < 25:
+            return ChatResponse(
+                answer=(f"I searched the web for **{topic}** but found nothing usable. "
+                        "Published Karnataka figures of this kind are usually in the NCRB "
+                        "*Crime in India* report."),
+                sql="", database="web", data="", source="web_search", original_question=question)
+
+        answer = None
+        llm = create_llm(temperature=0.3) if self._llm_enabled() else None
+        if llm is not None:
+            try:
+                from langchain_core.messages import HumanMessage, SystemMessage
+                resp = llm.invoke([
+                    SystemMessage(content=(
+                        "You are KSP Crime Intelligence. Answer ONLY from the web results given. "
+                        "These are external public sources, NOT the KSP database — say so. "
+                        "If the results do not actually answer the question, say that plainly "
+                        "instead of substituting a different country's or year's figures. "
+                        "Cite the source names. Under 200 words.")),
+                    HumanMessage(content=f"Question: {topic}\n\nWeb results:\n{hits[:4000]}"),
+                ])
+                answer = (getattr(resp, "content", "") or "").strip()
+            except Exception:
+                answer = None
+        if not answer:
+            answer = hits[:1500]
+        return ChatResponse(
+            answer="🌐 **From a web search** (external sources, not KSP data):\n\n" + answer,
+            sql="", database="web", data="", source="web_search", original_question=question)
+
+    _YEAR_RE = re.compile(r"\b(19\d{2}|20\d{2})\b")
+
+    def _data_year_range(self) -> tuple[int, int] | None:
+        """Widest year span any database can answer for."""
+        if getattr(self, "_yr_range", None) is not None:
+            return self._yr_range
+        lo = hi = None
+        for db, sql in (
+            ("criminal", "SELECT MIN(EXTRACT(YEAR FROM CrimeRegisteredDate))::INT, "
+                         "MAX(EXTRACT(YEAR FROM CrimeRegisteredDate))::INT FROM CaseMaster"),
+            ("ksp_crime", "SELECT MIN(year), MAX(year) FROM fir_records"),
+        ):
+            try:
+                row = self.db.execute(db, sql).iloc[0]
+                a, b = int(row.iloc[0]), int(row.iloc[1])
+                lo = a if lo is None else min(lo, a)
+                hi = b if hi is None else max(hi, b)
+            except Exception:
+                continue
+        self._yr_range = (lo, hi) if lo is not None else None
+        return self._yr_range
+
+    def _out_of_range_years(self, question: str) -> list[int]:
+        """Years the question asks about that no database covers."""
+        rng = self._data_year_range()
+        if not rng:
+            return []
+        lo, hi = rng
+        out = []
+        for m in self._YEAR_RE.finditer(question or ""):
+            y = int(m.group(1))
+            if (y < lo or y > hi) and y not in out:
+                out.append(y)
+        return out
+
+    def _ask_coverage_gap(self, question: str, years: list[int], metric: str) -> ChatResponse:
+        """Explain exactly what is missing and name what can be answered instead."""
+        rng = self._data_year_range()
+        lines: list[str] = []
+        if years:
+            ys = ", ".join(str(y) for y in years)
+            span = f"{rng[0]}-{rng[1]}" if rng else "the loaded years"
+            lines.append(
+                f"The KSP data covers **{span}**, so there are no records for **{ys}** — "
+                "I have not estimated a figure for a year we hold no data on."
+            )
+        if metric:
+            if lines:
+                lines.append("")
+                opener = f"Separately, **{metric}** are not recorded in this schema at all."
+            else:
+                opener = f"This database does not record **{metric}** at all."
+            lines.append(
+                opener + " `CaseStatusMaster` tracks how far a case has progressed — Registered, "
+                "Under Investigation, Charge Sheeted, Referred to Court, Closed/Disposed — "
+                "but never the court's decision, so this cannot be derived for any year."
+            )
+            lines += [
+                "",
+                "**What I can give you instead:** chargesheet and disposal rate by district "
+                f"({rng[0]}-{rng[1]} FIR data), the closest available measure of case progression. "
+                "Ask for *\"chargesheet rate by district\"* and I will pull it."
+                if rng else "",
+            ]
+        elif years:
+            lines += ["", f"Ask again for a year in {rng[0]}-{rng[1]} and I will pull the figures."]
+        lines += ["", "_Want published figures from outside our records? Say **\"search the web\"** "
+                      "and I will look them up, clearly labelled as an external source._"]
+        return ChatResponse(
+            answer="\n".join(x for x in lines if x is not None), sql="", database="criminal",
+            data="", source="chat", original_question=question,
+        )
+
+    def _is_known_accused(self, question: str) -> bool:
+        """True when the question names someone the FIR database has records for."""
+        try:
+            from src.chatbot.fallback_sql import _extract_person_name
+            name = _extract_person_name(question)
+            if not name or len(name) < 4:
+                return False
+            df = self.db.execute(
+                "criminal",
+                "SELECT 1 FROM Accused WHERE AccusedName ILIKE '%{}%' LIMIT 1".format(
+                    name.replace("'", "''")))
+            return df is not None and not df.empty
+        except Exception:
+            return False
+
+    def _unknown_places(self, question: str) -> list[str]:
+        """Districts/taluks the question names that are absent from the FIR database."""
+        try:
+            from src.chatbot.rag.schema_live import unknown_places
+            path = getattr(self.db, "fir_path", None)
+            if not path or not Path(path).exists():
+                return []
+            return unknown_places(question, str(path))
+        except Exception:
+            return []
+
+    def _ask_unknown_place(self, question: str, unknown: list[str]) -> ChatResponse:
+        """Say plainly that the place is not on record — and give no number."""
+        names = ", ".join(f"**{u}**" for u in unknown)
+        verb = "is not a district" if len(unknown) == 1 else "are not districts"
+        try:
+            from src.chatbot.rag.schema_live import _fir_vocab
+            districts = _fir_vocab(str(self.db.fir_path))[0]
+        except Exception:
+            districts = ()
+        lines = [
+            f"{names} {verb} in the KSP FIR database, so there are **no records** to report.",
+            "",
+            "I have deliberately not given you a number here. Reporting the statewide total "
+            "against a district name that does not exist would read as that district's count.",
+        ]
+        if districts:
+            lines += [
+                "",
+                f"**The {len(districts)} districts on record are:** " + ", ".join(districts) + ".",
+                "",
+                "Ask again with one of these and I will pull the figures.",
+            ]
+        return ChatResponse(
+            answer="\n".join(lines), sql="", database="criminal", data="",
+            source="chat", original_question=question,
+        )
 
     def _ask_investigation_guide(self, question: str) -> ChatResponse:
         """Handle 'how to investigate X' questions using Case Intelligence + LLM."""
@@ -420,19 +682,31 @@ class CrimeChatbot:
             except Exception:
                 sql = ""
 
-        # 3) Retry fallback if LLM SQL failed
+        # 3) Retry fallback if LLM SQL failed. The deterministic fallback is the
+        # quota-proof path, so use it when it fires instead of apologising.
         if not sql:
             fb = try_fallback_sql(normalized_ctx, history) or try_fallback_sql(normalized, history)
             if fb:
                 db_name, sql = fb.db, fb.sql
                 data_note = fb.note
-            return ChatResponse(
-                answer="I understand your question but couldn't generate a query. Could you rephrase it? "
-                       "For example: 'How many thefts in Bengaluru in 2024?'",
-                sql="", database=db_name, data="", source=source,
-                original_question=original, normalized_question=normalized,
-                correction_note=correction_note,
-            )
+            else:
+                missing = _missing_fields(original)
+                if missing:
+                    answer = (
+                        "The KSP FIR database has no " + missing + " — those fields do not exist "
+                        "in the CCTNS schema, so there is nothing to report.\n\n"
+                        "What it does hold: FIR numbers and dates, district and police station, "
+                        "crime head, accused names and their prior cases, gang links, and case status."
+                    )
+                else:
+                    answer = ("I understand your question but couldn't generate a query. Could you rephrase it? "
+                              "For example: 'How many thefts in Bengaluru in 2024?'")
+                return ChatResponse(
+                    answer=answer,
+                    sql="", database=db_name, data="", source=source,
+                    original_question=original, normalized_question=normalized,
+                    correction_note=correction_note,
+                )
 
         # Run the query. On timeout/error, try a fallback SQL; if that also
         # fails, leave df=None and remember the message — the web fallback
@@ -479,8 +753,22 @@ class CrimeChatbot:
                     f"district' or 'Murder FIRs by district in 2023'.\n\nTechnical detail: {e}"
                 )
 
-        # Web fallback: the DB query failed OR returned no rows → try the open web.
+        # Zero rows from the LLM's SQL does not mean the data is absent — the
+        # deterministic builder often has a correct query for the same question.
+        # Try it before falling back to the open web.
         is_empty_df = df is None or (hasattr(df, "empty") and df.empty)
+        if is_empty_df:
+            fb2 = try_fallback_sql(normalized_ctx, history) or try_fallback_sql(original, history)
+            if fb2 and fb2.sql.strip() != (sql or "").strip():
+                try:
+                    df2 = self.db.execute(fb2.db, fb2.sql)
+                    if df2 is not None and not df2.empty:
+                        df, sql, db_name = df2, fb2.sql, fb2.db
+                        data_note = fb2.note
+                        is_empty_df = False
+                except Exception:
+                    pass
+
         if is_empty_df:
             web_ans = self._web_fallback_answer(original, query_q)
             if web_ans:
@@ -511,6 +799,11 @@ class CrimeChatbot:
             answer += "\n\n" + db_gap
         if correction_note:
             answer = f"*(Understood your question as: {normalized})*\n\n{answer}"
+
+        # Responsible-AI guard: flag analyses touching protected attributes.
+        _notice = _responsible_guard(original, answer)
+        if _notice:
+            answer += "\n\n" + _notice
 
         return ChatResponse(
             answer=answer,

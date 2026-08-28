@@ -24,9 +24,17 @@ def _fir_path() -> Path:
     raise FileNotFoundError("No FIR database found in data/")
 
 
+# DuckDB refuses a second connection to the same file under a different config,
+# and every other module opens with external access disabled. Mismatching here
+# made concurrent ML/analytics calls raise into a bare except and silently return
+# empty results (the AI Brief showed "0 ML Clusters"). Keep this identical to
+# DatabaseManager._DUCKDB_SAFE_CONFIG everywhere.
+_DUCKDB_SAFE_CONFIG = {"enable_external_access": False}
+
+
 def _fir(sql: str) -> list[dict]:
     """Execute against the FIR DuckDB (ksp_fir.duckdb)."""
-    conn = duckdb.connect(str(_fir_path()), read_only=True)
+    conn = duckdb.connect(str(_fir_path()), read_only=True, config=_DUCKDB_SAFE_CONFIG)
     try:
         df = conn.execute(sql).df()
     finally:
@@ -48,7 +56,7 @@ def _cases(sql: str) -> list[dict]:
     path = DATA_DIR / "unified" / "cases.db"
     if not path.exists():
         path = DATA_DIR / "cases.db"
-    conn = duckdb.connect(str(path), read_only=True)
+    conn = duckdb.connect(str(path), read_only=True, config=_DUCKDB_SAFE_CONFIG)
     try:
         df = conn.execute(sql).df()
     finally:
@@ -229,6 +237,11 @@ def criminal_network():
                 SELECT AccusedMasterID FROM gang_accused
                 UNION
                 SELECT a.AccusedMasterID FROM Accused a JOIN top_cases tc ON a.CaseMasterID = tc.CaseMasterID
+            ),
+            name_firs AS (
+                SELECT AccusedName, COUNT(DISTINCT CaseMasterID) AS n
+                FROM Accused WHERE AccusedName IS NOT NULL
+                GROUP BY AccusedName
             )
             SELECT a.AccusedMasterID AS id,
                    a.AccusedName     AS name,
@@ -236,11 +249,12 @@ def criminal_network():
                    a.District        AS district,
                    om.OccupationName AS occupation,
                    CASE WHEN ga.AccusedMasterID IS NOT NULL THEN 1 ELSE 0 END AS in_gang,
-                   1 AS fir_count
+                   COALESCE(nf.n, 1) AS fir_count
             FROM Accused a
             JOIN seed_ids s ON a.AccusedMasterID = s.AccusedMasterID
             LEFT JOIN OccupationMaster om ON a.OccupationID = om.OccupationID
             LEFT JOIN gang_accused ga ON ga.AccusedMasterID = a.AccusedMasterID
+            LEFT JOIN name_firs nf ON nf.AccusedName = a.AccusedName
             WHERE a.AccusedName IS NOT NULL
             LIMIT 150
         """)
@@ -283,10 +297,28 @@ def criminal_network():
     except Exception:
         gang_edges_raw = []
 
-    # Merge edges, keep max weight for duplicates
+    # Accused holds one row per case, so the same person arrives as several ids.
+    # Collapse them onto one node per person, otherwise the graph draws the same
+    # offender repeatedly and splits their links across the duplicates.
+    rep: dict[str, int] = {}
+    alias: dict[int, int] = {}
+    unique_nodes = []
+    for r in nodes_raw:
+        key = (r["name"] or "").strip().lower()
+        if key in rep:
+            alias[r["id"]] = rep[key]
+            continue
+        rep[key] = r["id"]
+        alias[r["id"]] = r["id"]
+        unique_nodes.append(r)
+
+    # Merge edges onto the collapsed ids, keep max weight for duplicates
     edge_map: dict[tuple, float] = {}
     for r in edges_raw + gang_edges_raw:
-        key = (r["src"], r["tgt"])
+        src, tgt = alias.get(r["src"], r["src"]), alias.get(r["tgt"], r["tgt"])
+        if src == tgt:
+            continue
+        key = (src, tgt) if src < tgt else (tgt, src)
         edge_map[key] = max(edge_map.get(key, 0), float(r["weight"] or 1))
 
     # Count connections per node for risk scoring
@@ -308,7 +340,7 @@ def criminal_network():
             "age": int(r["age"] or 0),
             "in_gang": bool(r["in_gang"]),
         }
-        for r in nodes_raw
+        for r in unique_nodes
     ]
     edges = [
         {"from": src, "to": tgt, "weight": round(w, 2)}

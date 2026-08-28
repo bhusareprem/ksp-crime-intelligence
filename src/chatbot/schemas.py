@@ -117,11 +117,14 @@ Example — murder count by district 2023:
   GROUP BY d.DistrictName ORDER BY murder_firs DESC LIMIT 5
 
 Example — accused persons in a case / repeat offenders:
-  SELECT a.AccusedName, a.AgeYear AS age, a.District,
+  -- IMPORTANT: Accused has ONE ROW PER CASE and AccusedMasterID is unique per
+  -- row, so GROUP BY AccusedMasterID gives every person a count of 1 and finds
+  -- no repeat offenders. Always group repeat-offender queries by AccusedName.
+  SELECT a.AccusedName, MAX(a.AgeYear) AS age, MAX(a.District) AS district,
          COUNT(DISTINCT a.CaseMasterID) AS fir_count
   FROM Accused a
   WHERE a.AccusedName IS NOT NULL
-  GROUP BY a.AccusedMasterID, a.AccusedName, a.AgeYear, a.District
+  GROUP BY a.AccusedName
   ORDER BY fir_count DESC LIMIT 20
 
 Example — cyber crime gang members:
@@ -131,7 +134,7 @@ Example — cyber crime gang members:
   JOIN CrimeGang g ON agl.GangID = g.GangID
   JOIN Accused a ON agl.AccusedMasterID = a.AccusedMasterID
   WHERE g.Specialization ILIKE '%cyber%'
-  GROUP BY g.GangID, g.GangName, g.Specialization, a.AccusedMasterID, a.AccusedName, agl.Role
+  GROUP BY g.GangID, g.GangName, g.Specialization, a.AccusedName, agl.Role
   ORDER BY fir_count DESC LIMIT 20
 
 Example — communal / hate crime trends:
@@ -179,11 +182,11 @@ SQL_EXAMPLES = {
     ],
     "criminal": [
         "District crimes: CaseMaster JOIN Unit ON PoliceStationID JOIN District ON DistrictID JOIN CrimeSubHead ON CrimeMinorHeadID",
-        "Accused: SELECT AccusedName, AgeYear, District, COUNT(DISTINCT CaseMasterID) FROM Accused GROUP BY AccusedMasterID ORDER BY count DESC",
+        "Accused: SELECT AccusedName, COUNT(DISTINCT CaseMasterID) FROM Accused GROUP BY AccusedName ORDER BY count DESC (group by NAME, not AccusedMasterID — that is unique per row)",
         "Gangs: AccusedGangLink JOIN CrimeGang JOIN Accused GROUP BY GangName",
     ],
     "fir": [
         "District crimes: CaseMaster JOIN Unit ON PoliceStationID JOIN District ON DistrictID JOIN CrimeSubHead ON CrimeMinorHeadID",
-        "Accused repeat: SELECT AccusedName, COUNT(DISTINCT CaseMasterID) FROM Accused GROUP BY AccusedMasterID HAVING count > 1",
+        "Accused repeat: SELECT AccusedName, COUNT(DISTINCT CaseMasterID) FROM Accused GROUP BY AccusedName HAVING count > 1 (NEVER group by AccusedMasterID — it is unique per row, so every count becomes 1)",
     ],
 }

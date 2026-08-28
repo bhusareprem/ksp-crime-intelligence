@@ -184,7 +184,9 @@ _INVESTIGATIVE = re.compile(
     r"how\s+(do|to|should|can|would|must)\s+(i|we|you|one|officer|police|investigators?)\s+"
     r"(investigate|handle|approach|solve|crack|process|work\s+on|deal\s+with)|"
     r"how\s+to\s+(investigate|solve|handle|approach|crack|process)\b|"
-    r"(steps?|procedure|protocol|guide|method|process|checklist|tips?)\s+(to|for)\s+(investigate|solving?|handling?|approaching?)|"
+    # investigat\w* so "procedure for investigating" matches as well as
+    # "procedure to investigate"; the bare stem failed the trailing \b.
+    r"(steps?|procedure|protocol|guide|method|process|checklist|tips?)\s+(to|for)\s+(investigat\w*|solv\w*|handl\w*|approach\w*)|"
     r"what\s+(should|do|are\s+the)\s+(i|we|you|steps?|procedure).*invest|"
     r"help\s+(me\s+)?(investigate|solve|handle|crack)\b|"
     r"investigation\s+(guide|procedure|steps?|process|method|protocol|checklist)|"

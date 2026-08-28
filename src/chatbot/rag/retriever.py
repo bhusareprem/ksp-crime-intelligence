@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass, field
 
 from src.chatbot.rag.examples import EXAMPLES_BY_DB, QueryExample
-from src.chatbot.rag.schema_live import get_live_schema, get_value_hints
+from src.chatbot.rag.schema_live import get_live_schema, get_value_hints, ground_values
 from src.chatbot.schemas import SCHEMAS
 
 
@@ -17,6 +17,7 @@ class RAGContext:
     live_schema: str
     value_hints: str
     static_schema: str
+    value_grounding: str = ""
     examples: list[QueryExample] = field(default_factory=list)
     web_snippet: str | None = None
 
@@ -26,6 +27,10 @@ class RAGContext:
             f"Why this database: {self.routing_reason}",
             "",
             self.value_hints,
+        ]
+        if self.value_grounding:
+            lines += ["", self.value_grounding]
+        lines += [
             "",
             self.static_schema,
             "",
@@ -74,18 +79,26 @@ def retrieve_context(
     from pathlib import Path
 
     data_dir = Path(data_dir)
+    # The 'criminal' DB is the CCTNS ksp_fir.duckdb (fall back to old unified criminal.db).
+    fir_path = next(
+        (p for p in [data_dir / "ksp_fir.duckdb", data_dir / "unified" / "ksp_fir.duckdb"] if p.exists()),
+        data_dir / "ksp_fir.duckdb",
+    )
     paths = {
         "ksp_crime": data_dir / "ksp_crime.db",
-        "criminal": data_dir / "criminal.db",
+        "criminal": fir_path if fir_path.exists() else data_dir / "criminal.db",
         "cases": data_dir / "cases.db",
     }
-    live = get_live_schema(paths.get(db_name, data_dir / "ksp_crime.db"), db_name)
+    db_path = paths.get(db_name, data_dir / "ksp_crime.db")
+    live = get_live_schema(db_path, db_name)
+    grounding = ground_values(question, str(db_path)) if db_name == "criminal" else ""
     return RAGContext(
         database=db_name,
         routing_reason=routing_reason,
         live_schema=live,
         value_hints=get_value_hints(db_name),
         static_schema=SCHEMAS.get(db_name, ""),
+        value_grounding=grounding,
         examples=retrieve_similar_examples(question, db_name, top_k=top_examples),
         web_snippet=web_snippet,
     )

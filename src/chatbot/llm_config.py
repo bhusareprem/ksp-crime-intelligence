@@ -1,6 +1,7 @@
 """Multi-provider LLM configuration — Groq, Gemini, OpenRouter, Ollama, Mistral."""
 
 import os
+import re
 from typing import Any
 
 from langchain_openai import ChatOpenAI
@@ -15,10 +16,10 @@ PROVIDERS = {
         "fallback_env": "OPENAI_API_KEY",
         "key_prefix": "gsk_",
         "models": [
-            {"id": "llama-3.3-70b-versatile",  "label": "LLaMA 3.3 70B (best)"},
-            {"id": "llama-3.1-8b-instant",      "label": "LLaMA 3.1 8B (fast)"},
-            {"id": "mixtral-8x7b-32768",         "label": "Mixtral 8x7B"},
-            {"id": "gemma2-9b-it",              "label": "Gemma 2 9B"},
+            {"id": "openai/gpt-oss-120b",  "label": "GPT-OSS 120B (best, Kannada)"},
+            {"id": "openai/gpt-oss-20b",   "label": "GPT-OSS 20B (fast)"},
+            {"id": "groq/compound",         "label": "Groq Compound (web-search)"},
+            {"id": "qwen/qwen3.6-27b",     "label": "Qwen 3.6 27B (reasoning)"},
         ],
         "driver": "openai_compat",
     },
@@ -89,16 +90,63 @@ def get_active() -> tuple[str | None, str | None]:
 
 # ─── Key resolution ────────────────────────────────────────────────────────
 
+# ─── Groq key rotation ─────────────────────────────────────────────────────
+# Groq meters the free tier per ORGANISATION at 200k tokens/day, so a key from a
+# second account is a second budget. Collect every gsk_ key in the environment
+# (GROQ_API_KEY, GROQ_API_KEY_2ND, GROQ_API_KEY_3, ...) and move to the next one
+# when the current key is rate-limited, instead of failing the request.
+
+_key_index = 0
+# Rotate on a spent budget, and on a dead key too — a revoked key should fail
+# over to a working one rather than take the whole app down.
+_QUOTA_MARKERS = ("rate_limit", "rate limit", "429", "quota", "tokens per day",
+                  "tpd", "resource_exhausted", "too many requests",
+                  "401", "403", "invalid_api_key", "invalid api key",
+                  "unauthorized", "authentication")
+
+
+def _groq_keys() -> list[str]:
+    """Distinct Groq keys from the environment, primary first."""
+    seen: set[str] = set()
+    out: list[str] = []
+    for name in sorted(os.environ):
+        if not name.startswith(("GROQ_API_KEY", "OPENAI_API_KEY")):
+            continue
+        value = os.environ.get(name, "").strip().strip('"').strip("'")
+        if value.startswith("gsk_") and value not in seen:
+            seen.add(value)
+            out.append(value)
+    return out
+
+
+def groq_key_count() -> int:
+    return len(_groq_keys())
+
+
+def rotate_groq_key() -> bool:
+    """Advance to the next Groq key. False when none are left."""
+    global _key_index
+    keys = _groq_keys()
+    if not keys or _key_index + 1 >= len(keys):
+        return False
+    _key_index += 1
+    return True
+
+
+def _is_quota_error(exc: Exception) -> bool:
+    text = f"{type(exc).__name__} {exc}".lower()
+    return any(m in text for m in _QUOTA_MARKERS)
+
+
 def _resolve_key(provider_id: str) -> str:
+    if provider_id == "groq":
+        keys = _groq_keys()
+        if keys:
+            return keys[min(_key_index, len(keys) - 1)]
     cfg = PROVIDERS.get(provider_id, {})
     env_key = cfg.get("env_key")
     fallback = cfg.get("fallback_env")
     key = (os.getenv(env_key, "") if env_key else "") or (os.getenv(fallback, "") if fallback else "")
-    # Groq: accept the OPENAI_API_KEY when it starts with gsk_
-    if provider_id == "groq" and not key:
-        oa = os.getenv("OPENAI_API_KEY", "")
-        if oa.startswith("gsk_"):
-            key = oa
     return key.strip()
 
 
@@ -226,6 +274,93 @@ class _GoogleGenAIChat:
         return _R(response.text)
 
 
+# ─── Reasoning-model guard ────────────────────────────────────────────────
+
+_THINK_RE = re.compile(r"<(think|thinking|reasoning)>[\s\S]*?</\1>", re.I)
+_OPEN_THINK_RE = re.compile(r"^[\s\S]*?</(think|thinking|reasoning)>", re.I)
+
+
+# Exotic whitespace the models like to emit inside names ("Bengaluru Urban").
+# Harmless on screen, but it breaks search, copy-paste into CCTNS, and any
+# downstream string match, so normalise it to plain spaces.
+_ODD_SPACE = dict.fromkeys(
+    [0x00A0, 0x2007, 0x2009, 0x202F, 0x2002, 0x2003, 0x2005], " ")
+_ODD_SPACE.update(dict.fromkeys([0x200B, 0x200C, 0x200D, 0x2060, 0xFEFF], ""))
+
+
+def strip_reasoning(text: str) -> str:
+    """Clean a raw model response.
+
+    1. Remove <think> blocks that reasoning models (Qwen, DeepSeek-R1) emit —
+       left in place they poison SQL and JSON parsing, and an answer truncated
+       mid-thought comes back empty. Also handles the truncated case where the
+       opening tag was dropped but the closing tag survives.
+    2. Normalise exotic Unicode whitespace to plain ASCII spaces.
+    """
+    if not text:
+        return text
+    out = text
+    if "<" in out:
+        out = _THINK_RE.sub("", out)
+        low = out.lower()
+        if "</think" in low or "</thinking" in low or "</reasoning" in low:
+            out = _OPEN_THINK_RE.sub("", out)
+    out = out.translate(_ODD_SPACE)
+    return out.strip()
+
+
+class _CleanChat:
+    """Thin proxy that cleans every response and survives a rate-limited key.
+
+    The LLM object is only ever consumed as `.invoke(messages).content`, so
+    delegating everything else is safe. `rebuild` (when given) makes a fresh
+    client on the next Groq key so a daily-quota error becomes a retry rather
+    than a failed answer.
+    """
+
+    def __init__(self, inner, rebuild=None):
+        self._inner = inner
+        self._rebuild = rebuild
+
+    def __getattr__(self, item):
+        return getattr(self._inner, item)
+
+    def _invoke_raw(self, messages, *a, **kw):
+        try:
+            return self._inner.invoke(messages, *a, **kw)
+        except Exception as exc:
+            if self._rebuild is None or not _is_quota_error(exc):
+                raise
+            last = exc
+            while rotate_groq_key():
+                nxt = self._rebuild()
+                if nxt is None:
+                    break
+                self._inner = nxt
+                try:
+                    return self._inner.invoke(messages, *a, **kw)
+                except Exception as exc2:
+                    if not _is_quota_error(exc2):
+                        raise
+                    last = exc2
+            raise last
+
+    def invoke(self, messages, *a, **kw):
+        resp = self._invoke_raw(messages, *a, **kw)
+        content = getattr(resp, "content", None)
+        if isinstance(content, str):
+            cleaned = strip_reasoning(content)
+            if cleaned != content:
+                try:
+                    resp.content = cleaned
+                except Exception:
+                    class _R:
+                        def __init__(self, text):
+                            self.content = text
+                    return _R(cleaned)
+        return resp
+
+
 # ─── LLM factory ──────────────────────────────────────────────────────────
 
 def create_llm(temperature: float = 0.3, provider: str | None = None, model: str | None = None):
@@ -290,15 +425,27 @@ def create_llm(temperature: float = 0.3, provider: str | None = None, model: str
                 "HTTP-Referer": "https://ksp-crime-ai.local",
                 "X-Title": "KSP Crime Intelligence AI",
             }
-        return ChatOpenAI(
-            model=model,
-            api_key=api_key,
-            base_url=base_url or None,
-            temperature=temperature,
-            timeout=timeout,
-            max_retries=1,
-            default_headers=headers if headers else None,
-        )
+        def _make(key: str):
+            return ChatOpenAI(
+                model=model,
+                api_key=key,
+                base_url=base_url or None,
+                temperature=temperature,
+                timeout=timeout,
+                max_retries=1,
+                default_headers=headers if headers else None,
+            )
+
+        # Only Groq has multiple keys to rotate through.
+        rebuild = None
+        if provider == "groq":
+            def rebuild():
+                try:
+                    return _make(_resolve_key("groq"))
+                except Exception:
+                    return None
+
+        return _CleanChat(_make(api_key), rebuild=rebuild)
     except Exception:
         return None
 
