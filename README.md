@@ -29,8 +29,6 @@ Conversational AI for the KSP Crime Database.
 | [docs/design.md](docs/design.md) | UI principles, information architecture, interaction states, responsive and accessibility decisions |
 | [docs/agent-transcripts/](docs/agent-transcripts/) | Development logs, including the failures and how they were corrected |
 | [tests/MANUAL_TEST_PLAN.md](tests/MANUAL_TEST_PLAN.md) | Browser test plan for what automation cannot cover |
-| [demo/DEMO_QA.md](demo/DEMO_QA.md) | Demo questions with verified expected answers |
-| [demo/VIDEO_SCRIPT.md](demo/VIDEO_SCRIPT.md) | Shot-by-shot demo recording script |
 
 ---
 
@@ -375,7 +373,6 @@ frontend/       Single-page UI
 tests/          Automated suite and the manual test plan
 scripts/        Evaluation harness, QA smoke suite, build tooling
 docs/           PRD, architecture, design, agent transcripts
-demo/           Demo Q&A sheet and evidence upload files
 ```
 
 ---

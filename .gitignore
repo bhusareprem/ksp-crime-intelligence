@@ -62,3 +62,6 @@ server_err.log
 
 # Local agent/editor config
 .claude/
+
+# Demo prep material, kept local only
+demo/

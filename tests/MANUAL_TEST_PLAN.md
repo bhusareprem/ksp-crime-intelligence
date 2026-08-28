@@ -93,7 +93,7 @@ figures are still correct. Record it, do not treat it as a blocker.
 | 7.2 | Check the header | `method: autonomous` when the model is available, `playbook` when rate-limited. Both must produce a brief |
 | 7.3 | Check step tools | No two steps repeat the same tool with the same arguments |
 | 7.4 | Evidence Intel: **Load sample**, then Analyze | High risk, Thimmaiah Begum with 260 priors |
-| 7.5 | Upload `demo/witness_statement.docx` | Same two accused matched. Witness and officer return no record **(blocker)** |
+| 7.5 | Upload any witness statement naming a known accused | Their priors are matched. People with no record return no record **(blocker)** |
 | 7.6 | Upload an unsupported file type | Clear message, no crash |
 | 7.7 | AI Brief | Five signal tiles all non-zero **(blocker)**, brief text renders |
 
