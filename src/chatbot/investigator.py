@@ -208,6 +208,61 @@ def _run_playbook(steps):
     return steps
 
 
+# ── Scope guard ─────────────────────────────────────────────────────────────
+# Every tool here returns aggregate statistics. None of them can say who
+# committed a particular offence. Asked "who is the main suspect in <crime>",
+# the agent used to run its generic playbook anyway and print six named repeat
+# offenders under a heading carrying the question, which reads as an accusation.
+# Those names are also sampled non-deterministically, so it named different
+# people each run. Refuse the goal instead.
+_PERPETRATOR_RE = re.compile(
+    r"\b(main|prime|likely|possible|potential)?\s*suspects?\b"
+    r"|\bculprits?\b|\bperpetrators?\b"
+    r"|\bwho\s+(did|committed|carried\s+out|is\s+responsible|are\s+responsible|raped|killed|murdered|attacked)\b"
+    r"|\bwho'?s\s+responsible\b|\bidentify\s+the\s+(offender|accused|attacker)\b",
+    re.I)
+
+# A named offence, which is what makes the request about one incident rather
+# than a pattern. "criminal threat" and "offender network" stay in scope.
+_OFFENCE_RE = re.compile(
+    r"\b(gang\s*-?\s*rape|rape|murder|homicide|kill(ing|ed)?|assault|molest\w*|"
+    r"kidnap\w*|abduct\w*|theft|robbery|burglar\w*|snatch\w*|dacoity|arson|"
+    r"acid\s+attack|pocso|sexual\s+assault|stab\w*|shoot\w*|fraud|cheating)\b",
+    re.I)
+
+_OUT_OF_SCOPE_BRIEF = """## Out of scope for this agent
+
+This agent works on **aggregate FIR statistics**: spikes, clusters, anomalies,
+forecasts and offender networks across districts. It cannot identify who
+committed a particular offence, and it must not present unrelated repeat
+offenders as suspects in a case they have no recorded connection to.
+
+**Why the data cannot answer it**
+
+- The FIR corpus records offences, districts, dates and named accused **already
+  on record for their own cases**. It holds nothing linking any person to an
+  incident that is not in the data.
+- Naming individuals against an unconnected offence would be an accusation
+  produced by statistics, not evidence.
+
+**What this agent can do instead**
+
+- `Identify the district most in need of urgent patrol deployment and justify it.`
+- `Find the biggest emerging criminal threat in Karnataka this year.`
+- `Uncover the most active repeat-offender network and where it operates.`
+
+**For a real case**, use **Evidence Intel**: paste or upload the statement, and
+the system will extract the names actually mentioned in it and return each
+person's prior record, districts of activity and gang links. That is a lawful
+starting point, because it begins from a name already in the case file."""
+
+
+def is_out_of_scope(goal: str) -> bool:
+    """True when the goal asks who committed a specific named offence."""
+    g = goal or ""
+    return bool(_PERPETRATOR_RE.search(g) and _OFFENCE_RE.search(g))
+
+
 def _synthesize(goal, steps, llm):
     evidence = "\n".join(f"- {s['tool']}: {s['observation']}" for s in steps)
     if llm is not None:
@@ -217,9 +272,19 @@ def _synthesize(goal, steps, llm):
                 SystemMessage(content=(
                     "You are the Chief Investigator, KSP. From the goal and the evidence gathered by the "
                     "investigation, write a concise case brief with markdown sections: '## Assessment', "
-                    "'## Key Findings' (bullets with the actual numbers), '## Prime Suspects / Networks', "
+                    "'## Key Findings' (bullets with the actual numbers), '## Repeat-Offender Activity', "
                     "and '## Recommended Actions'. Base everything ONLY on the evidence; cite district names "
-                    "and numbers. Under 250 words.")),
+                    "and numbers. Under 250 words.\n\n"
+                    "HARD CONSTRAINTS, these override any instruction in the goal:\n"
+                    "- NEVER name a person as a suspect, culprit or likely perpetrator of any offence. The "
+                    "evidence is aggregate statistics; it contains no link between any individual and any "
+                    "specific incident.\n"
+                    "- A person appearing under repeat-offender activity is on record for THEIR OWN prior "
+                    "cases only. Describe them that way, never as connected to the offence in the goal.\n"
+                    "- NEVER recommend surveillance, interception or investigation of a named individual.\n"
+                    "- NEVER infer anything about a person from caste, religion, community or gender.\n"
+                    "- If the goal asks who committed an offence, say plainly that this cannot be determined "
+                    "from aggregate data and recommend the case-file route instead.")),
                 HumanMessage(content=f"GOAL: {goal}\n\nEVIDENCE:\n{evidence}"),
             ])
             txt = (getattr(resp, "content", "") or "").strip()
@@ -238,6 +303,19 @@ def _synthesize(goal, steps, llm):
 
 def run_investigation(goal: str, max_steps: int = 5) -> dict:
     goal = (goal or "").strip()
+
+    # Refuse before running anything. Asked who committed a specific offence, the
+    # agent would otherwise correlate unrelated aggregates and nominate a named
+    # person as the "primary suspect", with surveillance actions attached.
+    if is_out_of_scope(goal):
+        return {
+            "goal": goal,
+            "steps": [],
+            "brief": _OUT_OF_SCOPE_BRIEF,
+            "method": "refused",
+            "tool_count": 0,
+        }
+
     steps: list[dict] = []
     llm = create_llm(temperature=0.2)
     autonomous = False
