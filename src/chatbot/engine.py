@@ -12,6 +12,7 @@ from src.chatbot.normalize import normalize_question
 from src.chatbot.router import route_question, route_with_reason, is_investigative_question
 from src.chatbot.rag.retriever import retrieve_context
 from src.chatbot.rag.web_search import needs_web_search, search_web
+from src.chatbot.case_scope import is_perpetrator_question, clarifying_reply
 from src.chatbot.responsible_ai import guard as _responsible_guard
 from src.chatbot.schemas import DB_DESCRIPTIONS
 from src.chatbot.smalltalk import detect_smalltalk
@@ -194,6 +195,13 @@ class CrimeChatbot:
         st = detect_smalltalk(user_q)
         if st:
             return ChatResponse(answer=st, sql="", database="", data="", source="chat")
+
+        # --- "Who committed this offence?" → ask for what would make it answerable ---
+        # Unguarded this wrote SQL hunting for accused names, found nothing, and
+        # fell through to a web search that named school staff from an unrelated
+        # case in another state as the likely suspects.
+        if is_perpetrator_question(user_q):
+            return self._ask_case_scope(original)
 
         # --- Officer explicitly asked us to go online → honour it ---
         # Checked before the honesty guards: those are the right default, but the
@@ -391,6 +399,15 @@ class CrimeChatbot:
             return df is not None and not df.empty
         except Exception:
             return False
+
+    def _ask_case_scope(self, question: str) -> ChatResponse:
+        """Cannot name a suspect, so ask for the details that would let us help."""
+        path = getattr(self.db, "fir_path", None)
+        return ChatResponse(
+            answer=clarifying_reply(question, str(path) if path else None),
+            sql="", database="criminal", data="", source="chat",
+            original_question=question,
+        )
 
     def _unknown_places(self, question: str) -> list[str]:
         """Districts/taluks the question names that are absent from the FIR database."""

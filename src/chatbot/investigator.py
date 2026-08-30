@@ -258,9 +258,12 @@ starting point, because it begins from a name already in the case file."""
 
 
 def is_out_of_scope(goal: str) -> bool:
-    """True when the goal asks who committed a specific named offence."""
-    g = goal or ""
-    return bool(_PERPETRATOR_RE.search(g) and _OFFENCE_RE.search(g))
+    """True when the goal asks who committed a specific named offence.
+
+    Delegates to case_scope so the chat path and the agent share one
+    definition and cannot drift apart."""
+    from src.chatbot.case_scope import is_perpetrator_question
+    return is_perpetrator_question(goal)
 
 
 def _synthesize(goal, steps, llm):
@@ -308,10 +311,11 @@ def run_investigation(goal: str, max_steps: int = 5) -> dict:
     # agent would otherwise correlate unrelated aggregates and nominate a named
     # person as the "primary suspect", with surveillance actions attached.
     if is_out_of_scope(goal):
+        from src.chatbot.case_scope import clarifying_reply
         return {
             "goal": goal,
             "steps": [],
-            "brief": _OUT_OF_SCOPE_BRIEF,
+            "brief": clarifying_reply(goal, _fir_path()),
             "method": "refused",
             "tool_count": 0,
         }

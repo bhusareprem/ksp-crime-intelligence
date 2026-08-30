@@ -129,7 +129,21 @@
       display: flex;
       flex-direction: column;
       gap: 1px;
+      /* The sidebar clips its overflow, and this nav grows with its content
+         (9 destinations plus 8 case chips). Without these three the bottom of
+         the list was cut off on a laptop screen with no way to reach it. */
+      flex: 0 1 auto;
+      min-height: 0;
+      overflow-y: auto;
     }
+    /* New Chat leads the sidebar: it is the most used control and must never
+       be the thing that scrolls out of view. */
+    .nav-new-chat {
+      margin-bottom: 6px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .nav-new-chat:hover { border-color: var(--accent); }
 
     .nav-group-label {
       font-size: 9.5px;
@@ -2010,6 +2024,9 @@
   </div>
 
   <nav class="sidebar-nav">
+    <button class="nav-item nav-new-chat" onclick="newChat()">
+      <span class="nav-icon">✏️</span> New Chat
+    </button>
     <div class="nav-group-label">Workspace</div>
     <button class="nav-item active" onclick="switchTab('chat')" id="nav-chat">
       <span class="nav-icon">💬</span> Chat &amp; Investigate
@@ -2055,10 +2072,6 @@
         <button class="inv-chip-sidebar" onclick="sendCaseScenario('missing')"><span class="inv-chip-icon">❓</span> Missing Person</button>
       </div>
     </div>
-    <div class="nav-divider"></div>
-    <button class="nav-item" onclick="newChat()">
-      <span class="nav-icon">✏️</span> New Chat
-    </button>
   </nav>
 
   <div class="chat-sessions" id="sessionList">
@@ -3268,7 +3281,7 @@ function renderMarkdown(text) {
 }
 
 function addMessage(role, text, meta = {}, scroll = true) {
-  document.getElementById('welcome').style.display = 'none';
+  setWelcome(false);
   const el = document.createElement('div');
   el.className = 'message ' + role;
   const isUser = role === 'user';
@@ -3304,7 +3317,7 @@ function addMessage(role, text, meta = {}, scroll = true) {
 }
 
 function showTyping() {
-  document.getElementById('welcome').style.display = 'none';
+  setWelcome(false);
   const el = document.createElement('div');
   el.className = 'message bot'; el.id = 'typing-indicator';
   el.innerHTML = `<div class="avatar bot">K</div>
@@ -3411,13 +3424,12 @@ async function loadSession(id) {
   const data = await res.json();
   currentSession = data.id; chatHistory = [];
 
-  // Detach welcome element BEFORE clearing innerHTML, then re-attach
+  // Same rule as newChat(): remove the conversation but keep the welcome node,
+  // which lives inside #messages and is needed by every addMessage() call.
   const welcome = document.getElementById('welcome');
   const msgs = document.getElementById('messages');
-  if (welcome && welcome.parentNode === msgs) msgs.removeChild(welcome);
-  msgs.innerHTML = '';
-  welcome.style.display = data.messages.length ? 'none' : 'block';
-  msgs.appendChild(welcome);
+  [...msgs.children].forEach(el => { if (el !== welcome) el.remove(); });
+  setWelcome(!data.messages.length);
 
   for (const m of data.messages) {
     const meta = m.metadata || {};
@@ -3439,12 +3451,21 @@ async function delSession(e, id) {
   loadSessions();
 }
 
+// #welcome lives inside #messages, so clearing the container with innerHTML=''
+// destroyed the welcome screen and its case chips. Every later addMessage() then
+// threw on the missing element, which stopped chat working altogether.
+function setWelcome(show) {
+  const w = document.getElementById('welcome');
+  if (w) w.style.display = show ? 'block' : 'none';
+}
+
 function newChat() {
   currentSession = null; chatHistory = [];
   const msgs = document.getElementById('messages');
-  msgs.innerHTML = '';
   const w = document.getElementById('welcome');
-  w.style.display = 'block'; msgs.appendChild(w);
+  // Remove the conversation, keep the welcome screen node itself.
+  [...msgs.children].forEach(el => { if (el !== w) el.remove(); });
+  setWelcome(true);
   document.getElementById('chatInput').focus();
   loadSessions();
 }
