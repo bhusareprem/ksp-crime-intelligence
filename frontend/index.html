@@ -3114,6 +3114,7 @@ function renderGuide() {
   document.getElementById('guidePrevBtn').disabled = _guideAt === 0;
   document.getElementById('guideNextBtn').textContent =
     _guideAt === GUIDE.length - 1 ? L.done : L.next;
+  updateGuideVoiceButton();
   document.getElementById('guideBody') && (document.getElementById('guideBody').scrollTop = 0);
   const body = document.querySelector('.guide-body');
   if (body) body.scrollTop = 0;
@@ -3131,8 +3132,38 @@ function guideGo(delta) {
   if (document.getElementById('guideSpeakBtn').classList.contains('on')) guideSpeak(true);
 }
 
-// Reads the panel aloud in the current language. Uses the browser's own voices,
-// so it costs nothing and works offline.
+// Reads the panel aloud using the browser's own voices, so it costs nothing and
+// works with the network down.
+//
+// Whether Kannada can be spoken is not up to us: it depends on the voices the
+// operating system has installed. Windows ships English only unless a Kannada
+// language pack is added, while most Android devices have one. Setting
+// utterance.lang to "kn-IN" with no such voice present does not fall back — it
+// stays silent, which looked like a broken button. The voice is now chosen
+// explicitly, and when there is none the control says so instead of pretending.
+function _voiceFor(langPrefix) {
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  return voices.find(v => v.lang && v.lang.toLowerCase().startsWith(langPrefix)) || null;
+}
+
+function _guideVoiceState() {
+  const kn = currentLang === 'kn';
+  const voice = kn ? _voiceFor('kn') : (_voiceFor('en-in') || _voiceFor('en'));
+  return { kn, voice };
+}
+
+function updateGuideVoiceButton() {
+  const btn = document.getElementById('guideSpeakBtn');
+  if (!btn) return;
+  const { kn, voice } = _guideVoiceState();
+  btn.disabled = !voice;
+  btn.style.opacity = voice ? '' : '.4';
+  btn.title = voice
+    ? (kn ? 'ಕನ್ನಡದಲ್ಲಿ ಓದಿ' : 'Read this aloud')
+    : (kn ? 'ಈ ಸಾಧನದಲ್ಲಿ ಕನ್ನಡ ಧ್ವನಿ ಇಲ್ಲ. Windows ಭಾಷಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಕನ್ನಡ ಧ್ವನಿ ಸೇರಿಸಿ.'
+         : 'No voice installed for this language on this device.');
+}
+
 function guideSpeak(restart) {
   const btn = document.getElementById('guideSpeakBtn');
   if (!window.speechSynthesis) return;
@@ -3141,15 +3172,24 @@ function guideSpeak(restart) {
     btn.classList.remove('on');
     return;
   }
+  const { kn, voice } = _guideVoiceState();
+  if (!voice) { updateGuideVoiceButton(); return; }
   window.speechSynthesis.cancel();
-  const kn = currentLang === 'kn';
   const c = kn ? GUIDE[_guideAt].kn : GUIDE[_guideAt].en;
   const u = new SpeechSynthesisUtterance(`${c.t}. ${c.what} ${c.does} ${c.why}`);
-  u.lang = kn ? 'kn-IN' : 'en-IN';
+  u.voice = voice;                 // naming the voice, not just the language tag
+  u.lang = voice.lang;
   u.rate = 0.95;
   u.onend = () => btn.classList.remove('on');
+  u.onerror = () => btn.classList.remove('on');
   btn.classList.add('on');
   window.speechSynthesis.speak(u);
+}
+
+// Chrome loads voices asynchronously and fires this once they arrive, so the
+// button can start disabled and correct itself a moment later.
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = updateGuideVoiceButton;
 }
 
 // ─── LANGUAGE ─────────────────────────────────────────────────────────────
@@ -3738,10 +3778,19 @@ function toggleTTS() {
 }
 function speakText(text) {
   if (!ttsEnabled || !window.speechSynthesis) return;
+  // Same trap as the guide's read-aloud: a "kn-IN" tag with no Kannada voice
+  // installed does not fall back to anything, it simply stays silent. Naming
+  // the voice makes the failure visible instead, and an English voice is never
+  // handed Kannada text - it would mangle it.
+  const { voice } = _guideVoiceState();
+  if (!voice) { voiceHint(currentLang === 'kn'
+    ? 'ಈ ಸಾಧನದಲ್ಲಿ ಕನ್ನಡ ಧ್ವನಿ ಸ್ಥಾಪಿಸಿಲ್ಲ.'
+    : 'No voice for this language is installed on this device.', true); return; }
   window.speechSynthesis.cancel();
   const plain = text.replace(/[#*`>_~\[\]]/g, '').slice(0, 600);
   const u = new SpeechSynthesisUtterance(plain);
-  u.lang = currentLang === 'kn' ? 'kn-IN' : 'en-IN';
+  u.voice = voice;
+  u.lang = voice.lang;
   u.rate = 0.93;
   window.speechSynthesis.speak(u);
 }

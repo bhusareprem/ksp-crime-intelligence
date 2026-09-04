@@ -216,7 +216,34 @@ class TestSelfExplainingGuide:
         fn = re.search(r"function guideGo\(delta\) \{(.*?)\n\}", html, re.S)
         assert fn and "switchTab(GUIDE[_guideAt].tab)" in fn.group(1)
 
-    def test_speech_follows_the_interface_language(self):
+    def test_speech_picks_a_real_voice_not_just_a_language_tag(self):
+        """Setting utterance.lang to "kn-IN" with no Kannada voice installed does
+        not fall back to anything — it stays silent, which reads as a broken
+        button. Windows ships English voices only unless a Kannada pack is added.
+        The voice is resolved and named explicitly instead."""
         html = FRONTEND.read_text(encoding="utf-8")
         fn = re.search(r"function guideSpeak\(restart\) \{(.*?)\n\}", html, re.S)
-        assert fn and "'kn-IN'" in fn.group(1)
+        assert fn, "guideSpeak not found"
+        body = fn.group(1)
+        assert "_guideVoiceState()" in body, "must resolve an installed voice"
+        assert "u.voice = voice" in body, "must name the voice, not only the tag"
+        assert "if (!voice)" in body, "must handle the no-voice case"
+
+    def test_the_language_selects_the_voice(self):
+        html = FRONTEND.read_text(encoding="utf-8")
+        fn = re.search(r"function _guideVoiceState\(\) \{(.*?)\n\}", html, re.S)
+        assert fn and "'kn'" in fn.group(1)
+
+    def test_a_missing_voice_is_reported_not_swallowed(self):
+        """The button says why it cannot speak rather than doing nothing."""
+        html = FRONTEND.read_text(encoding="utf-8")
+        fn = re.search(r"function updateGuideVoiceButton\(\) \{(.*?)\n\}", html, re.S)
+        assert fn, "updateGuideVoiceButton not found"
+        assert "btn.disabled = !voice" in fn.group(1)
+        assert re.search(r"[ಀ-೿]", fn.group(1)), "the explanation must exist in Kannada too"
+
+    def test_chat_readout_uses_the_same_resolution(self):
+        """speakText had the identical bug: Kannada answers were never spoken."""
+        html = FRONTEND.read_text(encoding="utf-8")
+        fn = re.search(r"function speakText\(text\) \{(.*?)\n\}", html, re.S)
+        assert fn and "_guideVoiceState()" in fn.group(1)
