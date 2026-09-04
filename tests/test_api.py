@@ -156,3 +156,35 @@ class TestEvidenceNameExtraction:
         from src.chatbot.evidence import extract_names
         names = extract_names("The accused is David Mirza\nDate of record : 03/09/2026")
         assert "David Mirza" in names
+
+
+class TestSpeechEndpoint:
+    """Kannada read-aloud cannot depend on the officer's machine having a
+    Kannada voice, because Windows ships none. The server generates it."""
+
+    def test_wav_header_is_valid(self):
+        """Gemini returns headerless PCM, which no browser will play from an
+        <audio> element. It has to be wrapped."""
+        from src.tts.gemini_tts import _wav
+        wav = _wav(b"\x00\x01" * 100)
+        assert wav[:4] == b"RIFF" and wav[8:12] == b"WAVE"
+        assert wav[12:16] == b"fmt " and wav[36:40] == b"data"
+
+    def test_same_text_and_language_share_a_cache_entry(self):
+        from src.tts.gemini_tts import cached_path
+        a = cached_path("ಸಾಕ್ಷ್ಯ ಗುಪ್ತಚರ", "kn")
+        b = cached_path("ಸಾಕ್ಷ್ಯ ಗುಪ್ತಚರ", "kn")
+        c = cached_path("ಸಾಕ್ಷ್ಯ ಗುಪ್ತಚರ", "en")
+        assert a == b and a != c
+
+    def test_empty_text_is_refused_without_calling_out(self):
+        from src.tts.gemini_tts import synthesize
+        audio, note = synthesize("", "kn")
+        assert audio is None and "empty" in note
+
+    def test_a_failure_is_reported_not_raised(self, monkeypatch):
+        """Speech is an enhancement; it must never break the page."""
+        import src.tts.gemini_tts as t
+        monkeypatch.setattr(t, "_api_key", lambda: "")
+        audio, note = t.synthesize("ಪರೀಕ್ಷೆ ವಾಕ್ಯ", "kn")
+        assert audio is None and "key" in note.lower()

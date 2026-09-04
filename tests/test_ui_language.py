@@ -222,25 +222,34 @@ class TestSelfExplainingGuide:
         button. Windows ships English voices only unless a Kannada pack is added.
         The voice is resolved and named explicitly instead."""
         html = FRONTEND.read_text(encoding="utf-8")
-        fn = re.search(r"function guideSpeak\(restart\) \{(.*?)\n\}", html, re.S)
+        fn = re.search(r"async function guideSpeak\(restart\) \{(.*?)\n\}", html, re.S)
         assert fn, "guideSpeak not found"
         body = fn.group(1)
         assert "_guideVoiceState()" in body, "must resolve an installed voice"
         assert "u.voice = voice" in body, "must name the voice, not only the tag"
-        assert "if (!voice)" in body, "must handle the no-voice case"
 
     def test_the_language_selects_the_voice(self):
         html = FRONTEND.read_text(encoding="utf-8")
         fn = re.search(r"function _guideVoiceState\(\) \{(.*?)\n\}", html, re.S)
         assert fn and "'kn'" in fn.group(1)
 
-    def test_a_missing_voice_is_reported_not_swallowed(self):
-        """The button says why it cannot speak rather than doing nothing."""
+    def test_no_local_voice_falls_back_to_the_server(self):
+        """Explaining that Kannada cannot be spoken was the wrong answer for a
+        product differentiated by Kannada. When the machine has no voice the
+        audio is generated server-side instead, so the button always works."""
+        html = FRONTEND.read_text(encoding="utf-8")
+        fn = re.search(r"async function guideSpeak\(restart\) \{(.*?)\n\}", html, re.S)
+        assert fn and "speakViaServer(" in fn.group(1)
+
+    def test_the_button_is_never_disabled(self):
         html = FRONTEND.read_text(encoding="utf-8")
         fn = re.search(r"function updateGuideVoiceButton\(\) \{(.*?)\n\}", html, re.S)
-        assert fn, "updateGuideVoiceButton not found"
-        assert "btn.disabled = !voice" in fn.group(1)
-        assert re.search(r"[ಀ-೿]", fn.group(1)), "the explanation must exist in Kannada too"
+        assert fn and "btn.disabled = false" in fn.group(1)
+
+    def test_chat_readout_also_falls_back(self):
+        html = FRONTEND.read_text(encoding="utf-8")
+        fn = re.search(r"function speakText\(text\) \{(.*?)\n\}", html, re.S)
+        assert fn and "speakViaServer(" in fn.group(1)
 
     def test_chat_readout_uses_the_same_resolution(self):
         """speakText had the identical bug: Kannada answers were never spoken."""

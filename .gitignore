@@ -65,3 +65,7 @@ server_err.log
 
 # Demo prep material, kept local only
 demo/
+
+# Generated speech clips. A build artifact: they ship inside dist_appsail,
+# which is itself ignored, so there is no reason to carry 12 MB of WAV in git.
+data/tts_cache/

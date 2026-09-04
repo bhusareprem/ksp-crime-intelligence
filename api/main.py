@@ -13,7 +13,7 @@ import pandas as _pd
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -1022,6 +1022,34 @@ def patrol_recommendations(language: str = "en"):
 def evidence_sample():
     """A realistic witness statement seeded with a real repeat-offender name."""
     return {"statement": _evidence.sample_statement()}
+
+
+class TTSRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=900)
+    language: str = "kn"
+
+
+@app.post("/api/tts")
+def text_to_speech(req: TTSRequest):
+    """Speech for a language the officer's machine has no voice for.
+
+    The browser reads English aloud by itself, free and offline. It cannot read
+    Kannada unless the operating system has a Kannada voice, and Windows ships
+    none by default - so the read-aloud button was silent on exactly the language
+    this product is differentiated by. Audio is generated here instead and cached
+    on disk, so repeated plays of the same text cost nothing.
+    """
+    from src.tts.gemini_tts import synthesize
+    wav, note = synthesize(req.text, req.language)
+    if wav is None:
+        # Speech is an enhancement. A failure here is reported plainly and the
+        # page carries on reading rather than breaking.
+        return JSONResponse(status_code=503, content={"detail": note})
+    return Response(
+        content=wav,
+        media_type="audio/wav",
+        headers={"Cache-Control": "public, max-age=86400", "X-TTS-Source": note},
+    )
 
 
 @app.post("/api/evidence/analyze")
