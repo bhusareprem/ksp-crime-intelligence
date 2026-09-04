@@ -13,6 +13,13 @@ from src.chatbot.router import route_question, route_with_reason, is_investigati
 from src.chatbot.rag.retriever import retrieve_context
 from src.chatbot.rag.web_search import needs_web_search, search_web
 from src.chatbot.case_scope import is_perpetrator_question, clarifying_reply
+from src.chatbot.kannada import (
+    answer_count as kn_answer_count,
+    localize_note as kn_localize_note,
+    normalize_script as kn_normalize_script,
+    single_value as kn_single_value,
+    wants_kannada,
+)
 from src.chatbot.responsible_ai import guard as _responsible_guard
 from src.chatbot.schemas import DB_DESCRIPTIONS
 from src.chatbot.smalltalk import detect_smalltalk
@@ -809,8 +816,33 @@ class CrimeChatbot:
                 correction_note=correction_note,
             )
 
-        note_prefix = f"Note: {data_note}\n\n" if data_note else ""
-        answer = note_prefix + self.agent.summarize(query_q, df, db_name, history, rag=rag)
+        # Kannada answers, built from the officer's own sentence with the figure
+        # substituted. The model ignored the "respond in Kannada" directive every
+        # time, so a Kannada question always came back in English. This costs no
+        # tokens and still works when the quota is spent.
+        kn_question = self._LANG_PREFIX.sub("", original).strip()
+        is_kn = wants_kannada(kn_question, original)
+        kn_answer = None
+        if is_kn:
+            value = kn_single_value(df)
+            if value is not None:
+                kn_answer = kn_answer_count(kn_question, value)
+
+        if is_kn:
+            data_note = kn_localize_note(data_note)
+
+        if kn_answer:
+            answer = kn_answer + (f"\n\n_{data_note}_" if data_note else "")
+        else:
+            note_prefix = (f"ಟಿಪ್ಪಣಿ: {data_note}\n\n" if is_kn else f"Note: {data_note}\n\n") if data_note else ""
+            answer = note_prefix + self.agent.summarize(
+                query_q, df, db_name, history, rag=rag, kannada=is_kn,
+                display_question=kn_question if is_kn else None)
+        if is_kn:
+            # Models occasionally emit a Bengali or Devanagari letter inside a
+            # Kannada word; the Indic blocks are phonetically parallel, so each
+            # one maps back to its Kannada counterpart exactly.
+            answer = kn_normalize_script(answer)
         db_gap = _db_gap_suggestion(original, df)
         if db_gap:
             answer += "\n\n" + db_gap

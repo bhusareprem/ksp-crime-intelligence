@@ -43,15 +43,41 @@ def route_with_reason(question: str) -> RouteResult:
     year = _extract_year(q)
 
     # --- ksp_crime: NCRB / national / rates / benchmarks ---
+    # "chargesheet rate" is deliberately absent. It is computable from our own
+    # 500k FIRs (CaseStatusMaster records it), so sending it to the NCRB
+    # benchmark tables meant "what is the chargesheet rate?" answered 71% from a
+    # small Bengaluru sample while "what percentage of cases are chargesheeted?"
+    # answered 25% from the full FIR database. Same question, two datasets.
+    # "crime rate" stays: that is a per-100k-population figure and the FIR
+    # database holds no population, so only the NCRB tables can answer it.
     if re.search(
         r"\bncrb\b|\bnational\b|\ball india\b|\bnationwide\b|\bmetro\b|"
-        r"\bbenchmark\b|\bchargesheet rate\b|\bcrime rate\b|\bpopulation lakhs\b|"
+        r"\bbenchmark\b|\bcrime rate\b|\bpopulation lakhs\b|"
         r"\beconomic offence\b|\bcomplaint stat",
         q,
     ):
         return RouteResult(
             "ksp_crime",
             "Question asks for NCRB / national statistics or official crime rates",
+            "high",
+        )
+
+    # --- criminal: case-progression rates the FIR database itself records ---
+    # CaseStatusMaster holds chargesheet / disposal / pendency for all 500k FIRs.
+    # Without this rule these questions reached the keyword-scoring fallback at
+    # the bottom, where the bare word "rate" scores for ksp_crime and nothing
+    # else scores at all - so "what is the chargesheet rate?" was answered from a
+    # small NCRB sample (71%) while "what percentage of cases are chargesheeted?"
+    # was answered from the full FIR data (25%).
+    if re.search(
+        r"charge\s*sheet(ing|ed)?\b|chargesheet(ed)?\b|disposal\s*rate|\bpendency\b|"
+        r"clearance\s*rate|solve\s*rate|detection\s*rate|case\s*progress",
+        q,
+    ):
+        return RouteResult(
+            "criminal",
+            "Case progression (chargesheet / disposal / pendency) is recorded in "
+            "CaseStatusMaster across all 500k FIRs",
             "high",
         )
 

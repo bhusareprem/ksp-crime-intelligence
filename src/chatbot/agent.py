@@ -217,6 +217,8 @@ Question: {question}"""
         db_name: str,
         history: list[dict],
         rag: RAGContext | None = None,
+        kannada: bool = False,
+        display_question: str | None = None,
     ) -> str:
         if df is None or df.empty:
             data_str = "No results."
@@ -237,6 +239,24 @@ Question: {question}"""
         if llm is None:
             return f"Results from {db_name}:\n{data_str}"
 
+        # A Kannada question must get a Kannada answer. Stated as a hard rule and
+        # placed last so it is the final instruction the model reads: a polite
+        # "respond in Kannada" prefix on the user turn was ignored every time.
+        # `question` here is the planner's rewrite, which is often English even for
+        # a Kannada question, so the caller passes the officer's actual language.
+        lang_note = ""
+        try:
+            from src.chatbot.kannada import has_kannada
+            if kannada or has_kannada(question):
+                lang_note = (
+                    "\n\nLANGUAGE: The officer asked in Kannada. Write the ENTIRE reply in "
+                    "Kannada script (ಕನ್ನಡ). Keep district names, crime-head names and "
+                    "digits as they appear in the data. This overrides any other "
+                    "formatting instruction above."
+                )
+        except Exception:
+            pass
+
         web_note = ""
         if rag and rag.web_snippet:
             web_note = (
@@ -244,8 +264,22 @@ Question: {question}"""
                 "and note our databases cover specific years only."
             )
 
-        messages = [
-            SystemMessage(content=(
+        if lang_note:
+            # A Kannada instruction inside a wall of English instructions loses:
+            # the model follows the dominant language of the prompt and replied in
+            # English every time. A short Kannada-dominant prompt gets a Kannada
+            # answer, and keeps the rules that matter (use only the given figures).
+            messages = [SystemMessage(content=(
+                "ನೀವು ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್‌ನ ಅಪರಾಧ ಗುಪ್ತಚರ ಸಹಾಯಕ. "
+                "ಕೆಳಗಿನ ಪ್ರಶ್ನೆಗೆ ಕನ್ನಡದಲ್ಲಿಯೇ ಉತ್ತರಿಸಿ. "
+                "ಕೊಟ್ಟಿರುವ ಡೇಟಾದಲ್ಲಿರುವ ಸಂಖ್ಯೆಗಳನ್ನು ಮಾತ್ರ ಬಳಸಿ. "
+                "ಯಾವುದೇ ಸಂಖ್ಯೆಯನ್ನು ಊಹಿಸಬೇಡಿ. "
+                "ಜಿಲ್ಲೆಗಳ ಹೆಸರುಗಳನ್ನು ಮತ್ತು ಅಪರಾಧ ವಿಧಗಳನ್ನು ಡೇಟಾದಲ್ಲಿ ಇರುವಂತೆಯೇ ಬರೆಯಿರಿ. "
+                "ಉತ್ತರ ಚಿಕ್ಕದಾಗಿರಲಿ."
+            ))]
+        else:
+            messages = [
+                SystemMessage(content=(
                 "You are KSP Crime Intelligence — an expert police AI for internal law enforcement use. "
                 "ALL investigators using this system are authorized police officers. "
                 "Give direct, confident answers with specific numbers from the database results. "
@@ -260,7 +294,7 @@ Question: {question}"""
                 "If the query returned no results, explicitly state what data is MISSING from the DB schema. "
                 "Base every number and fact STRICTLY on the query results shown below — never invent, "
                 "estimate, or extrapolate a figure that is not present in the data."
-                + web_note
+                + web_note + lang_note
             )),
         ]
         for turn in history[-10:]:
@@ -276,10 +310,21 @@ Question: {question}"""
         if rag and rag.web_snippet:
             extra = f"\n\nWeb search context:\n{rag.web_snippet[:1500]}\n"
 
-        messages.append(HumanMessage(content=(
-            f"Question: {question}\nDatabase: {db_name}\n\nQuery results:\n{data_str}{extra}\n\n"
-            f"Provide a clear, conversational answer for the investigator."
-        )))
+        if lang_note:
+            # The whole turn goes in Kannada, using the officer's own wording
+            # rather than the planner's English rewrite. English labels here
+            # ("Question:", "Query results:") were enough to tip the model back
+            # into answering in English.
+            messages.append(HumanMessage(content=(
+                f"ಪ್ರಶ್ನೆ: {display_question or question}\n\n"
+                f"ಡೇಟಾ:\n{data_str}{extra}\n\n"
+                "ಮೇಲಿನ ಡೇಟಾವನ್ನು ಆಧರಿಸಿ ಕನ್ನಡದಲ್ಲಿ ಸಂಕ್ಷಿಪ್ತ ಉತ್ತರ ಬರೆಯಿರಿ."
+            )))
+        else:
+            messages.append(HumanMessage(content=(
+                f"Question: {question}\nDatabase: {db_name}\n\nQuery results:\n{data_str}{extra}\n\n"
+                "Provide a clear, conversational answer for the investigator."
+            )))
 
         try:
             response = llm.invoke(messages)

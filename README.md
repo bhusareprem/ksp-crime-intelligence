@@ -14,7 +14,7 @@ Conversational AI for the KSP Crime Database.
 ![Python](https://img.shields.io/badge/Python-3.12-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)
 ![DuckDB](https://img.shields.io/badge/DuckDB-500k_FIRs-yellow)
-![Tests](https://img.shields.io/badge/tests-135_passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-254_passing-brightgreen)
 ![Deploy](https://img.shields.io/badge/deploy-Zoho_Catalyst-e42527)
 
 ---
@@ -266,7 +266,7 @@ Interactive API docs at `/docs`.
 ## Tests
 
 ```bash
-python -m pytest                                        # 135 tests, ~18s, no model calls
+python -m pytest                                        # 254 tests, ~25s, no model calls
 python scripts/qa_smoke.py http://localhost:8080 --no-llm   # 32 endpoint checks, no tokens
 python scripts/eval_nlsql.py                            # 21 gold questions, spends tokens
 ```

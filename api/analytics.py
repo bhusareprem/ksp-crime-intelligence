@@ -230,7 +230,9 @@ def criminal_network():
                 FROM Accused
                 GROUP BY CaseMasterID
                 HAVING COUNT(*) >= 4
-                ORDER BY COUNT(*) DESC
+                -- CaseMasterID breaks the tie on COUNT(*): without it the 40
+                -- seed cases differ run to run and the whole graph changes.
+                ORDER BY COUNT(*) DESC, CaseMasterID
                 LIMIT 40
             ),
             seed_ids AS (
@@ -256,6 +258,11 @@ def criminal_network():
             LEFT JOIN gang_accused ga ON ga.AccusedMasterID = a.AccusedMasterID
             LEFT JOIN name_firs nf ON nf.AccusedName = a.AccusedName
             WHERE a.AccusedName IS NOT NULL
+            -- Without an ORDER BY, DuckDB is free to return any 150 of the seed
+            -- rows, so the graph redrew with different people on every load and
+            -- a demo could not be repeated. Ranking by prior count also puts the
+            -- most connected offenders on screen, which is the point of the view.
+            ORDER BY fir_count DESC, a.AccusedName, a.AccusedMasterID
             LIMIT 150
         """)
     except Exception:
@@ -277,6 +284,7 @@ def criminal_network():
              AND a1.AccusedMasterID < a2.AccusedMasterID
             WHERE a1.AccusedMasterID IN ({id_list})
               AND a2.AccusedMasterID IN ({id_list})
+            ORDER BY src, tgt
             LIMIT 500
         """)
     except Exception:
@@ -292,6 +300,7 @@ def criminal_network():
              AND agl1.AccusedMasterID < agl2.AccusedMasterID
             WHERE agl1.AccusedMasterID IN ({id_list})
               AND agl2.AccusedMasterID IN ({id_list})
+            ORDER BY src, tgt
             LIMIT 300
         """)
     except Exception:

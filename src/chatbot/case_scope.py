@@ -27,7 +27,17 @@ _PERPETRATOR_RE = re.compile(
     r"|\bwho\s+(did|committed|carried\s+out|is\s+responsible|are\s+responsible|"
     r"raped|killed|murdered|attacked|stole|robbed)\b"
     r"|\bwho'?s\s+responsible\b"
-    r"|\bidentify\s+the\s+(offender|accused|attacker|culprit)\b",
+    # "Who is behind the murder in Belagavi" and "name the person responsible
+    # for the theft in Hubli" both asked the guard's question and both got
+    # through: the first because "behind" was missing, the second because only
+    # "identify the offender" was covered and not "name the person".
+    r"|\bwho(?:\s+is|'?s|\s+are|\s+was|\s+were)?\s+behind\b"
+    # Requires a word for a *person* after the verb. A bare "responsible for the"
+    # was tried and rejected: it also refused "which district is responsible for
+    # the highest theft rate", which is an ordinary analytical question.
+    r"|\b(name|identify|tell\s+me)\s+(the\s+|who\s+the\s+)?"
+    r"(person|people|man|men|woman|women|individual|offender|accused|attacker|"
+    r"culprit|suspect|perpetrator)s?\b",
     re.I)
 
 # A named offence, which is what makes it about one incident rather than a
@@ -44,9 +54,34 @@ _OFFENCE_RE = re.compile(
 _YEAR_RE = re.compile(r"\b(19\d{2}|20\d{2})\b")
 
 
+# An FIR or case number in the question. The guard stands down when one is
+# present, because the objection it enforces no longer applies.
+_CASE_NO_RE = re.compile(
+    r"\b(?:fir|case|crime)\s*(?:no\.?|number|#)?\s*[:#]?\s*(?:\d{6,20}|\d{1,5}\s*/\s*\d{4})\b",
+    re.I)
+
+
+def has_case_number(text: str) -> bool:
+    return bool(_CASE_NO_RE.search(text or ""))
+
+
 def is_perpetrator_question(text: str) -> bool:
-    """True when the text asks who committed a specific named offence."""
+    """True when the text asks who committed a specific named offence.
+
+    A supplied FIR number is the exception. The guard exists because aggregate
+    statistics cannot link a person to an incident, so picking a name out of
+    them would be an accusation produced by arithmetic. An FIR number is that
+    link: the case record already names who is on record for it, and reading a
+    record back is not inference.
+
+    Without this the system contradicted itself. It told the officer "give me
+    the FIR number and I can pull that case and everyone recorded on it", and
+    then refused again when they did, because the words "who committed" were
+    still in the question they had been asked to add details to.
+    """
     t = text or ""
+    if has_case_number(t):
+        return False
     return bool(_PERPETRATOR_RE.search(t) and _OFFENCE_RE.search(t))
 
 

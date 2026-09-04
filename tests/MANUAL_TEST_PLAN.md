@@ -119,7 +119,7 @@ figures are still correct. Record it, do not treat it as a blocker.
 
 ## Release checklist
 
-- [ ] `python -m pytest` passes (135 tests)
+- [ ] `python -m pytest` passes (254 tests)
 - [ ] `python scripts/qa_smoke.py <url> --no-llm` passes (32 checks)
 - [ ] `python scripts/eval_nlsql.py` passes (21/21), spends tokens, run once
 - [ ] Every **blocker** row above passes

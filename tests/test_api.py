@@ -132,3 +132,27 @@ class TestSessionLifecycleOverHttp:
         rows = listed if isinstance(listed, list) else listed.get("sessions", [])
         assert any((r.get("id") or r.get("session_id")) == sid for r in rows)
         assert client.delete(f"/api/sessions/{sid}").status_code in (200, 204)
+
+
+class TestEvidenceNameExtraction:
+    """Names pulled from a statement are offered to the officer as people to
+    check, so institutional phrases appearing there read as sloppy work."""
+
+    def test_place_and_institution_phrases_are_not_people(self):
+        from src.chatbot.evidence import extract_names
+        text = (
+            "Police Station : Mysuru City - Devaraja Sub-Division. The seized "
+            "material was sent to the Forensic Science Laboratory. The witness "
+            "Arjun Fernandes named David Mirza as the rider."
+        )
+        names = extract_names(text)
+        assert "Arjun Fernandes" in names
+        assert "David Mirza" in names
+        for noise in ("Mysuru City", "Forensic Science", "Science Laboratory"):
+            assert noise not in names, f"{noise!r} was offered as a person"
+
+    def test_a_name_does_not_run_across_a_line_break(self):
+        """Plain \s let a name swallow the first word of the next line."""
+        from src.chatbot.evidence import extract_names
+        names = extract_names("The accused is David Mirza\nDate of record : 03/09/2026")
+        assert "David Mirza" in names

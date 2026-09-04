@@ -4,7 +4,11 @@ import os
 import re
 from typing import Any
 
-from langchain_openai import ChatOpenAI
+# langchain_openai is NOT imported here. Importing it pulls in the whole openai
+# SDK type tree - including the Azure chat models this app never uses - and cost
+# 13.8s of a 17.7s module import, which is most of the cold start a judge waits
+# through. It is imported inside create_llm() instead, where it is actually
+# needed, so a request that never builds an LLM never pays for it.
 
 # ─── Provider catalogue ────────────────────────────────────────────────────
 
@@ -28,10 +32,13 @@ PROVIDERS = {
         "env_key": "GEMINI_API_KEY",
         "fallback_env": "GOOGLE_API_KEY",
         "models": [
+            # Checked against the live ListModels endpoint. The retired 2.0-flash
+            # ids were still offered here and answered every request with a 404,
+            # so the fallback provider was dead whenever one was picked.
             {"id": "gemini-2.5-flash",           "label": "Gemini 2.5 Flash (free, best)"},
             {"id": "gemini-3.5-flash",           "label": "Gemini 3.5 Flash (free)"},
-            {"id": "gemini-2.0-flash",            "label": "Gemini 2.0 Flash (free)"},
-            {"id": "gemini-2.0-flash-lite",      "label": "Gemini 2.0 Flash Lite (free)"},
+            {"id": "gemini-2.5-flash-lite",      "label": "Gemini 2.5 Flash Lite (free, fastest)"},
+            {"id": "gemini-flash-latest",        "label": "Gemini Flash (latest, free)"},
         ],
         "driver": "genai_sdk",
     },
@@ -425,6 +432,8 @@ def create_llm(temperature: float = 0.3, provider: str | None = None, model: str
                 "HTTP-Referer": "https://ksp-crime-ai.local",
                 "X-Title": "KSP Crime Intelligence AI",
             }
+        from langchain_openai import ChatOpenAI   # deferred: see module header
+
         def _make(key: str):
             return ChatOpenAI(
                 model=model,

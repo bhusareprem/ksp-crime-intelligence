@@ -68,6 +68,19 @@ from src.news import live_news
 import src.ml.patterns as ml
 ml.DATA_DIR = PROJECT / "data"
 from src.chatbot import evidence as _evidence
+from src.chatbot.kannada import is_kn as _is_kn
+
+
+def _kn_prompt(english: str, kannada: bool) -> str:
+    """Kannada-dominant system prompt that keeps the English rules intact.
+
+    A Kannada line appended to an English prompt is ignored, so the language
+    instruction bookends the rules rather than sitting inside them.
+    """
+    if not kannada:
+        return english
+    from src.chatbot.kannada import SYSTEM_KN
+    return SYSTEM_KN + "\n\n" + english + "\n\nಉತ್ತರವನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ಕನ್ನಡದಲ್ಲಿ ಬರೆಯಿರಿ."
 
 
 def _init_audit():
@@ -903,7 +916,7 @@ def _gather_signals():
 
 
 @app.get("/api/intelligence/brief")
-def intelligence_brief():
+def intelligence_brief(language: str = "en"):
     """AI-synthesised executive crime-intelligence briefing from all live signals."""
     import json as _json
     from datetime import datetime
@@ -914,20 +927,43 @@ def intelligence_brief():
                 "generated_at": datetime.utcnow().isoformat(), "signals": sig}
     try:
         from langchain_core.messages import HumanMessage, SystemMessage
+        _kn = _is_kn(language)
+        # The section headers were named in English even in Kannada mode, so the
+        # brief came back with English headings over Kannada prose. Naming them
+        # in Kannada also keeps the whole instruction in one language, which is
+        # what stops the model drifting into a third script mid-answer.
+        sections_en = (
+            "Use these sections with markdown headers: '## Situation Overview', "
+            "'## Emerging Threats', '## Statistical Anomalies', '## Watchlist' "
+            "(top offenders), and '## Recommended Actions' (specific, prioritised "
+            "deployment advice)."
+        )
+        sections_kn = (
+            "ಈ ವಿಭಾಗಗಳನ್ನು ಮಾರ್ಕ್‌ಡೌನ್ ಶೀರ್ಷಿಕೆಗಳಾಗಿ ಬಳಸಿ: '## ಪರಿಸ್ಥಿತಿ ಅವಲೋಕನ', "
+            "'## ಉದಯೋನ್ಮುಖ ಬೆದರಿಕೆಗಳು', '## ಸಾಂಖ್ಯಿಕ ಅಸಂಗತತೆಗಳು', '## ನಿಗಾ ಪಟ್ಟಿ', "
+            "'## ಶಿಫಾರಸು ಮಾಡಿದ ಕ್ರಮಗಳು'. ಎಲ್ಲಾ ಪಠ್ಯವನ್ನು ಕನ್ನಡದಲ್ಲಿಯೇ ಬರೆಯಿರಿ. "
+            "ಕನ್ನಡ ಮತ್ತು ಇಂಗ್ಲಿಷ್ ಹೊರತುಪಡಿಸಿ ಬೇರೆ ಯಾವುದೇ ಲಿಪಿಯನ್ನು ಬಳಸಬೇಡಿ."
+        )
         resp = llm.invoke([
-            SystemMessage(content=(
+            SystemMessage(content=_kn_prompt(
                 "You are the Chief Crime Intelligence Analyst for the Karnataka State Police. "
                 "From the structured signals provided (trends, hotspots, ML-detected emerging clusters, "
                 "statistical anomalies, forecasts, live spike-alerts, top-risk offenders, and live crime news), "
-                "write a concise executive intelligence briefing for a senior officer. Use these sections with "
-                "markdown headers: '## Situation Overview', '## Emerging Threats', '## Statistical Anomalies', "
-                "'## Watchlist' (top offenders), and '## Recommended Actions' (specific, prioritised deployment "
-                "advice). Be specific with district names and numbers. Be crisp — this is read by a busy officer. "
-                "Do not invent data beyond the signals given."
+                "write a concise executive intelligence briefing for a senior officer. "
+                + (sections_kn if _kn else sections_en) +
+                " Be specific with district names and numbers. Be crisp — this is read by a busy officer. "
+                "Do not invent data beyond the signals given.", _kn
             )),
-            HumanMessage(content="Live signals (JSON):\n" + _json.dumps(sig, default=str)[:6000]),
+            HumanMessage(content=(
+                ("ನೇರ ಸಂಕೇತಗಳು (JSON):\n" if _kn else "Live signals (JSON):\n")
+                + _json.dumps(sig, default=str)[:6000]
+                + ("\n\nಕನ್ನಡದಲ್ಲಿ ಗುಪ್ತಚರ ವರದಿ ಬರೆಯಿರಿ." if _kn else "")
+            )),
         ])
         brief = getattr(resp, "content", "") or ""
+        if _kn:
+            from src.chatbot.kannada import normalize_script
+            brief = normalize_script(brief)
     except Exception as e:
         print(f"[brief error] {e}", file=sys.stderr)
         brief = "Unable to generate the intelligence brief right now."
@@ -940,9 +976,12 @@ def intelligence_brief():
 
 
 @app.get("/api/intelligence/patrol")
-def patrol_recommendations():
+def patrol_recommendations(language: str = "en"):
     """Rank districts for patrol deployment from forecast + hotspots + anomalies + alerts."""
     sig = _gather_signals()
+    # The reasons are assembled here rather than by the model, so they were the
+    # one part of the brief that stayed English when the UI was set to Kannada.
+    kn = _is_kn(language)
     score = {}
     reasons = {}
     def bump(d, pts, why):
@@ -950,19 +989,26 @@ def patrol_recommendations():
         score[d] = score.get(d, 0) + pts
         reasons.setdefault(d, []).append(why)
     for h in sig.get("hotspots", []):
-        bump(h["district"], 2 + (2 if (h.get("solved_pct") or 100) < 40 else 0),
-             f"high FIR volume ({h['firs']:,})" + (", low solve rate" if (h.get('solved_pct') or 100) < 40 else ""))
+        low = (h.get("solved_pct") or 100) < 40
+        bump(h["district"], 2 + (2 if low else 0),
+             (f"ಹೆಚ್ಚಿನ FIR ಪ್ರಮಾಣ ({h['firs']:,})" + (", ಕಡಿಮೆ ಇತ್ಯರ್ಥ ದರ" if low else ""))
+             if kn else
+             (f"high FIR volume ({h['firs']:,})" + (", low solve rate" if low else "")))
     for a in sig.get("alerts", []):
         bump(a["district"], 4 if a.get("severity") == "critical" else 2,
-             f"{a['crime_type']} spike +{a['change_pct']}%")
+             f"{a['crime_type']} ಏರಿಕೆ +{a['change_pct']}%" if kn
+             else f"{a['crime_type']} spike +{a['change_pct']}%")
     for an in sig.get("anomalies", []):
         bump(an["district"], 3 if an.get("severity") == "critical" else 1,
-             f"anomaly {an['month']} (z={an['z_score']})")
+             f"ಅಸಂಗತತೆ {an['month']} (z={an['z_score']})" if kn
+             else f"anomaly {an['month']} (z={an['z_score']})")
     for c in sig.get("clusters", []):
         for d in c.get("districts", [])[:4]:
-            bump(d, 1, "part of an emerging crime cluster")
+            bump(d, 1, "ಉದಯೋನ್ಮುಖ ಅಪರಾಧ ಗುಂಪಿನ ಭಾಗ" if kn
+                 else "part of an emerging crime cluster")
     for n in sig.get("live_news", []):
-        bump(n.get("district"), 1, f"fresh report: {n.get('crime')}")
+        bump(n.get("district"), 1,
+             f"ಹೊಸ ವರದಿ: {n.get('crime')}" if kn else f"fresh report: {n.get('crime')}")
     ranked = sorted(score.items(), key=lambda x: -x[1])[:8]
     recs = []
     for i, (d, s) in enumerate(ranked, 1):
@@ -1000,7 +1046,7 @@ async def evidence_analyze(text: str = Form(""), language: str = Form("en"),
     if not statement:
         raise HTTPException(status_code=400, detail=note or "Provide statement text or an evidence file.")
     try:
-        result = _evidence.analyze(statement)
+        result = _evidence.analyze(statement, kannada=_is_kn(language))
     except Exception as e:
         print(f"[evidence error] {e}", file=sys.stderr)
         raise HTTPException(status_code=500, detail="Could not analyze the evidence.") from e
@@ -1013,12 +1059,13 @@ async def evidence_analyze(text: str = Form(""), language: str = Form("en"),
 class InvestigateRequest(BaseModel):
     goal: str = Field(..., min_length=3, max_length=500)
     max_steps: int = 5
+    language: str = "en"
 
 
 @app.get("/api/investigate/examples")
-def investigate_examples():
+def investigate_examples(language: str = "en"):
     from src.chatbot import investigator
-    return {"examples": investigator.EXAMPLE_GOALS}
+    return {"examples": investigator.example_goals(_is_kn(language))}
 
 
 @app.post("/api/investigate")
@@ -1027,7 +1074,8 @@ def investigate(req: InvestigateRequest):
     from src.chatbot import investigator
     steps = min(max(req.max_steps, 3), 6)
     try:
-        return investigator.run_investigation(req.goal.strip(), max_steps=steps)
+        return investigator.run_investigation(req.goal.strip(), max_steps=steps,
+                                              kannada=_is_kn(req.language))
     except Exception as e:
         print(f"[investigate error] {e}", file=sys.stderr)
         raise HTTPException(status_code=500, detail="Investigation failed.") from e

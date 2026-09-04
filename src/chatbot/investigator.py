@@ -266,13 +266,26 @@ def is_out_of_scope(goal: str) -> bool:
     return is_perpetrator_question(goal)
 
 
-def _synthesize(goal, steps, llm):
+def _kn_system(english: str, kannada: bool) -> str:
+    """Kannada-dominant system prompt that still carries the safety constraints.
+
+    Swapping the whole prompt for a Kannada one would drop the rules that stop
+    the agent naming a suspect, so the constraints stay and the language
+    instruction bookends them: first thing read, and last.
+    """
+    if not kannada:
+        return english
+    from src.chatbot.kannada import SYSTEM_KN
+    return SYSTEM_KN + "\n\n" + english + "\n\nಉತ್ತರವನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ಕನ್ನಡದಲ್ಲಿ ಬರೆಯಿರಿ."
+
+
+def _synthesize(goal, steps, llm, kannada=False):
     evidence = "\n".join(f"- {s['tool']}: {s['observation']}" for s in steps)
     if llm is not None:
         try:
             from langchain_core.messages import HumanMessage, SystemMessage
             resp = llm.invoke([
-                SystemMessage(content=(
+                SystemMessage(content=_kn_system(
                     "You are the Chief Investigator, KSP. From the goal and the evidence gathered by the "
                     "investigation, write a concise case brief with markdown sections: '## Assessment', "
                     "'## Key Findings' (bullets with the actual numbers), '## Repeat-Offender Activity', "
@@ -287,11 +300,16 @@ def _synthesize(goal, steps, llm):
                     "- NEVER recommend surveillance, interception or investigation of a named individual.\n"
                     "- NEVER infer anything about a person from caste, religion, community or gender.\n"
                     "- If the goal asks who committed an offence, say plainly that this cannot be determined "
-                    "from aggregate data and recommend the case-file route instead.")),
-                HumanMessage(content=f"GOAL: {goal}\n\nEVIDENCE:\n{evidence}"),
+                    "from aggregate data and recommend the case-file route instead.", kannada)),
+                HumanMessage(content=(
+                    f"ಗುರಿ: {goal}\n\nಸಾಕ್ಷ್ಯ:\n{evidence}\n\nಕನ್ನಡದಲ್ಲಿ ಪ್ರಕರಣ ವರದಿ ಬರೆಯಿರಿ."
+                    if kannada else f"GOAL: {goal}\n\nEVIDENCE:\n{evidence}")),
             ])
             txt = (getattr(resp, "content", "") or "").strip()
             if txt:
+                if kannada:
+                    from src.chatbot.kannada import normalize_script
+                    txt = normalize_script(txt)
                 return txt
         except Exception:
             pass
@@ -304,7 +322,7 @@ def _synthesize(goal, steps, llm):
     return "\n".join(lines)
 
 
-def run_investigation(goal: str, max_steps: int = 5) -> dict:
+def run_investigation(goal: str, max_steps: int = 5, kannada: bool = False) -> dict:
     goal = (goal or "").strip()
 
     # Refuse before running anything. Asked who committed a specific offence, the
@@ -352,7 +370,7 @@ def run_investigation(goal: str, max_steps: int = 5) -> dict:
     # Ensure a substantial investigation even if the planner stalled / quota hit.
     if len(steps) < 3:
         steps = _run_playbook(steps)
-    brief = _synthesize(goal, steps, llm)
+    brief = _synthesize(goal, steps, llm, kannada=kannada)
     return {
         "goal": goal,
         "steps": steps,
@@ -368,3 +386,16 @@ EXAMPLE_GOALS = [
     "Identify the district most in need of urgent patrol deployment and justify it.",
     "Uncover the most active repeat-offender network and where it operates.",
 ]
+
+# The goal an officer picks becomes the agent's prompt, so a Kannada UI has to
+# offer Kannada goals: an English goal here produces an English investigation
+# however the interface is set.
+EXAMPLE_GOALS_KN = [
+    "ಈ ವರ್ಷ ಕರ್ನಾಟಕದಲ್ಲಿ ಉದಯೋನ್ಮುಖವಾಗುತ್ತಿರುವ ಅತಿದೊಡ್ಡ ಅಪರಾಧ ಬೆದರಿಕೆಯನ್ನು ಪತ್ತೆ ಮಾಡಿ.",
+    "ತುರ್ತು ಪಟ್ರೋಲ್ ನಿಯೋಜನೆಯ ಅಗತ್ಯವಿರುವ ಜಿಲ್ಲೆಯನ್ನು ಗುರುತಿಸಿ ಮತ್ತು ಕಾರಣ ನೀಡಿ.",
+    "ಅತ್ಯಂತ ಸಕ್ರಿಯ ಪುನರಾವರ್ತಿತ ಅಪರಾಧಿಗಳ ಜಾಲ ಮತ್ತು ಅದು ಎಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ ಎಂಬುದನ್ನು ಬಹಿರಂಗಪಡಿಸಿ.",
+]
+
+
+def example_goals(kannada: bool = False) -> list[str]:
+    return EXAMPLE_GOALS_KN if kannada else EXAMPLE_GOALS

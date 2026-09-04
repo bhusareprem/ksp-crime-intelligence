@@ -1964,6 +1964,13 @@
     .alert-pill:hover { filter: brightness(1.4); }
     .alert-pill.critical { background: rgba(220,38,38,.15); color: #fca5a5; border: 1px solid rgba(220,38,38,.3); }
     .alert-pill.warning  { background: rgba(234,179, 8,.1);  color: #fde68a; border: 1px solid rgba(234,179,8,.25); }
+    /* Open-source reporting, deliberately cooler than the red/amber of a spike
+       computed from our own FIRs, so the two signals stay distinguishable. */
+    .alert-pill.news {
+      background: rgba(59,130,246,.10); color: #bfdbfe;
+      border: 1px solid rgba(59,130,246,.28); text-decoration: none;
+    }
+    .alert-pill.news:hover { filter: brightness(1.35); }
     .alert-time { font-size: 10px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
     /* ── OFFICER BADGE ────────────────────────────────────────────── */
@@ -2027,51 +2034,6 @@
     <button class="nav-item nav-new-chat" onclick="newChat()">
       <span class="nav-icon">✏️</span> New Chat
     </button>
-    <div class="nav-group-label">Workspace</div>
-    <button class="nav-item active" onclick="switchTab('chat')" id="nav-chat">
-      <span class="nav-icon">💬</span> Chat &amp; Investigate
-    </button>
-    <button class="nav-item" onclick="switchTab('analytics')" id="nav-analytics">
-      <span class="nav-icon">📊</span> Analytics
-    </button>
-    <button class="nav-item" onclick="switchTab('browse')" id="nav-browse">
-      <span class="nav-icon">🗂️</span> Browse Records
-    </button>
-    <button class="nav-item" onclick="switchTab('audit')" id="nav-audit">
-      <span class="nav-icon">📋</span> Audit Trail
-    </button>
-
-    <div class="nav-group-label" style="margin-top:4px">Intelligence</div>
-    <button class="nav-item" onclick="switchTab('investigate')" id="nav-investigate">
-      <span class="nav-icon">🕵️</span> Investigate
-    </button>
-    <button class="nav-item" onclick="switchTab('brief')" id="nav-brief">
-      <span class="nav-icon">🧠</span> AI Brief
-    </button>
-    <button class="nav-item" onclick="switchTab('evidence')" id="nav-evidence">
-      <span class="nav-icon">🔬</span> Evidence Intel
-    </button>
-    <button class="nav-item" onclick="switchTab('intelmap')" id="nav-intelmap">
-      <span class="nav-icon">🗺️</span> Intel Map
-    </button>
-    <button class="nav-item" onclick="switchTab('solver')" id="nav-solver">
-      <span class="nav-icon">🔍</span> Case Solver
-    </button>
-
-    <div class="nav-divider"></div>
-    <div class="investigate-section">
-      <div class="nav-group-label" style="padding-top:2px">Investigate</div>
-      <div class="investigate-chips">
-        <button class="inv-chip-sidebar" onclick="sendCaseScenario('murder')"><span class="inv-chip-icon">🔪</span> Suspicious Death</button>
-        <button class="inv-chip-sidebar" onclick="sendCaseScenario('rape')"><span class="inv-chip-icon">⚠️</span> Sexual Assault</button>
-        <button class="inv-chip-sidebar" onclick="sendCaseScenario('kidnap')"><span class="inv-chip-icon">👤</span> Kidnapping</button>
-        <button class="inv-chip-sidebar" onclick="sendCaseScenario('fraud')"><span class="inv-chip-icon">💰</span> Financial Fraud</button>
-        <button class="inv-chip-sidebar" onclick="sendCaseScenario('cyber')"><span class="inv-chip-icon">💻</span> Cyber Crime</button>
-        <button class="inv-chip-sidebar" onclick="sendCaseScenario('burglary')"><span class="inv-chip-icon">🏠</span> Burglary</button>
-        <button class="inv-chip-sidebar" onclick="sendCaseScenario('stalking')"><span class="inv-chip-icon">😰</span> Stalking</button>
-        <button class="inv-chip-sidebar" onclick="sendCaseScenario('missing')"><span class="inv-chip-icon">❓</span> Missing Person</button>
-      </div>
-    </div>
   </nav>
 
   <div class="chat-sessions" id="sessionList">
@@ -2277,7 +2239,7 @@
       <div id="investExamples" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <input id="investGoal" type="text" placeholder="e.g. Find the biggest emerging threat and who's behind it" style="flex:1;min-width:280px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px">
-        <button onclick="runInvestigation()" id="investBtn" style="padding:8px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer">Investigate</button>
+        <button onclick="runInvestigation()" id="investBtn" class="i18n" style="padding:8px 20px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer">Investigate</button>
       </div>
       <div id="investSteps" style="margin-top:16px"></div>
       <div id="investBrief" style="margin-top:12px"></div>
@@ -2296,8 +2258,8 @@
     <div class="analytics-grid" style="grid-template-columns: 2fr 1fr;">
       <div class="card">
         <h3>🧠 AI Intelligence Brief
-          <button onclick="loadBrief(true)" id="briefRefreshBtn" style="float:right;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--accent);color:#fff;cursor:pointer">↻ Regenerate</button>
-          <button onclick="window.print()" style="float:right;margin-right:8px;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer">🖨 Print</button>
+          <button onclick="loadBrief(true)" id="briefRefreshBtn" class="i18n" style="float:right;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--accent);color:#fff;cursor:pointer">↻ Regenerate</button>
+          <button onclick="window.print()" class="i18n" style="float:right;margin-right:8px;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer">🖨 Print</button>
         </h3>
         <div id="briefBody" style="padding-top:8px;line-height:1.65">Open this tab to generate the briefing.</div>
         <div id="briefMeta" style="font-size:11px;color:var(--muted);margin-top:12px"></div>
@@ -2314,18 +2276,18 @@
     <div class="analytics-grid" style="grid-template-columns: 1fr 1fr;">
       <div class="card">
         <h3>🔬 Evidence Intelligence
-          <button onclick="loadEvidenceSample()" style="float:right;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer">Load sample</button>
+          <button onclick="loadEvidenceSample()" class="i18n" style="float:right;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer">Load sample</button>
         </h3>
         <div style="font-size:12px;color:var(--muted);margin:4px 0 8px">Paste a witness / complaint statement, or upload one (PDF, DOCX, TXT, or audio). The AI extracts suspects, districts &amp; crime types and cross-references 500k FIRs for priors and gang links.</div>
         <textarea id="evidenceText" rows="8" style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical" placeholder="Paste the statement text here..."></textarea>
         <div style="display:flex;gap:10px;margin-top:8px;align-items:center;flex-wrap:wrap">
           <input type="file" id="evidenceFile" accept=".txt,.md,.pdf,.docx,.doc,.wav,.mp3,.m4a,.webm,.ogg" style="font-size:12px;color:var(--muted)">
-          <button onclick="analyzeEvidence()" style="padding:8px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer">Analyze Evidence</button>
+          <button onclick="analyzeEvidence()" class="i18n" style="padding:8px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer">Analyze Evidence</button>
         </div>
       </div>
       <div class="card">
         <h3>Intelligence Findings</h3>
-        <div id="evidenceResult" style="padding-top:6px;color:var(--muted)">Run an analysis to see extracted entities and FIR cross-references.</div>
+        <div id="evidenceResult" style="padding-top:6px;color:var(--muted)"><span class="i18n">Run an analysis to see extracted entities and FIR cross-references.</span></div>
       </div>
     </div>
   </div>
@@ -2338,7 +2300,7 @@
         <div class="im-badge">KSP</div>
         <div class="im-head-text">
           <h3>Intel Map</h3>
-          <p>Criminal network · Karnataka</p>
+          <p class="i18n">Criminal network · Karnataka</p>
         </div>
       </div>
 
@@ -2403,9 +2365,9 @@
       </div>
 
       <div class="im-ctrl-row">
-        <button class="im-ctrl-btn" onclick="intelMapInstance && intelMapInstance.fitBounds(imAllBounds,{padding:[30,30]})">⊞ Fit</button>
-        <button class="im-ctrl-btn" onclick="reloadIntelMap()">↻ Reload</button>
-        <button class="im-ctrl-btn im-ctrl-accent" onclick="askNetworkInChat()">💬 Ask AI</button>
+        <button class="im-ctrl-btn i18n" onclick="intelMapInstance && intelMapInstance.fitBounds(imAllBounds,{padding:[30,30]})">⊞ Fit</button>
+        <button class="im-ctrl-btn i18n" onclick="reloadIntelMap()">↻ Reload</button>
+        <button class="im-ctrl-btn im-ctrl-accent i18n" onclick="askNetworkInChat()">💬 Ask AI</button>
       </div>
 
     </div>
@@ -2460,7 +2422,7 @@
       </div>
       <div class="ws-row">
         <input class="ws-input" id="wsInput" placeholder="Search anything — news, suspects, case context…" onkeydown="if(event.key==='Enter')runWebSearch()">
-        <button class="ws-btn" id="wsRunBtn" onclick="runWebSearch()">Search</button>
+        <button class="ws-btn i18n" id="wsRunBtn" onclick="runWebSearch()">Search</button>
       </div>
       <div class="ws-spinner" id="wsSpinner">Searching the web…</div>
       <div class="ws-results" id="wsResults"></div>
@@ -2489,7 +2451,7 @@
       <span class="browse-count" id="browseCount"></span>
     </div>
     <div class="browse-table-wrap" id="browseTableWrap">
-      <div class="browse-empty">Select a database and view above to browse records</div>
+      <div class="browse-empty i18n">Select a database and view above to browse records</div>
     </div>
     <div class="browse-pagination" id="browsePagination" style="display:none">
       <button class="page-btn" id="btnFirst" onclick="loadBrowsePage(1)">« First</button>
@@ -2497,11 +2459,11 @@
       <span class="page-info" id="pageInfo"></span>
       <button class="page-btn" id="btnNext" onclick="loadBrowsePage(browseState.page+1)">Next ›</button>
       <button class="page-btn" id="btnLast" onclick="loadBrowsePage(browseState.pages)">Last »</button>
-      <span style="margin-left:12px;font-size:12px;color:var(--muted)">Go to:</span>
+      <span class="i18n" style="margin-left:12px;font-size:12px;color:var(--muted)">Go to:</span>
       <input type="number" id="pageJumpInput" min="1" placeholder="#"
         style="width:60px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;margin:0 4px;"
         onkeydown="if(event.key==='Enter'){var p=parseInt(this.value);if(p>=1&&p<=browseState.pages)loadBrowsePage(p);}">
-      <button class="page-btn" onclick="var p=parseInt(document.getElementById('pageJumpInput').value);if(p>=1&&p<=browseState.pages)loadBrowsePage(p);">Go</button>
+      <button class="page-btn i18n" onclick="var p=parseInt(document.getElementById('pageJumpInput').value);if(p>=1&&p<=browseState.pages)loadBrowsePage(p);">Go</button>
       <select id="pageSizeSelect" style="margin-left:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;"
         onchange="browseState.limit=+this.value;loadBrowsePage(1);">
         <option value="50">50/page</option>
@@ -2516,8 +2478,10 @@
     <div class="solver-header">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
-          <h2>Case Solver — AI Investigation Advisor</h2>
-          <p>Describe your case facts. The AI cross-references <strong style="color:var(--navy)">52 solved Indian criminal cases</strong> and generates a structured investigation brief.</p>
+          <h2 class="i18n">Case Solver — AI Investigation Advisor</h2>
+          <!-- Split into spans so the bold figure survives translation: setting
+               textContent on the <p> itself would delete the <strong>. -->
+          <p><span class="i18n">Describe your case facts. The AI cross-references</span> <strong class="i18n" style="color:var(--navy)">52 solved Indian criminal cases</strong> <span class="i18n">and generates a structured investigation brief.</span></p>
         </div>
         <span id="caseDbStats" style="font-size:11px;color:var(--muted);white-space:nowrap;padding-top:4px;"></span>
       </div>
@@ -2545,7 +2509,7 @@
           </div>
         </div>
 
-        <button onclick="runCaseSolver()" id="solverBtn">Analyse Case &amp; Get Investigation Brief</button>
+        <button onclick="runCaseSolver()" id="solverBtn" class="i18n">Analyse Case &amp; Get Investigation Brief</button>
 
         <div class="divider"></div>
 
@@ -2553,7 +2517,7 @@
           <span class="field-label" style="display:block;margin-bottom:6px;">Search case database</span>
           <div class="search-row">
             <input id="caseSearchInput" placeholder="e.g. DNA evidence murder Karnataka..." onkeydown="if(event.key==='Enter')searchCases()">
-            <button class="search-btn" onclick="searchCases()">Search</button>
+            <button class="search-btn i18n" onclick="searchCases()">Search</button>
           </div>
           <div id="caseSearchResults" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;"></div>
         </div>
@@ -2579,7 +2543,7 @@
   <!-- AUDIT PANEL -->
   <div class="panel" id="panel-audit">
     <div class="panel-header">
-      <h2>Audit Trail</h2>
+      <h2 class="i18n">Audit Trail</h2>
       <button class="icon-btn" onclick="loadAudit()">↻ Refresh</button>
     </div>
     <table class="audit-table" id="auditTable">
@@ -2642,17 +2606,21 @@ function switchTab(tab) {
 }
 
 // ─── AI INTELLIGENCE BRIEF + PATROL DEPLOYMENT ────────────────────────────
-let _briefLoaded = false;
+let _briefLoaded = '';
 async function loadBrief(force) {
-  if (_briefLoaded && !force) return;
-  _briefLoaded = true;
+  // Holds the language the brief was written in: a toggle has to regenerate it,
+  // or a Kannada interface keeps showing the English briefing.
+  if (_briefLoaded === (currentLang || 'en') && !force) return;
+  _briefLoaded = currentLang || 'en';
   const body = document.getElementById('briefBody');
   const btn = document.getElementById('briefRefreshBtn');
-  body.innerHTML = '<div style="color:var(--muted)">🧠 Synthesising every live signal (trends, hotspots, ML clusters, anomalies, live news)… this takes a few seconds.</div>';
-  if (btn) { btn.disabled = true; btn.textContent = '↻ Working…'; }
+  body.innerHTML = '<div style="color:var(--muted)">🧠 ' + (currentLang === 'kn'
+    ? 'ಎಲ್ಲಾ ನೇರ ಸಂಕೇತಗಳನ್ನು ಸಂಯೋಜಿಸಲಾಗುತ್ತಿದೆ (ಪ್ರವೃತ್ತಿ, ಹಾಟ್‌ಸ್ಪಾಟ್, ML ಗುಂಪುಗಳು, ಅಸಂಗತತೆ, ನೇರ ಸುದ್ದಿ)… ಇದಕ್ಕೆ ಕೆಲವು ಸೆಕೆಂಡುಗಳು ಬೇಕು.'
+    : 'Synthesising every live signal (trends, hotspots, ML clusters, anomalies, live news)… this takes a few seconds.') + '</div>';
+  if (btn) { btn.disabled = true; btn.textContent = currentLang === 'kn' ? '↻ ಕೆಲಸ ನಡೆಯುತ್ತಿದೆ…' : '↻ Working…'; }
   loadPatrol();
   try {
-    const res = await fetch('/api/intelligence/brief');
+    const res = await fetch('/api/intelligence/brief?language=' + (currentLang||'en'));
     const d = await res.json();
     const md = d.brief || 'No brief available.';
     body.innerHTML = (window.marked ? marked.parse(md) : md.replace(/\n/g, '<br>'));
@@ -2660,31 +2628,38 @@ async function loadBrief(force) {
     const setv = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = (v ?? '—'); };
     setv('briefHotspots', s.hotspots); setv('briefClusters', s.clusters);
     setv('briefAnomalies', s.anomalies); setv('briefAlerts', s.alerts); setv('briefNews', s.news);
-    document.getElementById('briefMeta').textContent =
-      'Synthesised by the LLM from live ML + news signals · ' + (d.generated_at || '');
+    document.getElementById('briefMeta').textContent = (currentLang === 'kn'
+      ? 'ನೇರ ML + ಸುದ್ದಿ ಸಂಕೇತಗಳಿಂದ LLM ಸಂಯೋಜಿಸಿದೆ · '
+      : 'Synthesised by the LLM from live ML + news signals · ') + (d.generated_at || '');
   } catch (e) {
-    body.innerHTML = '<div style="color:var(--red)">Could not generate the brief. Check the LLM provider is configured.</div>';
+    body.innerHTML = '<div style="color:var(--red)">' + (currentLang === 'kn'
+      ? 'ಸಂಕ್ಷಿಪ್ತ ವರದಿ ರಚಿಸಲಾಗಲಿಲ್ಲ. LLM ಪೂರೈಕೆದಾರರ ಸಂರಚನೆ ಪರಿಶೀಲಿಸಿ.'
+      : 'Could not generate the brief. Check the LLM provider is configured.') + '</div>';
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '↻ Regenerate'; }
+    if (btn) { btn.disabled = false; btn.textContent = currentLang === 'kn' ? '↻ ಮರುಸೃಷ್ಟಿಸಿ' : '↻ Regenerate'; }
   }
 }
 
 async function loadPatrol() {
   const el = document.getElementById('patrolList');
-  el.innerHTML = '<div style="color:var(--muted)">Ranking districts…</div>';
+  el.innerHTML = '<div style="color:var(--muted)">' +
+    (currentLang === 'kn' ? 'ಜಿಲ್ಲೆಗಳ ಶ್ರೇಣೀಕರಣ…' : 'Ranking districts…') + '</div>';
   try {
-    const res = await fetch('/api/intelligence/patrol');
+    const res = await fetch('/api/intelligence/patrol?language=' + (currentLang||'en'));
     const d = await res.json();
     const recs = d.recommendations || [];
-    if (!recs.length) { el.innerHTML = '<div style="color:var(--muted)">No deployment signals right now.</div>'; return; }
+    if (!recs.length) { el.innerHTML = '<div style="color:var(--muted)">' +
+      (currentLang === 'kn' ? 'ಈಗ ಯಾವುದೇ ನಿಯೋಜನಾ ಸೂಚನೆಗಳಿಲ್ಲ.' : 'No deployment signals right now.') + '</div>'; return; }
     el.innerHTML = recs.map(r =>
       '<div style="padding:8px 0;border-bottom:1px solid var(--border)">' +
         '<div style="font-weight:600"><span style="color:var(--accent)">#' + r.priority + '</span> ' +
-        escHtml(r.district) + '<span style="float:right;font-size:11px;color:var(--muted)">score ' + r.score + '</span></div>' +
+        escHtml(knDistrict(r.district)) + '<span style="float:right;font-size:11px;color:var(--muted)">' +
+        (currentLang === 'kn' ? 'ಸ್ಕೋರ್ ' : 'score ') + r.score + '</span></div>' +
         '<div style="font-size:11px;color:var(--muted);margin-top:2px">' + (r.reasons || []).map(escHtml).join(' · ') + '</div>' +
       '</div>').join('');
   } catch (e) {
-    el.innerHTML = '<div style="color:var(--red)">Patrol ranking unavailable.</div>';
+    el.innerHTML = '<div style="color:var(--red)">' +
+      (currentLang === 'kn' ? 'ಪಟ್ರೋಲ್ ಶ್ರೇಣೀಕರಣ ಲಭ್ಯವಿಲ್ಲ.' : 'Patrol ranking unavailable.') + '</div>';
   }
 }
 
@@ -2738,6 +2713,43 @@ async function analyzeEvidence() {
           + '</div>';
       });
     }
+    // Names written in Kannada script. Deliberately styled apart from the
+    // confirmed matches above: transliteration is ambiguous, so these are
+    // possibilities for the officer to resolve, not identifications. Amber,
+    // never red, and no ⚠️ - the visual language of "check this", not "guilty".
+    const kn = d.name_candidates || [];
+    if (kn.length) {
+      const KNL = currentLang === 'kn';
+      h += '<div style="font-size:12px;color:var(--muted);margin:14px 0 4px">'
+        + (KNL ? 'ಕನ್ನಡದಲ್ಲಿ ಬರೆದ ಹೆಸರುಗಳು — ಸಂಭಾವ್ಯ ಹೊಂದಿಕೆಗಳು, ಅಧಿಕಾರಿ ದೃಢೀಕರಿಸಬೇಕು'
+               : 'Names written in Kannada — possible matches, for the officer to confirm') + '</div>';
+      kn.forEach(g => {
+        h += '<div style="border:1px solid #d97706;border-radius:8px;padding:9px;margin:6px 0;background:rgba(217,119,6,.06)">'
+          + '<div style="font-weight:600">' + escHtml(g.written)
+          + (g.ambiguous ? '<span style="float:right;font-size:11px;color:#d97706">'
+              + (KNL ? g.candidates.length + ' ಸಾಧ್ಯತೆಗಳು' : g.candidates.length + ' possible people')
+              + '</span>' : '') + '</div>';
+        if (!g.candidates.length) {
+          h += '<div style="font-size:11px;color:var(--muted);margin-top:3px">'
+            + (KNL ? 'ಈ ಹೆಸರಿಗೆ ಯಾವುದೇ ದಾಖಲೆ ಇಲ್ಲ' : 'No record resembles this name') + '</div>';
+        } else {
+          if (g.ambiguous) {
+            h += '<div style="font-size:11px;color:#d97706;margin:4px 0 6px">'
+              + (KNL ? 'ಒಂದೇ ಕನ್ನಡ ಕಾಗುಣಿತ ಹಲವು ದಾಖಲೆಗಳಿಗೆ ಹೊಂದುತ್ತದೆ. ಗುರುತಿಸುವ ಮೊದಲು ಪರಿಶೀಲಿಸಿ.'
+                     : 'One Kannada spelling fits several records. Verify before identifying anyone.') + '</div>';
+          }
+          g.candidates.forEach(c => {
+            h += '<div style="display:flex;gap:8px;align-items:baseline;font-size:12px;padding:3px 0;border-top:1px solid rgba(217,119,6,.18)">'
+              + '<span style="font-weight:600">' + escHtml(c.name) + '</span>'
+              + '<span style="color:var(--muted);font-size:11px">' + c.priors + (KNL ? ' ಪೂರ್ವ FIRಗಳು' : ' prior FIRs') + '</span>'
+              + '<span style="margin-left:auto;font-size:10px;color:var(--muted)">' + (KNL ? 'ಹೊಂದಿಕೆ ' : 'match ') + Math.round(c.confidence * 100) + '%</span>'
+              + '</div>'
+              + ((c.gangs && c.gangs.length) ? '<div style="font-size:10px;color:var(--muted);padding-left:2px">' + c.gangs.map(escHtml).join(', ') + '</div>' : '');
+          });
+        }
+        h += '</div>';
+      });
+    }
     if (d.summary) {
       h += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
         + '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">AI investigative note</div>'
@@ -2752,18 +2764,65 @@ async function analyzeEvidence() {
 // ─── AUTONOMOUS INVESTIGATION AGENT ───────────────────────────────────────
 async function loadInvestigateExamples() {
   const el = document.getElementById('investExamples');
-  if (!el || el.dataset.loaded) return;
+  // Re-fetch when the language changes: the goals are the agent's prompt, so
+  // stale English ones would run an English investigation in a Kannada UI.
+  if (!el || el.dataset.loaded === currentLang) return;
   try {
-    const r = await fetch('/api/investigate/examples');
+    const r = await fetch('/api/investigate/examples?language=' + (currentLang || 'en'));
     const d = await r.json();
     el.innerHTML = (d.examples || []).map(x =>
       '<button onclick="document.getElementById(\'investGoal\').value=this.textContent" style="font-size:11px;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:3px 10px;color:var(--muted);cursor:pointer">' + escHtml(x) + '</button>'
     ).join('');
-    el.dataset.loaded = '1';
+    el.dataset.loaded = currentLang || 'en';
   } catch (e) {}
 }
 
 let _investBusy = false;
+// The agent asks for a district, a date, an FIR number or the statement itself.
+// Those are the start of a conversation, and the Investigate panel is one-shot
+// by design, so the reply box hands the answer to Chat, which is conversational
+// and can actually run the lookup.
+function renderInvestigationClarification(el, brief, goal) {
+  const KN = currentLang === 'kn';
+  const body = window.marked ? marked.parse(brief) : escHtml(brief);
+  el.innerHTML =
+    '<div style="font-size:11px;color:#d97706;margin:10px 0 6px">'
+      + (KN ? '⚠️ ಈ ಪ್ರಶ್ನೆಗೆ ಒಟ್ಟು ಅಂಕಿಅಂಶಗಳಿಂದ ಉತ್ತರಿಸಲಾಗದು — ಹೆಚ್ಚಿನ ವಿವರ ಬೇಕು'
+            : '⚠️ This cannot be answered from aggregate data — the agent needs case specifics')
+      + '</div>'
+    + '<div class="card" style="background:rgba(217,119,6,.06);border:1px solid #d97706">' + body
+      + '<div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(217,119,6,.3)">'
+        + '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">'
+          + (KN ? 'ವಿವರಗಳನ್ನು ಇಲ್ಲಿ ನೀಡಿ — ಜಿಲ್ಲೆ, ದಿನಾಂಕ ಅಥವಾ FIR ಸಂಖ್ಯೆ'
+                : 'Answer here — district, date, or FIR number') + '</div>'
+        + '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+          + '<input id="investFollowUp" type="text" placeholder="'
+            + escAttr(KN ? 'ಉದಾ: ಮೈಸೂರು, ಆಗಸ್ಟ್ 2024, FIR 214/2026' : 'e.g. Mysuru, August 2024, FIR 214/2026')
+            + '" style="flex:1;min-width:240px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px;font-size:13px"'
+            + ' onkeydown="if(event.key===\'Enter\')sendInvestigationFollowUp()">'
+          + '<button onclick="sendInvestigationFollowUp()" style="padding:8px 16px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:600;cursor:pointer">'
+            + (KN ? 'ಚಾಟ್‌ನಲ್ಲಿ ಮುಂದುವರಿಸಿ' : 'Continue in Chat') + '</button>'
+          + '<button onclick="switchTab(\'evidence\')" style="padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer">'
+            + (KN ? '🔬 ಸಾಕ್ಷ್ಯಕ್ಕೆ ಹೋಗಿ' : '🔬 Open Evidence Intel') + '</button>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  el.dataset.goal = goal;
+}
+
+function sendInvestigationFollowUp() {
+  const box = document.getElementById('investFollowUp');
+  const detail = (box && box.value || '').trim();
+  if (!detail) { if (box) box.focus(); return; }
+  const goal = document.getElementById('investBrief').dataset.goal || '';
+  // The original goal is carried across so the officer does not retype it.
+  document.getElementById('chatInput').value = currentLang === 'kn'
+    ? `${goal}\n\nಹೆಚ್ಚಿನ ವಿವರ: ${detail}`
+    : `${goal}\n\nCase details: ${detail}`;
+  switchTab('chat');
+  sendMessage();
+}
+
 async function runInvestigation() {
   if (_investBusy) return;
   const goal = (document.getElementById('investGoal').value || '').trim();
@@ -2777,7 +2836,7 @@ async function runInvestigation() {
   try {
     const res = await fetch('/api/investigate', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ goal })
+      body: JSON.stringify({ language: currentLang || 'en', goal })
     });
     const d = await res.json();
     if (!res.ok) { stepsEl.innerHTML = '<div style="color:var(--red)">' + escHtml(d.detail || 'Investigation failed') + '</div>'; return; }
@@ -2794,6 +2853,14 @@ async function runInvestigation() {
       await new Promise(r => setTimeout(r, 650));
       div.style.opacity = '1';
     }
+    // A refusal is not a failed investigation, and it used to be labelled
+    // "Case written after 0 investigative steps", which reads like the agent
+    // broke. It also asked the officer four questions with nowhere to answer
+    // them. Both are handled here.
+    if (d.method === 'refused') {
+      renderInvestigationClarification(briefEl, d.brief || '', goal);
+      return;
+    }
     const tag = d.method === 'autonomous' ? '🧠 autonomously planned' : '📋 investigation playbook';
     briefEl.innerHTML = '<div style="font-size:11px;color:var(--muted);margin:10px 0 6px">Case written after ' + (d.tool_count || steps.length) + ' investigative steps · ' + tag + '</div>'
       + '<div class="card" style="background:var(--bg)">' + (window.marked ? marked.parse(d.brief || '') : escHtml(d.brief || '')) + '</div>';
@@ -2805,12 +2872,313 @@ async function runInvestigation() {
 }
 
 // ─── LANGUAGE ─────────────────────────────────────────────────────────────
+// ─── UI LANGUAGE ──────────────────────────────────────────────────────────
+// Switching the toggle to Kannada used to change only the input placeholder,
+// so an officer working in Kannada still read an English interface. These are
+// the chrome strings: navigation, panel headings, stat labels and buttons.
+// Data values (district names, crime heads) stay as they are in the records,
+// which is what an officer cross-checks against CCTNS.
+// District names in Kannada. Inverted from the backend's own Kannada→English
+// map (src/chatbot/rag/schema_live.py) so the two never drift apart: the strip
+// shows the same spelling the parser accepts when the officer types it back.
+const KN_DISTRICT = {
+  'Bagalkot': 'ಬಾಗಲಕೋಟೆ', 'Ballari': 'ಬಳ್ಳಾರಿ', 'Belagavi': 'ಬೆಳಗಾವಿ',
+  'Bengaluru Rural': 'ಬೆಂಗಳೂರು ಗ್ರಾಮಾಂತರ', 'Bengaluru Urban': 'ಬೆಂಗಳೂರು ನಗರ',
+  'Bidar': 'ಬೀದರ್', 'Chamarajanagara': 'ಚಾಮರಾಜನಗರ', 'Chikkaballapur': 'ಚಿಕ್ಕಬಳ್ಳಾಪುರ',
+  'Chikkamagaluru': 'ಚಿಕ್ಕಮಗಳೂರು', 'Chitradurga': 'ಚಿತ್ರದುರ್ಗ',
+  'Dakshina Kannada': 'ದಕ್ಷಿಣ ಕನ್ನಡ', 'Davanagere': 'ದಾವಣಗೆರೆ', 'Dharwad': 'ಧಾರವಾಡ',
+  'Gadag': 'ಗದಗ', 'Hassan': 'ಹಾಸನ', 'Haveri': 'ಹಾವೇರಿ', 'Kalaburagi': 'ಕಲಬುರಗಿ',
+  'Kodagu': 'ಕೊಡಗು', 'Kolar': 'ಕೋಲಾರ', 'Koppal': 'ಕೊಪ್ಪಳ', 'Mandya': 'ಮಂಡ್ಯ',
+  'Mysuru': 'ಮೈಸೂರು', 'Raichur': 'ರಾಯಚೂರು', 'Ramanagara': 'ರಾಮನಗರ',
+  'Shivamogga': 'ಶಿವಮೊಗ್ಗ', 'Tumakuru': 'ತುಮಕೂರು', 'Udupi': 'ಉಡುಪಿ',
+  'Uttara Kannada': 'ಉತ್ತರ ಕನ್ನಡ', 'Vijayanagara': 'ವಿಜಯನಗರ',
+  'Vijayapura': 'ವಿಜಯಪುರ', 'Yadgir': 'ಯಾದಗಿರಿ',
+};
+
+function knDistrict(name) {
+  if (currentLang !== 'kn') return name;
+  return KN_DISTRICT[(name || '').trim()] || name;
+}
+
+// Crime heads as they appear in alert pills. Unknown heads fall through to
+// English rather than being guessed at.
+// Covers the 24 heads that account for almost every FIR in the database, so a
+// chart legend or an alert pill does not fall back to English in practice.
+const KN_CRIME = {
+  'Theft': 'ಕಳ್ಳತನ', 'Burglary': 'ಮನೆ ಕಳ್ಳತನ', 'Robbery': 'ದರೋಡೆ',
+  'Murder': 'ಕೊಲೆ', 'Attempt to Murder': 'ಕೊಲೆ ಯತ್ನ', 'Rape': 'ಅತ್ಯಾಚಾರ',
+  'Kidnapping': 'ಅಪಹರಣ', 'Cheating': 'ಮೋಸ', 'Hurt': 'ಗಾಯ',
+  'Rioting': 'ಗಲಭೆ', 'Dowry Death': 'ವರದಕ್ಷಿಣೆ ಸಾವು', 'Stalking': 'ಹಿಂಬಾಲನೆ',
+  'Snatching': 'ಕಸಿದುಕೊಳ್ಳುವಿಕೆ', 'Abetment to Suicide': 'ಆತ್ಮಹತ್ಯೆಗೆ ಪ್ರಚೋದನೆ',
+  'Assault on Women': 'ಮಹಿಳೆಯರ ಮೇಲೆ ಹಲ್ಲೆ', 'Cyber Crime': 'ಸೈಬರ್ ಅಪರಾಧ',
+  'Criminal Breach of Trust': 'ನಂಬಿಕೆ ದ್ರೋಹ', 'Extortion': 'ಸುಲಿಗೆ',
+  'Missing Person': 'ಕಾಣೆಯಾದ ವ್ಯಕ್ತಿ', 'Suspicious Death': 'ಸಂದೇಹಾಸ್ಪದ ಮರಣ',
+  'Cheating & Fraud': 'ಮೋಸ ಮತ್ತು ವಂಚನೆ', 'Vehicle Theft': 'ವಾಹನ ಕಳ್ಳತನ',
+  'Road Accident - Non Fatal': 'ರಸ್ತೆ ಅಪಘಾತ - ಮಾರಣಾಂತಿಕವಲ್ಲದ',
+  'Road Accident - Fatal': 'ರಸ್ತೆ ಅಪಘಾತ - ಮಾರಣಾಂತಿಕ',
+  'Other IPC': 'ಇತರ IPC', 'Simple Hurt/Assault': 'ಸಾಮಾನ್ಯ ಗಾಯ/ಹಲ್ಲೆ',
+  'Cyber Crime - Online Fraud': 'ಸೈಬರ್ ಅಪರಾಧ - ಆನ್‌ಲೈನ್ ವಂಚನೆ',
+  'Trespass/House Breaking': 'ಅತಿಕ್ರಮಣ/ಮನೆ ಒಡೆಯುವಿಕೆ',
+  'Cruelty by Husband': 'ಪತಿಯಿಂದ ಕ್ರೌರ್ಯ', 'NDPS - Possession': 'NDPS - ಸ್ವಾಧೀನ',
+  'Grievous Hurt': 'ಗಂಭೀರ ಗಾಯ', 'Social Media Abuse': 'ಸಾಮಾಜಿಕ ಮಾಧ್ಯಮ ದುರುಪಯೋಗ',
+  'Sexual Harassment': 'ಲೈಂಗಿಕ ಕಿರುಕುಳ', 'Property Damage': 'ಆಸ್ತಿ ಹಾನಿ',
+  'Unnatural Death': 'ಅಸ್ವಾಭಾವಿಕ ಸಾವು', 'Forgery': 'ನಕಲಿ ದಾಖಲೆ',
+  'Atrocities Against SC': 'ಪ.ಜಾತಿ ವಿರುದ್ಧ ದೌರ್ಜನ್ಯ',
+};
+
+function knCrime(name) {
+  if (currentLang !== 'kn') return name;
+  return KN_CRIME[(name || '').trim()] || name;
+}
+
+// Browse view names. These are display names for the underlying tables, not
+// the row values inside them, so they follow the interface language.
+const KN_VIEW = {
+  'FIR Records': 'FIR ದಾಖಲೆಗಳು', 'Accused': 'ಆರೋಪಿಗಳು',
+  'Police Stations': 'ಪೊಲೀಸ್ ಠಾಣೆಗಳು', 'Districts': 'ಜಿಲ್ಲೆಗಳು',
+  'Crime Gangs': 'ಅಪರಾಧ ಗ್ಯಾಂಗ್‌ಗಳು', 'Victims': 'ಸಂತ್ರಸ್ತರು',
+  'Cases': 'ಪ್ರಕರಣಗಳು', 'Criminals': 'ಅಪರಾಧಿಗಳು',
+  'Arrests': 'ಬಂಧನಗಳು', 'Gangs': 'ಗ್ಯಾಂಗ್‌ಗಳು',
+};
+
+function knView(v) {
+  if (currentLang !== 'kn') return v;
+  return KN_VIEW[(v || '').trim()] || v;
+}
+
+// Forecast direction, sent by the analytics API as a bare English word.
+const KN_TREND = { increasing: 'ಏರಿಕೆ', decreasing: 'ಇಳಿಕೆ', flat: 'ಸ್ಥಿರ' };
+
+function knTrend(t) {
+  if (currentLang !== 'kn') return t;
+  return KN_TREND[(t || '').trim().toLowerCase()] || t;
+}
+
+const UI_KN = {
+  'Chat': 'ಚಾಟ್',
+  // Masthead and shell
+  'Crime Intelligence': 'ಅಪರಾಧ ಗುಪ್ತಚರ',
+  'Karnataka State Police': 'ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್',
+  'Karnataka State Police · Internal System': 'ಕರ್ನಾಟಕ ರಾಜ್ಯ ಪೊಲೀಸ್ · ಆಂತರಿಕ ವ್ಯವಸ್ಥೆ',
+  'KSP Crime Intelligence AI': 'KSP ಅಪರಾಧ ಗುಪ್ತಚರ AI',
+  'Query crime databases, get investigation briefs, or upload case files — all in one place.':
+    'ಅಪರಾಧ ಡೇಟಾಬೇಸ್ ಪ್ರಶ್ನಿಸಿ, ತನಿಖಾ ಸಾರಾಂಶ ಪಡೆಯಿರಿ, ಅಥವಾ ಕೇಸ್ ಫೈಲ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ — ಎಲ್ಲವೂ ಒಂದೇ ಕಡೆ.',
+  'PDF': 'ಪಿಡಿಎಫ್',
+  'Connecting...': 'ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ...',
+  'Demo Officer': 'ಡೆಮೋ ಅಧಿಕಾರಿ',
+  // Upload hint
+  'Attach a case file (FIR, charge sheet, PDF, DOCX) to ask questions about it':
+    'ಪ್ರಶ್ನೆ ಕೇಳಲು ಕೇಸ್ ಫೈಲ್ (FIR, ಚಾರ್ಜ್‌ಶೀಟ್, PDF, DOCX) ಲಗತ್ತಿಸಿ',
+  'click to expand': 'ವಿಸ್ತರಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ',
+  'Drop case file here or click to select — PDF, DOCX, TXT, CSV':
+    'ಕೇಸ್ ಫೈಲ್ ಇಲ್ಲಿ ಬಿಡಿ ಅಥವಾ ಆಯ್ಕೆ ಮಾಡಲು ಕ್ಲಿಕ್ ಮಾಡಿ — PDF, DOCX, TXT, CSV',
+  // Example cards: label and the question each one fills in
+  'Crime Trends': 'ಅಪರಾಧ ಪ್ರವೃತ್ತಿ',
+  'How many thefts in Bengaluru in 2023?': 'ಬೆಂಗಳೂರಿನಲ್ಲಿ 2023 ರಲ್ಲಿ ಎಷ್ಟು ಕಳ್ಳತನ ಪ್ರಕರಣಗಳು ದಾಖಲಾಗಿವೆ?',
+  'Repeat Offenders': 'ಪುನರಾವರ್ತಿತ ಅಪರಾಧಿಗಳು',
+  'Who are the top repeat offenders by district?': 'ಜಿಲ್ಲಾವಾರು ಪ್ರಮುಖ ಪುನರಾವರ್ತಿತ ಅಪರಾಧಿಗಳು ಯಾರು?',
+  'Court Outcomes': 'ನ್ಯಾಯಾಲಯದ ಫಲಿತಾಂಶ',
+  'Conviction rate by district in 2017?': '2017 ರಲ್ಲಿ ಜಿಲ್ಲಾವಾರು ಶಿಕ್ಷೆ ಪ್ರಮಾಣ ಎಷ್ಟು?',
+  'NCRB Benchmarks': 'NCRB ಮಾನದಂಡ',
+  'NCRB cyber crime rate in Bengaluru 2024': 'ಬೆಂಗಳೂರಿನಲ್ಲಿ 2024 ರ NCRB ಸೈಬರ್ ಅಪರಾಧ ಪ್ರಮಾಣ',
+  'Evidence': 'ಸಾಕ್ಷ್ಯ',
+  'Browse': 'ದಾಖಲೆಗಳು',
+  'Audit': 'ಆಡಿಟ್',
+  'AI Brief': 'AI ಸಂಕ್ಷಿಪ್ತ',
+  'AI Intelligence Brief': 'AI ಇಂಟೆಲಿಜೆನ್ಸ್ ಸಂಕ್ಷಿಪ್ತ',
+  'Analytics': 'ವಿಶ್ಲೇಷಣೆ',
+  'Anomalies': 'ಅಸಾಮಾನ್ಯತೆಗಳು',
+  'Ask AI': 'AIಗೆ ಕೇಳಿ',
+  'Audit Trail': 'ಆಡಿಟ್ ಟ್ರೇಲ್',
+  'Autonomous Investigation Agent': 'ಸ್ವಯಂಚಾಲಿತ ತನಿಖಾ ಏಜೆಂಟ್',
+  'Browse Records': 'ದಾಖಲೆ ವೀಕ್ಷಿಸಿ',
+  'Burglary': 'ಮನೆ ಕಳ್ಳತನ',
+  'Case Dispositions': 'ಕೇಸ್ ನಿರ್ಣಯಗಳು',
+  'Case Solver': 'ಕೇಸ್ ಪರಿಹಾರ',
+  'Chargesheeted': 'ಚಾರ್ಜ್‌ಶೀಟ್ ಸಲ್ಲಿಕೆ',
+  'Chat & Investigate': 'ಚಾಟ್ & ತನಿಖೆ',
+  'Crime Types Over Years': 'ವರ್ಷಗಳ ಅಪರಾಧ ಪ್ರಕಾರ',
+  'Cyber Crime': 'ಸೈಬರ್ ಅಪರಾಧ',
+  'Day of Week · Crime Pattern': 'ವಾರದ ದಿನ · ಅಪರಾಧ ಮಾದರಿ',
+  'Evidence Intel': 'ಸಾಕ್ಷ್ಯ ಇಂಟೆಲ್',
+  'Evidence Intelligence': 'ಸಾಕ್ಷ್ಯ ಇಂಟೆಲಿಜೆನ್ಸ್',
+  'FIR Trends · Year-wise': 'FIR ಟ್ರೆಂಡ್ಗಳು · ವರ್ಷವಾರು',
+  'Financial Fraud': 'ಹಣಕಾಸು ಮೋಸ',
+  'Fit': 'ಫಿಟ್',
+  'Hotspots': 'ಹಾಟ್ಸ್ಪಾಟ್ಗಳು',
+  'Intel Map': 'ಇಂಟೆಲ್ ನಕ್ಷೆ',
+  'Intelligence': 'ಇಂಟೆಲಿಜೆನ್ಸ್',
+  'Intelligence Findings': 'ಇಂಟೆಲಿಜೆನ್ಸ್ ಫಲಿತಾಂಶ',
+  'Investigate': 'ತನಿಖೆ',
+  'Investigate a case — pick a scenario': 'ಕೇಸ್ ತನಿಖೆ — ದೃಶ್ಯ ಆಯ್ಕೆ',
+  'Kidnapping': 'ಅಪಹರಣ',
+  'Live Alerts': 'ಲೈವ್ ಅಲರ್ಟ್ಗಳು',
+  'Live Crime News · Karnataka': 'ಲೈವ್ ಅಪರಾಧ ಸುದ್ದಿ · ಕರ್ನಾಟಕ',
+  'ML Clusters': 'ML ಗುಂಪುಗಳು',
+  'Missing Person': 'ಕಾಣೆಯಾದ ವ್ಯಕ್ತಿ',
+  'New Chat': 'ಹೊಸ ಚಾಟ್',
+  'News Items': 'ಸುದ್ದಿ ಐಟಂಗಳು',
+  'Patrol Deployment': 'ಪಟ್ರೋಲ್ ನಿಯೋಜನೆ',
+  'Predictive Forecast · Next Year': 'ಭವಿಷ್ಯವಾಣಿ · ಮುಂದಿನ ವರ್ಷ',
+  'Query crime data': 'ಅಪರಾಧ ಡೇಟಾ ಪ್ರಶ್ನೆ',
+  'Recent': 'ಇತ್ತೀಚಿನ',
+  'Refresh': 'ರಿಫ್ರೆಶ್',
+  'Reload': 'ರಿಲೋಡ್',
+  'Regenerate': 'ಮರುಸೃಷ್ಟಿಸಿ',
+  'Sexual Assault': 'ಲೈಂಗಿಕ ಹಲ್ಲೆ',
+  'Stalking': 'ಹಿಂಬಾಲನೆ',
+  'Suspicious Death': 'ಸಂದೇಹಾಸ್ಪದ ಮರಣ',
+  'Top Districts by FIR Count': 'FIR ಸಂಖ್ಯೆಯಿಂದ ಟಾಪ್ ಜಿಲ್ಲೆಗಳು',
+  'Total Arrests': 'ಒಟ್ಟು ಬಂಧನಗಳು',
+  'Total FIRs': 'ಒಟ್ಟು FIRಗಳು',
+  'Total Victims': 'ಒಟ್ಟು ಸಂತ್ರಸ್ತರು',
+  'Workspace': 'ಕಾರ್ಯಸ್ಥಳ',
+  // Evidence, Investigate and Brief controls
+  'Load sample': 'ಮಾದರಿ ಲೋಡ್ ಮಾಡಿ',
+  'Analyze Evidence': 'ಸಾಕ್ಷ್ಯ ವಿಶ್ಲೇಷಿಸಿ',
+  'Run an analysis to see extracted entities and FIR cross-references.':
+    'ಹೊರತೆಗೆದ ಘಟಕಗಳು ಮತ್ತು FIR ಪರಸ್ಪರ ಉಲ್ಲೇಖಗಳನ್ನು ನೋಡಲು ವಿಶ್ಲೇಷಣೆ ನಡೆಸಿ.',
+  'Print': 'ಮುದ್ರಿಸಿ',
+  // Intel Map
+  'Criminal network · Karnataka': 'ಅಪರಾಧ ಜಾಲ · ಕರ್ನಾಟಕ',
+  'Suspects': 'ಶಂಕಿತರು',
+  'Gangs': 'ಗ್ಯಾಂಗ್‌ಗಳು',
+  'At Risk': 'ಅಪಾಯದಲ್ಲಿ',
+  'Districts': 'ಜಿಲ್ಲೆಗಳು',
+  'Map layers': 'ನಕ್ಷೆ ಪದರಗಳು',
+  'Risk filter': 'ಅಪಾಯ ಫಿಲ್ಟರ್',
+  'Selected suspect': 'ಆಯ್ಕೆ ಮಾಡಿದ ಶಂಕಿತ',
+  'Legend': 'ಸಂಕೇತ ಸೂಚಿ',
+  'Critical': 'ಗಂಭೀರ',
+  'High': 'ಹೆಚ್ಚು',
+  'Medium': 'ಮಧ್ಯಮ',
+  'Low': 'ಕಡಿಮೆ',
+  'Reload': 'ರಿಲೋಡ್',
+  // Case Solver
+  'Case Solver — AI Investigation Advisor': 'ಪ್ರಕರಣ ಪರಿಹಾರ — AI ತನಿಖಾ ಸಲಹೆಗಾರ',
+  'Case Facts': 'ಪ್ರಕರಣದ ವಿವರ',
+  'Quick scenarios': 'ತ್ವರಿತ ಸನ್ನಿವೇಶಗಳು',
+  'Analyse Case & Get Investigation Brief': 'ಪ್ರಕರಣ ವಿಶ್ಲೇಷಿಸಿ ಮತ್ತು ತನಿಖಾ ಸಾರಾಂಶ ಪಡೆಯಿರಿ',
+  'Search case database': 'ಪ್ರಕರಣ ಡೇಟಾಬೇಸ್ ಹುಡುಕಿ',
+  'Search': 'ಹುಡುಕಿ',
+  'Investigation Brief': 'ತನಿಖಾ ಸಾರಾಂಶ',
+  '52 solved Indian criminal cases': '52 ಇತ್ಯರ್ಥಗೊಂಡ ಭಾರತೀಯ ಅಪರಾಧ ಪ್ರಕರಣಗಳು',
+  'Describe your case facts. The AI cross-references':
+    'ನಿಮ್ಮ ಪ್ರಕರಣದ ವಿವರಗಳನ್ನು ಬರೆಯಿರಿ. AI ಇವುಗಳೊಂದಿಗೆ ಹೋಲಿಸುತ್ತದೆ',
+  'and generates a structured investigation brief.':
+    'ಮತ್ತು ಕ್ರಮಬದ್ಧ ತನಿಖಾ ಸಾರಾಂಶವನ್ನು ರಚಿಸುತ್ತದೆ.',
+  // Browse
+  'Database': 'ಡೇಟಾಬೇಸ್',
+  'Filter': 'ಫಿಲ್ಟರ್',
+  'Clear': 'ತೆರವುಗೊಳಿಸಿ',
+  'Go to:': 'ಇಲ್ಲಿಗೆ ಹೋಗಿ:',
+  'Go': 'ಹೋಗಿ',
+  // A leading symbol is carried across separately by _i18nApply and stripped
+  // before the lookup, so these keys are the bare word without the « or ‹.
+  'First': 'ಮೊದಲ',
+  'Prev': 'ಹಿಂದಿನ',
+  'Next ›': 'ಮುಂದಿನ ›',
+  'Last »': 'ಕೊನೆಯ »',
+  'Select a database and view above to browse records':
+    'ದಾಖಲೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಮೇಲೆ ಡೇಟಾಬೇಸ್ ಮತ್ತು ವೀಕ್ಷಣೆ ಆಯ್ಕೆಮಾಡಿ',
+  // Audit table headers
+  'Timestamp': 'ಸಮಯ ಮುದ್ರೆ',
+  'Question': 'ಪ್ರಶ್ನೆ',
+  'Language': 'ಭಾಷೆ',
+  'SQL Generated': 'ರಚಿಸಲಾದ SQL',
+};
+
+// Remembers the English original on first switch so EN restores exactly.
+function _i18nApply(el, lang) {
+  if (el.dataset.enText === undefined) {
+    const t = el.textContent.trim();
+    if (!t) return;
+    el.dataset.enText = t;
+  }
+  const en = el.dataset.enText;
+  // Icons live in their own span, so only the trailing label is swapped.
+  const icon = el.querySelector('.nav-icon, .inv-chip-icon, .case-chip-icon');
+  // Top tabs keep their emoji inline rather than in a span, so it has to be
+  // carried across or the icons vanish when switching to Kannada.
+  const lead = (en.match(/^[^\w(]+/) || [''])[0].trim();
+  const label = lang === 'kn' ? (UI_KN[en.replace(/^[^\w(]+\s*/, '')] || null) : null;
+  if (lang === 'kn' && label) {
+    if (icon) {
+      const keep = icon.outerHTML;
+      el.innerHTML = keep + ' ' + label;
+    } else {
+      el.textContent = (lead ? lead + ' ' : '') + label;
+    }
+  } else if (lang === 'en') {
+    if (icon) {
+      el.innerHTML = icon.outerHTML + ' ' + en.replace(/^[^\w(]+\s*/, '');
+    } else {
+      el.textContent = en;
+    }
+  }
+}
+
+function applyUiLanguage(lang) {
+  const sels = ['.tab-btn', '.nav-item', '.nav-group-label', '.stat-label',
+                '.inv-chip-sidebar', '.sessions-header', '.welcome-section-label',
+                // Shell chrome: the masthead and status line read as the app's
+                // own voice, so leaving them English made the toggle look partial.
+                // #statusText is deliberately absent: it is overwritten at
+                // runtime with the live provider id ("groq · openai/gpt-oss-120b"),
+                // so caching its first value would replace that with a stale label.
+                '.logo-name', '.logo-sub', '.icon-btn',
+                '#officerNameDisplay', '.welcome-badge', '.welcome-screen > h1',
+                '.welcome-screen > p', '#inlineUploadLabel',
+                // Explicit opt-in for controls that carry no shared class.
+                '.i18n',
+                // Intel Map sidebar. .im-ctrl-btn is deliberately absent: the
+                // news filter chips reuse that class and are rebuilt from data.
+                '.im-stat-lbl', '.im-section-title', '.net-risk-pill',
+                // Case Solver, Browse and the audit table's column headers.
+                // The audit rows themselves stay as logged, and the browse rows
+                // stay as stored — those are records, not interface text.
+                '.field-label', '.browse-db-label', '.browse-search-btn',
+                '.page-btn', '#auditTable th', '.case-chip-btn', '.solver-chip',
+                '.welcome-upload-hint > span:not([style*="font-size:16px"])'];
+  sels.forEach(s => document.querySelectorAll(s).forEach(el => _i18nApply(el, lang)));
+
+  // Example cards hold a bold label and the question text as siblings. Both are
+  // translated: fillExample() reads the question straight off the card, so in
+  // Kannada a click has to put a Kannada question in the box.
+  document.querySelectorAll('.example-card').forEach(card => {
+    const strong = card.querySelector('strong');
+    if (strong) _i18nApply(strong, lang);
+    const node = [...card.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+    if (!node) return;
+    if (card.dataset.enQ === undefined) card.dataset.enQ = node.textContent.trim();
+    const q = card.dataset.enQ;
+    node.textContent = '\n            ' + ((lang === 'kn' && UI_KN[q]) ? UI_KN[q] : q) + '\n          ';
+  });
+  // Headings carry buttons as siblings, so translate only their first text node.
+  document.querySelectorAll('.card > h3, .panel h3').forEach(h => {
+    const node = [...h.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+    if (!node) return;
+    if (h.dataset.enText === undefined) h.dataset.enText = node.textContent.trim();
+    const en = h.dataset.enText;
+    const key = en.replace(/^[^\w(]+\s*/, '');
+    node.textContent = (lang === 'kn' && UI_KN[key]) ? UI_KN[key] + ' ' : en + ' ';
+  });
+}
+
 function setLang(lang) {
   currentLang = lang;
   document.getElementById('langEN').classList.toggle('active', lang === 'en');
   document.getElementById('langKN').classList.toggle('active', lang === 'kn');
   const ph = lang === 'kn' ? 'ಕ್ರೈಂ ಡೇಟಾ ಬಗ್ಗೆ ಕೇಳಿ...' : 'Ask about Karnataka crime data... (English or ಕನ್ನಡ)';
   document.getElementById('chatInput').placeholder = ph;
+  applyUiLanguage(lang);
+  // The strip is built by innerHTML on a 60s timer, so it has to be redrawn
+  // here or it stays in the old language for up to a minute.
+  if (_lastAlerts.length || _lastNews.length) renderAlerts(_lastAlerts, _lastNews);
+  // Charts and feeds are drawn once when their tab opens, so without this the
+  // panel the officer is looking at keeps its old labels until they navigate away
+  // and back. switchTab re-runs the loader for whichever panel is showing.
+  if (currentTab) switchTab(currentTab);
 }
 
 // ─── VOICE INPUT (record → Groq Whisper transcription) ─────────────────────
@@ -3150,7 +3518,12 @@ function _applyOfficer(officer) {
   const badge = document.getElementById('officerBadge');
   badge.style.display = 'flex';
   document.getElementById('officerRoleTag').textContent = officer.tag;
-  document.getElementById('officerNameDisplay').textContent = officer.id;
+  const nameEl = document.getElementById('officerNameDisplay');
+  nameEl.textContent = officer.id;
+  // Login replaces the placeholder id, so the cached English original is stale.
+  // Drop it and re-translate, or the badge stays English after a Kannada login.
+  delete nameEl.dataset.enText;
+  _i18nApply(nameEl, currentLang);
   // Role-gated tabs: hidden for Viewers, restored for Inspector/SP
   const restricted = ['tab-solver', 'nav-solver', 'tab-audit', 'nav-audit'];
   restricted.forEach(id => {
@@ -3217,41 +3590,84 @@ function checkLogin() {
 // >20% rise with ≥5 cases = warning, ≥50% = critical. Polled every 60s.
 function escAttr(s) { return escHtml(s).replace(/"/g, '&quot;'); }
 
+// The strip now carries two kinds of signal side by side: statistical spikes
+// computed from our own FIRs, and live open-source reporting. A story usually
+// breaks before the FIR reaches CCTNS, so the two together are the earliest
+// warning available. Each source is fetched independently, so if the news feed
+// is slow or blocked the spike alerts still render.
 async function loadAlerts() {
-  try {
-    const res = await fetch('/api/analytics/alerts');
-    if (!res.ok) return;
-    const data = await res.json();
-    renderAlerts(data.alerts || []);
-  } catch {}
+  const [alerts, news] = await Promise.all([
+    fetch('/api/analytics/alerts').then(r => r.ok ? r.json() : null).catch(() => null),
+    fetch('/api/news/live').then(r => r.ok ? r.json() : null).catch(() => null),
+  ]);
+  _lastAlerts = (alerts && alerts.alerts) || [];
+  _lastNews = (news && news.feed) || [];
+  renderAlerts(_lastAlerts, _lastNews);
 }
 
-function renderAlerts(alerts) {
+// Kept so switching language redraws the strip immediately instead of leaving
+// it English until the next 60s refresh.
+let _lastAlerts = [], _lastNews = [];
+
+function _newsPill(n) {
+  const head = (n.headline || '').trim();
+  if (!head) return '';
+  const short = head.length > 64 ? head.slice(0, 64).trim() + '…' : head;
+  // The district tag is ours, so it follows the UI language; the headline stays
+  // in the language the outlet published it in.
+  const where = n.district ? `<strong>${escHtml(knDistrict(n.district))}</strong>:&nbsp;` : '';
+  // An anchor, so a headline opens its source instead of querying the database.
+  return `<a class="alert-pill news" href="${escAttr(n.url || '#')}" target="_blank" rel="noopener noreferrer"
+             title="${escAttr(head)} — ${escAttr(n.source || 'source')}">
+            📰&nbsp;${where}${escHtml(short)}
+          </a>`;
+}
+
+function renderAlerts(alerts, news) {
   const strip = document.getElementById('alertStrip');
-  if (!alerts.length) { strip.style.display = 'none'; return; }
-  const pills = alerts.slice(0, 15).map(a =>
+  news = news || [];
+  if (!alerts.length && !news.length) { strip.style.display = 'none'; return; }
+  const alertPills = alerts.slice(0, 12).map(a =>
     `<div class="alert-pill ${a.severity}" data-d="${escAttr(a.district)}" data-c="${escAttr(a.crime_type)}" data-pct="${a.change_pct}"
           title="${a.prior_count} → ${a.recent_count} cases (${escAttr(a.period)}) — click to analyze with AI">
-      ${a.severity === 'critical' ? '🚨' : '⚠️'}&nbsp;<strong>${escHtml(a.district)}</strong>:&nbsp;${escHtml(a.crime_type)}&nbsp;<strong>+${a.change_pct}%</strong>
+      ${a.severity === 'critical' ? '🚨' : '⚠️'}&nbsp;<strong>${escHtml(knDistrict(a.district))}</strong>:&nbsp;${escHtml(knCrime(a.crime_type))}&nbsp;<strong>+${a.change_pct}%</strong>
     </div>`
-  ).join('');
+  );
+  // District-matched stories first: those are the ones an officer can act on.
+  const ranked = [...news].sort((x, y) => (y.district ? 1 : 0) - (x.district ? 1 : 0));
+  const newsPills = ranked.slice(0, 10).map(_newsPill).filter(Boolean);
+  // Interleave so the strip reads as one live feed rather than two blocks.
+  const merged = [];
+  for (let i = 0; i < Math.max(alertPills.length, newsPills.length); i++) {
+    if (alertPills[i]) merged.push(alertPills[i]);
+    if (newsPills[i]) merged.push(newsPills[i]);
+  }
+  const pills = merged.join('');
   const t = new Date().toLocaleTimeString('en-IN', { hour12: false });
   strip.innerHTML =
-    `<span class="alert-lbl"><span class="live-dot"></span>LIVE ALERTS</span>
+    `<span class="alert-lbl"><span class="live-dot"></span>${currentLang === 'kn' ? 'ಲೈವ್ ಅಲರ್ಟ್' : 'LIVE ALERTS'}</span>
      <div class="alert-track"><div class="alert-track-inner">
        <div class="alert-half">${pills}</div><div class="alert-half">${pills}</div>
      </div></div>
-     <span class="alert-time">Updated ${t}</span>`;
+     <span class="alert-time">${currentLang === 'kn' ? 'ನವೀಕರಣ' : 'Updated'} ${t}</span>`;
   strip.style.display = 'flex';
   strip.onclick = (e) => {
     const p = e.target.closest('.alert-pill');
-    if (p) askAlertInChat(p.dataset.d, p.dataset.c, p.dataset.pct);
+    // News pills are anchors: let the browser open the story rather than
+    // querying the database with an undefined district.
+    if (p && !p.classList.contains('news')) {
+      askAlertInChat(p.dataset.d, p.dataset.c, p.dataset.pct);
+    }
   };
 }
 
 function askAlertInChat(district, crime, pct) {
   const input = document.getElementById('chatInput');
-  input.value = `Early-warning alert: ${crime} cases in ${district} district rose ${pct}% in the last 90 days. Analyze this spike — which police stations are affected, what patterns explain it, and what preventive deployment do you recommend?`;
+  // The question is what decides the reply's language, so in Kannada mode the
+  // alert has to be asked in Kannada or the officer gets an English answer.
+  input.value = currentLang === 'kn'
+    ? `ಮುನ್ನೆಚ್ಚರಿಕೆ: ${knDistrict(district)} ಜಿಲ್ಲೆಯಲ್ಲಿ ${knCrime(crime)} ಪ್ರಕರಣಗಳು ಕಳೆದ 90 ದಿನಗಳಲ್ಲಿ ${pct}% ಏರಿಕೆಯಾಗಿವೆ. ಈ ಏರಿಕೆಯನ್ನು ವಿಶ್ಲೇಷಿಸಿ — ಯಾವ ಠಾಣೆಗಳು ಪ್ರಭಾವಿತವಾಗಿವೆ, ಯಾವ ಮಾದರಿಗಳು ಇದನ್ನು ವಿವರಿಸುತ್ತವೆ, ಮತ್ತು ಯಾವ ಮುಂಜಾಗ್ರತಾ ನಿಯೋಜನೆಯನ್ನು ಶಿಫಾರಸು ಮಾಡುತ್ತೀರಿ?`
+    : `Early-warning alert: ${crime} cases in ${district} district rose ${pct}% in the last 90 days. Analyze this spike — which police stations are affected, what patterns explain it, and what preventive deployment do you recommend?`;
   switchTab('chat');
   sendMessage();
 }
@@ -3285,7 +3701,9 @@ function addMessage(role, text, meta = {}, scroll = true) {
   const el = document.createElement('div');
   el.className = 'message ' + role;
   const isUser = role === 'user';
-  const label = isUser ? 'You' : 'KSP Crime AI';
+  const label = currentLang === 'kn'
+    ? (isUser ? 'ನೀವು' : 'KSP ಅಪರಾಧ AI')
+    : (isUser ? 'You' : 'KSP Crime AI');
   const avatarClass = isUser ? 'user' : 'bot';
   const avatarText = isUser ? 'U' : 'K';
 
@@ -3300,7 +3718,10 @@ function addMessage(role, text, meta = {}, scroll = true) {
   }
   let sqlHtml = '';
   if (meta.sql) {
-    sqlHtml = `<details class="sql-toggle"><summary>View SQL Query · Explainable AI</summary><pre>${escHtml(meta.sql)}</pre></details>`;
+    const sqlLabel = currentLang === 'kn'
+      ? 'SQL ಪ್ರಶ್ನೆ ನೋಡಿ · ವಿವರಿಸಬಹುದಾದ AI'
+      : 'View SQL Query · Explainable AI';
+    sqlHtml = `<details class="sql-toggle"><summary>${sqlLabel}</summary><pre>${escHtml(meta.sql)}</pre></details>`;
   }
 
   const bubbleContent = isUser ? escHtml(text).replace(/\n/g,'<br>') : renderMarkdown(text);
@@ -3322,7 +3743,7 @@ function showTyping() {
   el.className = 'message bot'; el.id = 'typing-indicator';
   el.innerHTML = `<div class="avatar bot">K</div>
     <div class="msg-body">
-      <div class="msg-role">KSP Crime AI</div>
+      <div class="msg-role">${currentLang === 'kn' ? 'KSP ಅಪರಾಧ AI' : 'KSP Crime AI'}</div>
       <div class="msg-bubble" style="min-width:60px"><div class="typing-dots"><span></span><span></span><span></span></div></div>
     </div>`;
   document.getElementById('messages').appendChild(el);
@@ -3516,9 +3937,12 @@ function _newsAge(published) {
   const t = Date.parse(published || '');
   if (!t) return '';
   const mins = Math.round((Date.now() - t) / 60000);
-  if (mins < 60) return mins + 'm ago';
-  if (mins < 1440) return Math.round(mins / 60) + 'h ago';
-  return Math.round(mins / 1440) + 'd ago';
+  // "ಹಿಂದೆ" (ago) follows the unit in Kannada, so the whole phrase is built here
+  // rather than translating the suffix on its own.
+  const kn = currentLang === 'kn';
+  if (mins < 60) return mins + (kn ? ' ನಿಮಿಷಗಳ ಹಿಂದೆ' : 'm ago');
+  if (mins < 1440) return Math.round(mins / 60) + (kn ? ' ಗಂಟೆಗಳ ಹಿಂದೆ' : 'h ago');
+  return Math.round(mins / 1440) + (kn ? ' ದಿನಗಳ ಹಿಂದೆ' : 'd ago');
 }
 
 function renderNewsFeed() {
@@ -3565,23 +3989,48 @@ function renderNewsFilters() {
     '<button class="im-ctrl-btn' + (_newsFilter === key ? ' im-ctrl-accent' : '') + '" ' +
     'onclick="setNewsFilter(' + JSON.stringify(key).replace(/"/g, '&quot;') + ')">' +
     escapeHtml(label) + (n != null ? ' (' + n + ')' : '') + '</button>';
-  bar.innerHTML = mk('all', 'All', _newsItems.length) +
-    top.map(([d, n]) => mk(d, d, n)).join('');
+  // The filter key stays the English district name (it matches the feed data);
+  // only the label the officer reads is translated.
+  bar.innerHTML = mk('all', currentLang === 'kn' ? 'ಎಲ್ಲಾ' : 'All', _newsItems.length) +
+    top.map(([d, n]) => mk(d, knDistrict(d), n)).join('');
 }
 
 function setNewsFilter(k) { _newsFilter = k; renderNewsFilters(); renderNewsFeed(); }
 
 let _newsBusy = false;
 
+// Meta line for the feed. Split out because the cached path has to redraw it
+// too, otherwise switching language leaves the feed's summary in English.
+function renderNewsMeta() {
+  const meta = document.getElementById('newsMeta');
+  if (!meta) return;
+  const withDistrict = _newsItems.filter(n => n.district).length;
+  const newest = _newsItems.length ? _newsAge(_newsItems[0].published) : '';
+  meta.textContent = currentLang === 'kn'
+    ? _newsItems.length + ' ಸುದ್ದಿಗಳು · ' + withDistrict + ' ಜಿಲ್ಲೆ ಹೊಂದಿಕೆ' +
+      (newest ? ' · ಇತ್ತೀಚಿನದು ' + newest : '')
+    : _newsItems.length + ' stories · ' + withDistrict +
+      ' district-matched' + (newest ? ' · newest ' + newest : '');
+}
+
 async function loadNewsFeed(force) {
   if (_newsBusy) return;
-  if (_newsLoaded && !force) return;
+  if (_newsLoaded && !force) {
+    // Already fetched: redraw from cache so a language switch takes effect
+    // without spending another request on the news service.
+    renderNewsMeta();
+    renderNewsFilters();
+    renderNewsFeed();
+    const rb = document.getElementById('newsRefreshBtn');
+    if (rb) rb.textContent = currentLang === 'kn' ? '↻ ರಿಫ್ರೆಶ್' : '↻ Refresh';
+    return;
+  }
   _newsBusy = true;
   const wrap = document.getElementById('newsFeed');
   const meta = document.getElementById('newsMeta');
   const btn = document.getElementById('newsRefreshBtn');
   const label = btn ? btn.textContent : null;
-  if (btn) { btn.disabled = true; btn.textContent = 'Refreshing…'; }
+  if (btn) { btn.disabled = true; btn.textContent = currentLang === 'kn' ? 'ರಿಫ್ರೆಶ್ ಆಗುತ್ತಿದೆ…' : 'Refreshing…'; }
   if (wrap && !_newsItems.length) {
     wrap.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:14px 0">' +
       'Fetching live reports…</div>';
@@ -3593,12 +4042,7 @@ async function loadNewsFeed(force) {
     const d = await (await fetch(url, { cache: 'no-store' })).json();
     _newsItems = d.feed || [];
     _newsLoaded = true;
-    if (meta) {
-      const withDistrict = _newsItems.filter(n => n.district).length;
-      const newest = _newsItems.length ? _newsAge(_newsItems[0].published) : '';
-      meta.textContent = _newsItems.length + ' stories · ' + withDistrict +
-        ' district-matched' + (newest ? ' · newest ' + newest : '');
-    }
+    renderNewsMeta();
     renderNewsFilters();
     renderNewsFeed();
   } catch (e) {
@@ -3608,7 +4052,13 @@ async function loadNewsFeed(force) {
     }
   } finally {
     _newsBusy = false;
-    if (btn) { btn.disabled = false; btn.textContent = label || '↻ Refresh'; }
+    if (btn) {
+      btn.disabled = false;
+      // Always rebuild from the current language rather than restoring the text
+      // captured before the fetch: on a first load in Kannada that captured
+      // value is the English label baked into the static HTML.
+      btn.textContent = currentLang === 'kn' ? '↻ ರಿಫ್ರೆಶ್' : '↻ Refresh';
+    }
   }
 }
 
@@ -3639,10 +4089,10 @@ async function loadAnalytics() {
       data: {
         labels: trends.data.map(r => r.year),
         datasets: [{
-          label: 'Total FIRs', data: trends.data.map(r => r.total_firs),
+          label: currentLang === 'kn' ? 'ಒಟ್ಟು FIRಗಳು' : 'Total FIRs', data: trends.data.map(r => r.total_firs),
           borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,.12)', fill: true, tension: 0.4, pointBackgroundColor: '#60a5fa',
         }, {
-          label: 'Arrests', data: trends.data.map(r => r.total_arrests),
+          label: currentLang === 'kn' ? 'ಬಂಧನಗಳು' : 'Arrests', data: trends.data.map(r => r.total_arrests),
           borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,.08)', fill: true, tension: 0.4, pointBackgroundColor: '#34d399',
         }],
       },
@@ -3654,8 +4104,8 @@ async function loadAnalytics() {
     chartInstances['districtChart'] = new Chart(document.getElementById('districtChart').getContext('2d'), {
       type: 'bar',
       data: {
-        labels: topDist.map(r => r.district),
-        datasets: [{ label: 'FIRs', data: topDist.map(r => r.firs), backgroundColor: 'rgba(96,165,250,.75)', borderRadius: 4 }],
+        labels: topDist.map(r => knDistrict(r.district)),
+        datasets: [{ label: currentLang === 'kn' ? 'FIRಗಳು' : 'FIRs', data: topDist.map(r => r.firs), backgroundColor: 'rgba(96,165,250,.75)', borderRadius: 4 }],
       },
       options: { ...CHART_DEFAULTS, indexAxis: 'y' },
     });
@@ -3664,7 +4114,10 @@ async function loadAnalytics() {
     if (crimeTypes.labels && crimeTypes.labels.length) {
       chartInstances['crimeTypeChart'] = new Chart(document.getElementById('crimeTypeChart').getContext('2d'), {
         type: 'line',
-        data: { labels: crimeTypes.labels, datasets: crimeTypes.datasets.map(d => ({ ...d, fill: false, tension: 0.4 })) },
+        data: {
+          labels: crimeTypes.labels,
+          datasets: crimeTypes.datasets.map(d => ({ ...d, label: knCrime(d.label), fill: false, tension: 0.4 })),
+        },
         options: { ...CHART_DEFAULTS },
       });
     }
@@ -3673,13 +4126,13 @@ async function loadAnalytics() {
     predEl.innerHTML = `<div style="margin-bottom:14px;font-size:13px;color:var(--muted)">
       Forecast for <strong style="color:var(--navy)">${preds.next_year || ''}</strong> —
       <strong style="color:var(--navy)">${fmt(preds.predicted_total_firs)}</strong> total FIRs
-      <em style="font-size:12px">(${preds.trend || ''})</em>
+      <em style="font-size:12px">(${knTrend(preds.trend) || ''})</em>
     </div>`;
     for (const p of (preds.crime_type_predictions || [])) {
       const trendIcon = p.trend === 'up' ? '↑' : '↓';
       const trendClass = p.trend === 'up' ? 'up' : 'down';
       predEl.innerHTML += `<div class="pred-item">
-        <div class="pred-crime">${escHtml(p.crime_type)}</div>
+        <div class="pred-crime">${escHtml(knCrime(p.crime_type))}</div>
         <div class="pred-count">${fmt(p.predicted_count)}</div>
         <div class="pred-trend ${trendClass}">${trendIcon} ${Math.abs(p.change_pct)}%</div>
       </div>`;
@@ -3783,7 +4236,7 @@ function imSyncZoomLayers() {
 function imAddZoomHint(map) {
   const el = document.createElement('div');
   el.id = 'imZoomHint';
-  el.textContent = 'Zoom in to plot individual suspects';
+  el.textContent = currentLang === 'kn' ? 'ಪ್ರತ್ಯೇಕ ಶಂಕಿತರನ್ನು ತೋರಿಸಲು ಜೂಮ್ ಮಾಡಿ' : 'Zoom in to plot individual suspects';
   el.style.cssText =
     'position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:500;' +
     'padding:7px 14px;border-radius:999px;pointer-events:none;white-space:nowrap;' +
@@ -4191,7 +4644,8 @@ async function loadCaseSolverStats() {
     const res = await fetch('/api/case-solver/stats');
     const d = await res.json();
     const el = document.getElementById('caseDbStats');
-    if (el) el.textContent = `${d.total} solved cases`;
+    if (el) el.textContent = currentLang === 'kn'
+      ? `${d.total} ಇತ್ಯರ್ಥಗೊಂಡ ಪ್ರಕರಣಗಳು` : `${d.total} solved cases`;
   } catch {}
 }
 
@@ -4241,7 +4695,9 @@ async function runCaseSolver() {
     out.textContent = 'Error: ' + e.message;
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Analyse Case & Get Investigation Brief';
+    btn.textContent = currentLang === 'kn'
+      ? 'ಪ್ರಕರಣ ವಿಶ್ಲೇಷಿಸಿ ಮತ್ತು ತನಿಖಾ ಸಾರಾಂಶ ಪಡೆಯಿರಿ'
+      : 'Analyse Case & Get Investigation Brief';
   }
 }
 
@@ -4446,7 +4902,7 @@ async function setBrowseDb(db) {
   // Render view tabs — use data-view to avoid quote conflicts in onclick
   const row = document.getElementById('browseViewRow');
   row.innerHTML = browseState.views.map(v =>
-    `<button class="view-tab" data-view="${escHtml(v)}" onclick="setBrowseView(this.dataset.view)">${escHtml(v)}</button>`
+    `<button class="view-tab" data-view="${escHtml(v)}" onclick="setBrowseView(this.dataset.view)">${escHtml(knView(v))}</button>`
   ).join('');
 
   // Auto-select first view
@@ -4492,7 +4948,9 @@ async function loadBrowsePage(page) {
   const start = (page - 1) * browseState.limit + 1;
   const end = Math.min(page * browseState.limit, d.total);
   document.getElementById('browseCount').textContent =
-    `${d.total.toLocaleString('en-IN')} records${browseState.q ? ' (filtered)' : ''}`;
+    currentLang === 'kn'
+      ? `${d.total.toLocaleString('en-IN')} ದಾಖಲೆಗಳು${browseState.q ? ' (ಫಿಲ್ಟರ್ ಮಾಡಲಾಗಿದೆ)' : ''}`
+      : `${d.total.toLocaleString('en-IN')} records${browseState.q ? ' (filtered)' : ''}`;
 }
 
 function renderBrowseTable() {
@@ -4520,7 +4978,9 @@ function updateBrowsePagination() {
   pag.style.display = pages > 1 ? 'flex' : 'none';
   const start = (page - 1) * limit + 1;
   const end = Math.min(page * limit, total);
-  document.getElementById('pageInfo').textContent = `Page ${page} of ${pages} · rows ${start}–${end} of ${total.toLocaleString('en-IN')}`;
+  document.getElementById('pageInfo').textContent = currentLang === 'kn'
+    ? `ಪುಟ ${page} / ${pages} · ಸಾಲುಗಳು ${start}–${end} / ${total.toLocaleString('en-IN')}`
+    : `Page ${page} of ${pages} · rows ${start}–${end} of ${total.toLocaleString('en-IN')}`;
   document.getElementById('btnFirst').disabled = page <= 1;
   document.getElementById('btnPrev').disabled = page <= 1;
   document.getElementById('btnNext').disabled = page >= pages;

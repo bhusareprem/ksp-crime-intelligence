@@ -170,8 +170,12 @@ _NAME_REJECT = {
 def _extract_person_name(question: str) -> str | None:
     q = question.strip()
     for pat in (
-        r"(?:details?|info|information|profile|data)\s+(?:about|on|for)\s+([A-Za-z][A-Za-z\s'.-]{2,50})",
-        r"(?:about|on)\s+([A-Za-z][A-Za-z\s'.-]{2,50})\??$",
+        r"\b(?:details?|info|information|profile|data)\s+(?:about|on|for)\s+([A-Za-z][A-Za-z\s'.-]{2,50})",
+        # \b matters: without it the "on" inside "proporti-on" matched, and
+        # "What proportion of FIRs end in a charge sheet?" was answered as a
+        # profile request for a person named "of FIRs end". Any word ending in
+        # "on" - comparison, region, information - could do the same.
+        r"\b(?:about|on)\s+([A-Za-z][A-Za-z\s'.-]{2,50})\??$",
         r"^who is\s+([A-Za-z][A-Za-z\s'.-]{2,50})\??$",
     ):
         m = re.search(pat, q, re.I)
@@ -375,6 +379,75 @@ def _top_accused_per_district() -> FallbackQuery:
     )
 
 
+def _case_by_number(case_no: str, district: str | None = None) -> FallbackQuery:
+    """Everyone recorded on one FIR.
+
+    The scope guard tells an officer "give me the FIR number and I can pull that
+    case and everyone recorded on it". That promise was being kept by generated
+    SQL, so it held for "pull up case number X" and broke for "show me the
+    details of FIR number X", which came back as aggregate crime-type counts. An
+    offer the system makes in writing should not depend on how it is taken up.
+    """
+    return FallbackQuery(
+        db=DB,
+        sql=f"""
+            SELECT cm.CaseNo                AS fir_number,
+                   cm.CrimeRegisteredDate   AS registered,
+                   d.DistrictName           AS district,
+                   u.UnitName               AS police_station,
+                   csh.CrimeHeadName        AS offence,
+                   cst.CaseStatusName       AS status,
+                   a.AccusedName            AS accused,
+                   a.AgeYear                AS age
+            FROM CaseMaster cm
+            JOIN Unit u ON cm.PoliceStationID = u.UnitID
+            JOIN District d ON u.DistrictID = d.DistrictID
+            JOIN CrimeSubHead csh ON cm.CrimeMinorHeadID = csh.CrimeSubHeadID
+            LEFT JOIN CaseStatusMaster cst ON cm.CaseStatusID = cst.CaseStatusID
+            LEFT JOIN Accused a ON a.CaseMasterID = cm.CaseMasterID
+            WHERE (cm.CaseNo = '{case_no}' OR cm.CrimeNo = '{case_no}')
+            {f"AND d.DistrictName ILIKE '%{district}%'" if district else ""}
+            ORDER BY d.DistrictName, a.AccusedName
+            LIMIT 200
+        """,
+        explanation=(f"Full record for FIR / case number {case_no}"
+                     + (f" in {district}" if district else "")),
+        # CaseNo is unique per station, not statewide: 202200001 exists in most
+        # districts. Without the district filter the officer who named one got
+        # 200 rows from everywhere else as well.
+        note=(f"Filtered to {district}. CaseNo repeats across police stations, so "
+              f"the same number exists in other districts."
+              if district else
+              "CaseNo repeats across police stations, so the same number exists in "
+              "several districts — name the district to narrow it."),
+    )
+
+
+def _chargesheet_rate_overall(year: int | None = None) -> FallbackQuery:
+    """One figure for the whole state.
+
+    Asked as "what percentage of cases are chargesheeted", this used to be left
+    to the model, which wrote a slightly different query each time: the same
+    question returned 24.98% on one run and 30.36% on another. Generation is
+    already at temperature 0, so the variance is the model's, not a setting -
+    the only way to make a headline number repeatable is to stop generating it.
+    """
+    yr = f"WHERE EXTRACT(YEAR FROM cm.CrimeRegisteredDate)::INT = {year}" if year else ""
+    return FallbackQuery(
+        db=DB,
+        sql=f"""
+            SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE csm.CaseStatusName = 'Charge Sheeted')
+                         / NULLIF(COUNT(*), 0), 2) AS chargesheet_pct
+            FROM CaseMaster cm
+            JOIN CaseStatusMaster csm ON cm.CaseStatusID = csm.CaseStatusID
+            {yr}
+        """,
+        explanation=f"Chargesheet rate across all FIRs{' in ' + str(year) if year else ''}",
+        note=("Case progression, not court outcomes — this database records how far a case "
+              "has advanced (chargesheet / disposal), not conviction or acquittal."),
+    )
+
+
 def _case_progress_by_district(year: int | None = None) -> FallbackQuery:
     """Chargesheet / disposal rate by district.
 
@@ -527,7 +600,21 @@ def _top_crimes_by_year(year: int) -> FallbackQuery:
 
 # ── Context helpers ────────────────────────────────────────────────────────────
 
+# An FIR / case / crime number anywhere in the text.
+_CASE_NO_RE = re.compile(
+    r"\b(?:fir|case|crime)\s*(?:no\.?|number|#)?\s*[:#]?\s*(\d{6,20}|\d{1,5}\s*/\s*\d{4})\b",
+    re.I)
+
+
 def expand_question_with_history(question: str, history: list[dict]) -> str:
+    # A question carrying a specific case number is not a vague follow-up.
+    # Expanding it threw the number away: "who is behind the murder in Belagavi
+    # ... case details: FIR number 202200001" was rewritten to "murder case
+    # details in Belagavi district", and the one identifier that made the
+    # question answerable was gone before any handler saw it.
+    if _CASE_NO_RE.search(question or ""):
+        return question
+
     if _is_name_followup(question):
         district = _find_district(question) or _district_from_history(history)
         if district:
@@ -561,16 +648,42 @@ def try_fallback_sql(question: str, history: list[dict] | None = None) -> Fallba
     year = _extract_year(question)
     district = _find_district(question) or _district_from_history(history)
 
+    # --- One FIR by its number ---
+    # Before the person-name check: "details on FIR 202200001" would otherwise be
+    # read as a request for a profile of someone called "FIR 202200001".
+    m_case = _CASE_NO_RE.search(q)
+    if m_case:
+        return _case_by_number(m_case.group(1).replace(" ", ""), district)
+
     # --- Person profile by name ---
     person_name = _extract_person_name(question)
     if person_name:
         return _person_details(person_name)
 
-    # --- Case progression (chargesheet / disposal / pendency) by district ---
-    if re.search(r"charge\s*sheet(ing)?\s*rate|chargesheet\s*rate|disposal\s*rate|pendency|"
-                 r"case\s*progress|case\s*status\s*(by|per)\s*district|"
+    # --- Case progression (chargesheet / disposal / pendency) ---
+    # "chargesheeted" and "charge sheeted" are matched too. Only the exact phrase
+    # "chargesheet rate" used to qualify, so every paraphrase fell through to the
+    # model and came back with a different figure.
+    if re.search(r"charge\s*sheet(ing|ed)?\s*(rate|percent|percentage|proportion|share)|"
+                 # The measure word can come first: "what PROPORTION of FIRs end
+                 # in a CHARGE SHEET" reached the model instead, found nothing,
+                 # and fell through to a web search on a question the database
+                 # answers exactly.
+                 r"(rate|percent|percentage|proportion|share|fraction)\b[^.?]{0,60}"
+                 r"\bcharge\s*sheet|"
+                 r"chargesheet(ed)?\b|charge\s*sheeted\b|"
+                 r"disposal\s*rate|pendency|case\s*progress|"
+                 r"case\s*status\s*(by|per)\s*district|"
                  r"clearance\s*rate|solve\s*rate|detection\s*rate", q):
-        return _case_progress_by_district(year)
+        # A single-figure question deserves a single figure; a district question
+        # deserves the breakdown.
+        if re.search(r"\bby district\b|\bper district\b|\beach district\b|"
+                     r"\bacross districts\b|\bdistrict[- ]wise\b", q):
+            return _case_progress_by_district(year)
+        if re.search(r"disposal\s*rate|pendency|case\s*progress|clearance\s*rate|"
+                     r"solve\s*rate|detection\s*rate|case\s*status", q):
+            return _case_progress_by_district(year)
+        return _chargesheet_rate_overall(year)
 
     # --- Communal / hate crime / caste violence trends ---
     if re.search(r"communal|hate\s*crime|religious.*crime|sectarian|caste\s*attack|mob\s*lynch|minority.*crime", q):
