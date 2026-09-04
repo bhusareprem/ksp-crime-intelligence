@@ -162,3 +162,61 @@ class TestWiring:
         """Switching back to English must restore the exact original text."""
         html = FRONTEND.read_text(encoding="utf-8")
         assert "dataset.enText" in html
+
+
+@pytest.fixture(scope="module")
+def guide_block() -> str:
+    html = FRONTEND.read_text(encoding="utf-8")
+    m = re.search(r"const GUIDE = \[(.*?)\n\];", html, re.S)
+    assert m, "GUIDE content not found in the frontend"
+    return m.group(1)
+
+
+class TestSelfExplainingGuide:
+    """Every screen carries its own explanation in both languages, so the app can
+    walk an officer through itself without anyone presenting it."""
+
+    def test_covers_every_tab(self, guide_block):
+        html = FRONTEND.read_text(encoding="utf-8")
+        tabs = set(re.findall(r"tab: '([a-z]+)'", guide_block))
+        assert len(tabs) == 9, f"expected 9 screens, got {sorted(tabs)}"
+        # Each named tab must be a panel that actually exists.
+        for t in tabs:
+            assert f'id="panel-{t}"' in html, f"guide names a missing panel: {t}"
+
+    def test_both_languages_on_every_screen(self, guide_block):
+        n = guide_block.count("tab:")
+        assert guide_block.count("en: {") == n
+        assert guide_block.count("kn: {") == n
+
+    def test_kannada_is_kannada(self, guide_block):
+        """The prose is written, not machine-translated. A translator once
+        returned a Kannada word with Bengali characters inside it."""
+        offenders = []
+        for ch in guide_block:
+            cp = ord(ch)
+            for name, (lo, hi) in _FOREIGN_SCRIPTS.items():
+                if lo <= cp < hi:
+                    offenders.append(f"{name} {ch!r}")
+                    break
+        assert not offenders, "foreign script in guide: " + ", ".join(sorted(set(offenders)))
+
+    def test_kannada_is_substantial(self, guide_block):
+        """Guards against a stub entry left in English."""
+        assert len(re.findall(r"[ಀ-೿]", guide_block)) > 1500
+
+    def test_guide_redraws_on_language_switch(self):
+        """It holds its own prose, so the UI dictionary cannot translate it."""
+        html = FRONTEND.read_text(encoding="utf-8")
+        setlang = re.search(r"function setLang\(lang\) \{(.*?)\n\}", html, re.S)
+        assert setlang and "renderGuide()" in setlang.group(1)
+
+    def test_advancing_moves_the_app_to_that_screen(self):
+        html = FRONTEND.read_text(encoding="utf-8")
+        fn = re.search(r"function guideGo\(delta\) \{(.*?)\n\}", html, re.S)
+        assert fn and "switchTab(GUIDE[_guideAt].tab)" in fn.group(1)
+
+    def test_speech_follows_the_interface_language(self):
+        html = FRONTEND.read_text(encoding="utf-8")
+        fn = re.search(r"function guideSpeak\(restart\) \{(.*?)\n\}", html, re.S)
+        assert fn and "'kn-IN'" in fn.group(1)

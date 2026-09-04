@@ -1973,6 +1973,68 @@
     .alert-pill.news:hover { filter: brightness(1.35); }
     .alert-time { font-size: 10px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 
+    /* ── Self-explaining guide ─────────────────────────────────────────── */
+    #guideScrim {
+      position: fixed; inset: 0; background: rgba(0,0,0,.42);
+      opacity: 0; pointer-events: none; transition: opacity .22s; z-index: 900;
+    }
+    #guideScrim.open { opacity: 1; pointer-events: auto; }
+    #guidePanel {
+      position: fixed; top: 0; right: 0; bottom: 0; width: 400px; max-width: 92vw;
+      background: var(--panel); border-left: 1px solid var(--border);
+      box-shadow: -18px 0 46px rgba(0,0,0,.28);
+      transform: translateX(102%); transition: transform .26s cubic-bezier(.4,0,.2,1);
+      z-index: 901; display: flex; flex-direction: column;
+    }
+    #guidePanel.open { transform: translateX(0); }
+    .guide-head {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+      padding: 20px 20px 14px; border-bottom: 1px solid var(--border);
+    }
+    .guide-step {
+      font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--accent); font-variant-numeric: tabular-nums; margin-bottom: 4px;
+    }
+    .guide-head h3 { margin: 0; font-size: 19px; font-weight: 700; line-height: 1.2; }
+    .guide-x {
+      background: none; border: none; color: var(--muted); font-size: 16px;
+      cursor: pointer; padding: 2px 6px; border-radius: 6px; line-height: 1;
+    }
+    .guide-x:hover { background: var(--bg); color: var(--text); }
+    .guide-body { padding: 18px 20px; overflow-y: auto; flex: 1; }
+    .guide-block + .guide-block { margin-top: 18px; }
+    .guide-lbl {
+      font-size: 10.5px; letter-spacing: .11em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 8px;
+    }
+    /* Kannada sets matras above and below the baseline, so the line box needs
+       more room than the same size of Latin text or the rows visibly touch. */
+    .guide-body p { margin: 0; font-size: 14.5px; line-height: 1.78; }
+    .guide-block + .guide-block { margin-top: 22px; }
+    /* The "why" is the line that wins an argument about the product, so it is
+       the one thing on the panel given any emphasis. */
+    .guide-why {
+      border-left: 2px solid var(--accent); padding-left: 12px;
+    }
+    .guide-foot {
+      display: flex; gap: 8px; padding: 14px 20px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .guide-btn {
+      padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); cursor: pointer; font-size: 13px;
+      font-weight: 600;
+    }
+    .guide-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .guide-btn:disabled { opacity: .38; cursor: default; }
+    .guide-next { margin-left: auto; background: var(--accent); color: #fff; border-color: var(--accent); }
+    .guide-next:hover:not(:disabled) { filter: brightness(1.08); color: #fff; }
+    .guide-speak.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .guide-btn:focus-visible, .guide-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+      #guidePanel, #guideScrim { transition: none; }
+    }
+
     /* ── OFFICER BADGE ────────────────────────────────────────────── */
     .officer-badge {
       display: flex; align-items: center; gap: 7px; padding: 4px 10px;
@@ -2072,6 +2134,7 @@
         <button class="lang-btn active" id="langEN" onclick="setLang('en')">EN</button>
         <button class="lang-btn" id="langKN" onclick="setLang('kn')">ಕನ್ನಡ</button>
       </div>
+      <button class="tts-btn" id="guideBtn" onclick="openGuide()" title="What is this screen?">💡</button>
       <button class="tts-btn" id="ttsBtn" onclick="toggleTTS()" title="Enable voice output (TTS)">🔊</button>
       <button class="icon-btn" onclick="exportPDF()" title="Export chat as PDF">📄 PDF</button>
       <div class="officer-badge" onclick="logout()" id="officerBadge" title="Logged in as — click to log out" style="display:none">
@@ -2563,6 +2626,39 @@
 
 </div><!-- .main -->
 
+<!-- GUIDE — every screen explains itself, in either language, out loud if wanted.
+     Doubles as a self-running tour: Next advances the tab as well as the text, so
+     the application can walk someone through itself without anyone presenting. -->
+<div id="guideScrim" onclick="closeGuide()"></div>
+<aside id="guidePanel" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="guide-head">
+    <div>
+      <div class="guide-step" id="guideStep">1 / 9</div>
+      <h3 id="guideTitle">Chat</h3>
+    </div>
+    <button class="guide-x" onclick="closeGuide()" aria-label="Close">✕</button>
+  </div>
+  <div class="guide-body">
+    <div class="guide-block">
+      <div class="guide-lbl" id="guideLblWhat">What this is</div>
+      <p id="guideWhat"></p>
+    </div>
+    <div class="guide-block">
+      <div class="guide-lbl" id="guideLblDoes">What it does</div>
+      <p id="guideDoes"></p>
+    </div>
+    <div class="guide-block guide-why">
+      <div class="guide-lbl" id="guideLblWhy">Why it matters</div>
+      <p id="guideWhy"></p>
+    </div>
+  </div>
+  <div class="guide-foot">
+    <button class="guide-btn" onclick="guideGo(-1)" id="guidePrevBtn">‹</button>
+    <button class="guide-btn guide-speak" onclick="guideSpeak()" id="guideSpeakBtn">🔊</button>
+    <button class="guide-btn guide-next" onclick="guideGo(1)" id="guideNextBtn">Next ›</button>
+  </div>
+</aside>
+
 <script>
 // ─── STATE ────────────────────────────────────────────────────────────────
 let currentTab = 'chat';
@@ -2871,6 +2967,191 @@ async function runInvestigation() {
   }
 }
 
+// ─── SELF-EXPLAINING GUIDE ────────────────────────────────────────────────
+// Each screen carries its own explanation in both languages. Written rather
+// than translated: the Kannada is composed for an officer reading it, not run
+// through a translator from the English, which is how "ತদন্তಿ" happened once.
+//
+// Three fields, always in this order, because it is the order someone actually
+// asks in: what am I looking at, what does it do, and why should I care.
+const GUIDE = [
+  { tab: 'chat',
+    en: { t: 'Chat',
+          what: 'A question box for the crime records. You type the way you would speak to a colleague — in English or Kannada.',
+          does: 'It works out which records answer your question, writes the database query, runs it, and replies in a sentence. Open “View SQL Query” under any answer to see exactly what it ran.',
+          why:  'An officer who has never written a database query can now ask one. And because the query is on screen, a figure can be checked before it goes into a report.' },
+    kn: { t: 'ಚಾಟ್',
+          what: 'ಅಪರಾಧ ದಾಖಲೆಗಳಿಗೆ ಪ್ರಶ್ನೆ ಕೇಳುವ ಸ್ಥಳ. ಸಹೋದ್ಯೋಗಿಯೊಂದಿಗೆ ಮಾತನಾಡುವಂತೆ ಕನ್ನಡ ಅಥವಾ ಇಂಗ್ಲಿಷ್‌ನಲ್ಲಿ ಬರೆಯಿರಿ.',
+          does: 'ಯಾವ ದಾಖಲೆಗಳು ಉತ್ತರ ನೀಡುತ್ತವೆ ಎಂದು ಗುರುತಿಸಿ, ಡೇಟಾಬೇಸ್ ಪ್ರಶ್ನೆ ಬರೆದು, ಅದನ್ನು ನಡೆಸಿ, ವಾಕ್ಯದಲ್ಲಿ ಉತ್ತರಿಸುತ್ತದೆ. ಪ್ರತಿ ಉತ್ತರದ ಕೆಳಗೆ “SQL ಪ್ರಶ್ನೆ ನೋಡಿ” ತೆರೆದು ಪರಿಶೀಲಿಸಬಹುದು.',
+          why:  'ಡೇಟಾಬೇಸ್ ಪ್ರಶ್ನೆ ಬರೆಯಲು ಬಾರದ ಅಧಿಕಾರಿಯೂ ಈಗ ಕೇಳಬಹುದು. ಪ್ರಶ್ನೆ ಪರದೆಯ ಮೇಲೆ ಇರುವುದರಿಂದ, ವರದಿಗೆ ಸೇರಿಸುವ ಮೊದಲು ಸಂಖ್ಯೆಯನ್ನು ಪರಿಶೀಲಿಸಬಹುದು.' } },
+
+  { tab: 'investigate',
+    en: { t: 'Investigation Agent',
+          what: 'You give it a goal instead of a question, and it works on its own.',
+          does: 'It decides what to look up, runs several analyses one after another, lets each result shape the next, and writes up the case.',
+          why:  'It will not name a suspect from statistics. Aggregate numbers cannot link a person to an incident, so a name produced that way would be an accusation made by arithmetic. Give it an FIR number and it pulls that case instead — that is a record, not a guess.' },
+    kn: { t: 'ತನಿಖಾ ಏಜೆಂಟ್',
+          what: 'ಪ್ರಶ್ನೆಯ ಬದಲು ಗುರಿ ನೀಡಿ; ಅದು ತಾನೇ ಕೆಲಸ ಮಾಡುತ್ತದೆ.',
+          does: 'ಏನನ್ನು ಹುಡುಕಬೇಕೆಂದು ತಾನೇ ನಿರ್ಧರಿಸಿ, ಹಲವು ವಿಶ್ಲೇಷಣೆಗಳನ್ನು ಒಂದರ ನಂತರ ಒಂದು ನಡೆಸಿ, ಪ್ರತಿ ಫಲಿತಾಂಶ ಮುಂದಿನ ಹೆಜ್ಜೆಯನ್ನು ನಿರ್ಧರಿಸಲು ಬಿಟ್ಟು, ಪ್ರಕರಣ ವರದಿ ಬರೆಯುತ್ತದೆ.',
+          why:  'ಅಂಕಿಅಂಶಗಳಿಂದ ಶಂಕಿತರ ಹೆಸರು ಹೇಳುವುದಿಲ್ಲ. ಒಟ್ಟು ಸಂಖ್ಯೆಗಳು ವ್ಯಕ್ತಿಯನ್ನು ಘಟನೆಗೆ ಜೋಡಿಸಲಾರವು; ಹಾಗೆ ಹೇಳಿದ ಹೆಸರು ಲೆಕ್ಕಾಚಾರದಿಂದ ಮಾಡಿದ ಆರೋಪವಾಗುತ್ತದೆ. FIR ಸಂಖ್ಯೆ ನೀಡಿದರೆ ಆ ಪ್ರಕರಣವನ್ನೇ ತೆಗೆದು ತೋರಿಸುತ್ತದೆ — ಅದು ದಾಖಲೆ, ಊಹೆ ಅಲ್ಲ.' } },
+
+  { tab: 'brief',
+    en: { t: 'Intelligence Brief',
+          what: 'The briefing a senior officer would want on their desk each morning, written fresh each time.',
+          does: 'It gathers the districts running hot, the months the statistics flagged as unusual, the crime clusters forming, and today’s news — then writes a short brief with recommended deployment, district by district.',
+          why:  'Nobody has to assemble it. The signals it combines are already being computed; this turns them into something a busy officer can read in two minutes.' },
+    kn: { t: 'ಗುಪ್ತಚರ ಸಂಕ್ಷಿಪ್ತ ವರದಿ',
+          what: 'ಪ್ರತಿ ಬೆಳಿಗ್ಗೆ ಹಿರಿಯ ಅಧಿಕಾರಿಯ ಮೇಜಿನ ಮೇಲೆ ಬೇಕಾದ ವರದಿ, ಪ್ರತಿ ಬಾರಿಯೂ ಹೊಸದಾಗಿ ಬರೆಯಲಾಗುತ್ತದೆ.',
+          does: 'ಹೆಚ್ಚು ಅಪರಾಧವಿರುವ ಜಿಲ್ಲೆಗಳು, ಅಸಾಮಾನ್ಯ ಎಂದು ಗುರುತಿಸಿದ ತಿಂಗಳುಗಳು, ರೂಪುಗೊಳ್ಳುತ್ತಿರುವ ಅಪರಾಧ ಗುಂಪುಗಳು ಮತ್ತು ಇಂದಿನ ಸುದ್ದಿ — ಇವೆಲ್ಲವನ್ನೂ ಸೇರಿಸಿ, ಜಿಲ್ಲಾವಾರು ನಿಯೋಜನಾ ಶಿಫಾರಸಿನೊಂದಿಗೆ ಸಂಕ್ಷಿಪ್ತ ವರದಿ ಬರೆಯುತ್ತದೆ.',
+          why:  'ಯಾರೂ ಇದನ್ನು ಕೈಯಿಂದ ಜೋಡಿಸಬೇಕಿಲ್ಲ. ಬಿಡುವಿಲ್ಲದ ಅಧಿಕಾರಿ ಎರಡು ನಿಮಿಷದಲ್ಲಿ ಓದಬಹುದಾದ ರೂಪಕ್ಕೆ ಬರುತ್ತದೆ.' } },
+
+  { tab: 'evidence',
+    en: { t: 'Evidence Intelligence',
+          what: 'Drop in a witness statement or a complaint — a Word file, a PDF, or a voice recording.',
+          does: 'It reads the document, picks out the people named in it, and checks every name against 895,927 accused records, returning prior cases, districts of activity and gang links.',
+          why:  'Two men named in one complaint can turn out to have hundreds of prior cases between them. Nobody had connected them before, because their earlier cases sit in different districts.' },
+    kn: { t: 'ಸಾಕ್ಷ್ಯ ಗುಪ್ತಚರ',
+          what: 'ಸಾಕ್ಷಿ ಹೇಳಿಕೆ ಅಥವಾ ದೂರನ್ನು ಇಲ್ಲಿ ಹಾಕಿ — ವರ್ಡ್ ಫೈಲ್, PDF ಅಥವಾ ಧ್ವನಿ ಮುದ್ರಣ.',
+          does: 'ದಾಖಲೆಯನ್ನು ಓದಿ, ಅದರಲ್ಲಿ ಹೆಸರಿಸಿದ ವ್ಯಕ್ತಿಗಳನ್ನು ಗುರುತಿಸಿ, ಪ್ರತಿ ಹೆಸರನ್ನೂ 8,95,927 ಆರೋಪಿ ದಾಖಲೆಗಳೊಂದಿಗೆ ಪರಿಶೀಲಿಸಿ, ಹಿಂದಿನ ಪ್ರಕರಣಗಳು, ಜಿಲ್ಲೆಗಳು ಮತ್ತು ಗ್ಯಾಂಗ್ ಸಂಬಂಧಗಳನ್ನು ತೋರಿಸುತ್ತದೆ.',
+          why:  'ಒಂದೇ ದೂರಿನಲ್ಲಿ ಹೆಸರಿಸಿದ ಇಬ್ಬರಿಗೆ ನೂರಾರು ಹಿಂದಿನ ಪ್ರಕರಣಗಳಿರಬಹುದು. ಅವರ ಹಳೆಯ ಪ್ರಕರಣಗಳು ಬೇರೆ ಜಿಲ್ಲೆಗಳಲ್ಲಿ ಇರುವುದರಿಂದ ಈವರೆಗೆ ಯಾರೂ ಜೋಡಿಸಿರಲಿಲ್ಲ.' } },
+
+  { tab: 'intelmap',
+    en: { t: 'Intel Map',
+          what: 'The same records placed on a map of Karnataka.',
+          does: 'Crime hotspots and the people on record, coloured by risk. Zoom out for the state; zoom into a district and individual markers appear.',
+          why:  'A station officer sees their own area rather than everyone else’s. Where a thing happened is often the fastest way to understand it.' },
+    kn: { t: 'ಇಂಟೆಲ್ ನಕ್ಷೆ',
+          what: 'ಅದೇ ದಾಖಲೆಗಳನ್ನು ಕರ್ನಾಟಕದ ನಕ್ಷೆಯ ಮೇಲೆ ತೋರಿಸಲಾಗಿದೆ.',
+          does: 'ಅಪರಾಧ ಹಾಟ್‌ಸ್ಪಾಟ್‌ಗಳು ಮತ್ತು ದಾಖಲೆಯಲ್ಲಿರುವ ವ್ಯಕ್ತಿಗಳು, ಅಪಾಯದ ಪ್ರಕಾರ ಬಣ್ಣ ಹಾಕಲಾಗಿದೆ. ಹಿಂದೆ ಸರಿದರೆ ಇಡೀ ರಾಜ್ಯ; ಜಿಲ್ಲೆಗೆ ಜೂಮ್ ಮಾಡಿದರೆ ಪ್ರತ್ಯೇಕ ಗುರುತುಗಳು ಕಾಣಿಸುತ್ತವೆ.',
+          why:  'ಠಾಣೆಯ ಅಧಿಕಾರಿಗೆ ತಮ್ಮದೇ ವ್ಯಾಪ್ತಿ ಕಾಣಿಸುತ್ತದೆ. ಘಟನೆ ಎಲ್ಲಿ ನಡೆಯಿತು ಎಂಬುದು ಅದನ್ನು ಅರ್ಥ ಮಾಡಿಕೊಳ್ಳಲು ಅತ್ಯಂತ ವೇಗದ ದಾರಿ.' } },
+
+  { tab: 'analytics',
+    en: { t: 'Analytics',
+          what: 'Charts across five years of records, plus a forecast and live crime news.',
+          does: 'Which districts, which crimes, how it has moved year on year. The forecast projects next year per crime type. The news feed matches Karnataka reporting to districts.',
+          why:  'A crime is usually reported in the press before the FIR reaches the central system, so the news column is often the earliest warning available.' },
+    kn: { t: 'ವಿಶ್ಲೇಷಣೆ',
+          what: 'ಐದು ವರ್ಷಗಳ ದಾಖಲೆಗಳ ಚಾರ್ಟ್‌ಗಳು, ಜೊತೆಗೆ ಭವಿಷ್ಯವಾಣಿ ಮತ್ತು ನೇರ ಅಪರಾಧ ಸುದ್ದಿ.',
+          does: 'ಯಾವ ಜಿಲ್ಲೆಗಳು, ಯಾವ ಅಪರಾಧಗಳು, ವರ್ಷದಿಂದ ವರ್ಷಕ್ಕೆ ಹೇಗೆ ಬದಲಾಗಿದೆ. ಭವಿಷ್ಯವಾಣಿ ಮುಂದಿನ ವರ್ಷವನ್ನು ಅಪರಾಧ ಪ್ರಕಾರವಾರು ತೋರಿಸುತ್ತದೆ. ಸುದ್ದಿ ಪಟ್ಟಿ ಕರ್ನಾಟಕದ ವರದಿಗಳನ್ನು ಜಿಲ್ಲೆಗಳಿಗೆ ಹೊಂದಿಸುತ್ತದೆ.',
+          why:  'FIR ಕೇಂದ್ರ ವ್ಯವಸ್ಥೆಗೆ ತಲುಪುವ ಮೊದಲೇ ಅಪರಾಧ ಪತ್ರಿಕೆಗಳಲ್ಲಿ ವರದಿಯಾಗುತ್ತದೆ, ಆದ್ದರಿಂದ ಸುದ್ದಿ ಹೆಚ್ಚಾಗಿ ಮೊದಲ ಎಚ್ಚರಿಕೆ.' } },
+
+  { tab: 'solver',
+    en: { t: 'Case Solver',
+          what: 'Describe the case in front of you and see how comparable cases were actually solved.',
+          does: 'It compares your facts against 52 solved Indian criminal cases and returns what to collect, who to interview, what forensics to order, and which past case resembles this one.',
+          why:  'It is the institutional memory a new officer does not have yet, available on their first week rather than their fifth year.' },
+    kn: { t: 'ಪ್ರಕರಣ ಪರಿಹಾರ',
+          what: 'ನಿಮ್ಮ ಮುಂದಿರುವ ಪ್ರಕರಣವನ್ನು ವಿವರಿಸಿ; ಇದೇ ರೀತಿಯ ಪ್ರಕರಣಗಳು ಹೇಗೆ ಪರಿಹಾರವಾದವು ಎಂದು ನೋಡಿ.',
+          does: '52 ಇತ್ಯರ್ಥಗೊಂಡ ಭಾರತೀಯ ಅಪರಾಧ ಪ್ರಕರಣಗಳೊಂದಿಗೆ ಹೋಲಿಸಿ, ಏನನ್ನು ಸಂಗ್ರಹಿಸಬೇಕು, ಯಾರನ್ನು ವಿಚಾರಿಸಬೇಕು, ಯಾವ ವಿಧಿವಿಜ್ಞಾನ ಪರೀಕ್ಷೆ ಬೇಕು, ಮತ್ತು ಯಾವ ಹಳೆಯ ಪ್ರಕರಣ ಹೋಲುತ್ತದೆ ಎಂದು ತಿಳಿಸುತ್ತದೆ.',
+          why:  'ಹೊಸ ಅಧಿಕಾರಿಗೆ ಇನ್ನೂ ಇಲ್ಲದ ಅನುಭವ ಇದು — ಐದನೇ ವರ್ಷದ ಬದಲು ಮೊದಲ ವಾರದಲ್ಲೇ ಸಿಗುತ್ತದೆ.' } },
+
+  { tab: 'browse',
+    en: { t: 'Records',
+          what: 'The raw tables, with no AI in the middle.',
+          does: 'Every table — FIRs, accused, stations, districts, gangs, victims — searchable, filterable and paged.',
+          why:  'Anything the system says on another screen can be checked here against the data as it is actually stored.' },
+    kn: { t: 'ದಾಖಲೆಗಳು',
+          what: 'ಮೂಲ ಕೋಷ್ಟಕಗಳು, ನಡುವೆ AI ಇಲ್ಲದೆ.',
+          does: 'ಎಲ್ಲಾ ಕೋಷ್ಟಕಗಳು — FIRಗಳು, ಆರೋಪಿಗಳು, ಠಾಣೆಗಳು, ಜಿಲ್ಲೆಗಳು, ಗ್ಯಾಂಗ್‌ಗಳು, ಸಂತ್ರಸ್ತರು — ಹುಡುಕಬಹುದು, ಫಿಲ್ಟರ್ ಮಾಡಬಹುದು, ಪುಟ ಪುಟವಾಗಿ ನೋಡಬಹುದು.',
+          why:  'ಬೇರೆ ಪರದೆಯಲ್ಲಿ ವ್ಯವಸ್ಥೆ ಹೇಳಿದ್ದನ್ನು ಇಲ್ಲಿ ಮೂಲ ದಾಖಲೆಯೊಂದಿಗೆ ಪರಿಶೀಲಿಸಬಹುದು.' } },
+
+  { tab: 'audit',
+    en: { t: 'Audit Trail',
+          what: 'A record of every question anyone has asked the system.',
+          does: 'The time, the question, which database answered, the language, and the exact query that ran.',
+          why:  'If someone looks up a name they had no business looking up, it is on this screen. For a police force that is not an extra — it is the difference between a tool a department can adopt and a demonstration.' },
+    kn: { t: 'ಆಡಿಟ್ ಟ್ರೇಲ್',
+          what: 'ವ್ಯವಸ್ಥೆಗೆ ಯಾರು ಏನು ಕೇಳಿದರು ಎಂಬುದರ ದಾಖಲೆ.',
+          does: 'ಸಮಯ, ಪ್ರಶ್ನೆ, ಯಾವ ಡೇಟಾಬೇಸ್ ಉತ್ತರಿಸಿತು, ಭಾಷೆ, ಮತ್ತು ನಡೆದ ನಿಖರ ಪ್ರಶ್ನೆ.',
+          why:  'ಯಾರಾದರೂ ಅನಗತ್ಯವಾಗಿ ಹೆಸರು ಹುಡುಕಿದರೆ ಅದು ಈ ಪರದೆಯಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ. ಪೊಲೀಸ್ ಇಲಾಖೆಗೆ ಇದು ಹೆಚ್ಚುವರಿ ಸೌಲಭ್ಯವಲ್ಲ — ಇಲಾಖೆ ಅಳವಡಿಸಿಕೊಳ್ಳಬಹುದಾದ ಸಾಧನ ಮತ್ತು ಕೇವಲ ಪ್ರದರ್ಶನದ ನಡುವಿನ ವ್ಯತ್ಯಾಸ ಇದು.' } },
+];
+
+const GUIDE_LABELS = {
+  en: { what: 'What this is', does: 'What it does', why: 'Why it matters', next: 'Next ›', done: 'Done' },
+  kn: { what: 'ಇದು ಏನು',   does: 'ಇದು ಏನು ಮಾಡುತ್ತದೆ', why: 'ಇದು ಏಕೆ ಮುಖ್ಯ', next: 'ಮುಂದೆ ›', done: 'ಮುಗಿಯಿತು' },
+};
+
+let _guideAt = 0;
+
+function openGuide(index) {
+  // Default to explaining whatever the officer is already looking at.
+  const here = GUIDE.findIndex(g => g.tab === currentTab);
+  _guideAt = index != null ? index : (here >= 0 ? here : 0);
+  renderGuide();
+  document.getElementById('guideScrim').classList.add('open');
+  document.getElementById('guidePanel').classList.add('open');
+  document.addEventListener('keydown', _guideKeys);
+}
+
+function closeGuide() {
+  document.getElementById('guideScrim').classList.remove('open');
+  document.getElementById('guidePanel').classList.remove('open');
+  document.removeEventListener('keydown', _guideKeys);
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  document.getElementById('guideSpeakBtn').classList.remove('on');
+}
+
+// Arrow keys move through the tour, Escape leaves it.
+function _guideKeys(e) {
+  if (e.key === 'Escape') closeGuide();
+  else if (e.key === 'ArrowRight') guideGo(1);
+  else if (e.key === 'ArrowLeft') guideGo(-1);
+}
+
+function renderGuide() {
+  const kn = currentLang === 'kn';
+  const step = GUIDE[_guideAt];
+  const c = kn ? step.kn : step.en;
+  const L = GUIDE_LABELS[kn ? 'kn' : 'en'];
+  document.getElementById('guideStep').textContent = `${_guideAt + 1} / ${GUIDE.length}`;
+  document.getElementById('guideTitle').textContent = c.t;
+  document.getElementById('guideLblWhat').textContent = L.what;
+  document.getElementById('guideLblDoes').textContent = L.does;
+  document.getElementById('guideLblWhy').textContent = L.why;
+  document.getElementById('guideWhat').textContent = c.what;
+  document.getElementById('guideDoes').textContent = c.does;
+  document.getElementById('guideWhy').textContent = c.why;
+  document.getElementById('guidePrevBtn').disabled = _guideAt === 0;
+  document.getElementById('guideNextBtn').textContent =
+    _guideAt === GUIDE.length - 1 ? L.done : L.next;
+  document.getElementById('guideBody') && (document.getElementById('guideBody').scrollTop = 0);
+  const body = document.querySelector('.guide-body');
+  if (body) body.scrollTop = 0;
+}
+
+function guideGo(delta) {
+  if (delta > 0 && _guideAt === GUIDE.length - 1) { closeGuide(); return; }
+  const next = Math.min(Math.max(_guideAt + delta, 0), GUIDE.length - 1);
+  if (next === _guideAt) return;
+  _guideAt = next;
+  // Move the application to the screen being described, so the explanation and
+  // the thing it explains are never out of step.
+  switchTab(GUIDE[_guideAt].tab);
+  renderGuide();
+  if (document.getElementById('guideSpeakBtn').classList.contains('on')) guideSpeak(true);
+}
+
+// Reads the panel aloud in the current language. Uses the browser's own voices,
+// so it costs nothing and works offline.
+function guideSpeak(restart) {
+  const btn = document.getElementById('guideSpeakBtn');
+  if (!window.speechSynthesis) return;
+  if (!restart && btn.classList.contains('on')) {
+    window.speechSynthesis.cancel();
+    btn.classList.remove('on');
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const kn = currentLang === 'kn';
+  const c = kn ? GUIDE[_guideAt].kn : GUIDE[_guideAt].en;
+  const u = new SpeechSynthesisUtterance(`${c.t}. ${c.what} ${c.does} ${c.why}`);
+  u.lang = kn ? 'kn-IN' : 'en-IN';
+  u.rate = 0.95;
+  u.onend = () => btn.classList.remove('on');
+  btn.classList.add('on');
+  window.speechSynthesis.speak(u);
+}
+
 // ─── LANGUAGE ─────────────────────────────────────────────────────────────
 // ─── UI LANGUAGE ──────────────────────────────────────────────────────────
 // Switching the toggle to Kannada used to change only the input placeholder,
@@ -3175,6 +3456,11 @@ function setLang(lang) {
   // The strip is built by innerHTML on a 60s timer, so it has to be redrawn
   // here or it stays in the old language for up to a minute.
   if (_lastAlerts.length || _lastNews.length) renderAlerts(_lastAlerts, _lastNews);
+  // The guide holds its own prose in both languages, so it redraws rather than
+  // being translated through the UI dictionary.
+  if (document.getElementById('guidePanel')?.classList.contains('open')) renderGuide();
+  const gb = document.getElementById('guideBtn');
+  if (gb) gb.title = lang === 'kn' ? 'ಈ ಪರದೆ ಏನು?' : 'What is this screen?';
   // Charts and feeds are drawn once when their tab opens, so without this the
   // panel the officer is looking at keeps its old labels until they navigate away
   // and back. switchTab re-runs the loader for whichever panel is showing.
